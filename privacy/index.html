@@ -15,19 +15,31 @@ Soon :)<br/>
 
 <h5> Definitions </h5>
 
-<a target="_blank" href="https://arxiv.org/abs/1702.07476">Renyi Differential Privacy, Ilya Mironov, 2017</a>
+<a target="_blank" href="https://arxiv.org/abs/1702.07476">Renyi Differential Privacy, Ilya Mironov, 2017</a>:
+Definition of privacy that uses Renyi divergence and aims at simplifying the analysis of the tail of 
+the privacy loss.
 <br/>
-<a target="_blank" href="https://arxiv.org/abs/1905.02383">Gaussian Differential Privacy, Jinshuo Dong, Aaron Roth, Weijie J. Su, 2019</a>
+<a target="_blank" href="https://arxiv.org/abs/1905.02383">Gaussian Differential Privacy, Jinshuo Dong, Aaron Roth, Weijie J. Su, 2019</a>:
+Definition of privacy in term of testing difficulty. Allows tighter control than the previous ones. Comes with a composition theorem and 
+a limit theorem.
 
 <h5> Laplace and Gauss processes </h5>
 
 <h5> Beyond global sensitivity </h5>
 
-<a target="_blank" href="http://www.stat.cmu.edu/~jinglei/dprs_stoc09.pdf">Differential Privacy and Robust Statistics, Cynthia Dwork, Jing Lei, 2008</a>
+<a target="_blank" href="http://www.stat.cmu.edu/~jinglei/dprs_stoc09.pdf">Differential Privacy and Robust Statistics, Cynthia Dwork, Jing Lei, 2008</a>:
+Presents the links between differential privacy and robust statistics. Based on this idea, it presents the Propose Test Release framework 
+that allows to release information with a smaller noise than proportional to the global sensitivity. It has a probability to halt 
+that is small if the permormed statistic is robust.
 <br/>
-<a target="_blank" href="https://cs-people.bu.edu/ads22//pubs/NRS07/NRS07-full-draft-v1.pdf">Smooth Sensitivity and Sampling in Private Data Analysis, Kobbi Nissim, Sofya Raskhodnikova, Adam Smith, 2011</a>
+<a target="_blank" href="https://cs-people.bu.edu/ads22//pubs/NRS07/NRS07-full-draft-v1.pdf">Smooth Sensitivity and Sampling in Private Data Analysis, Kobbi Nissim, Sofya Raskhodnikova, Adam Smith, 2011</a>:
+Presents a way to release statistics with noise proportionnal to a smoothed local sensitivity. Studies also the sample and agregate mechanism and uses it 
+to develop a differentially private k-means.
 <br/>
-<a target="_blank" href="https://arxiv.org/abs/2002.08774">Propose, Test, Release: Differentially private estimation with high probability, Victor-Emmanuel Brunel, Marco Avella-Medina, 2020</a>
+<a target="_blank" href="https://arxiv.org/abs/2002.08774">Propose, Test, Release: Differentially private estimation with high probability, Victor-Emmanuel Brunel, Marco Avella-Medina, 2020</a>:
+A development on the initial PTR algorithm.
+
+<h5> Composition theorems </h5>
 
 <h5> Empirical risk minimization </h5>
 
@@ -43,17 +55,30 @@ Soon :)<br/>
 
 <a target="_blank" href="https://arxiv.org/abs/0907.3754">On the Geometry of Differential Privacy, Moritz Hardt, Kunal Talwar, 2009</a>
 <br/>
-<a target="_blank" href="https://www.tau.ac.il/~saharon/BigData2015/privacybook.pdf">The Algorithmic Foundationsof Differential Privacy, Cynthia Dwork, Aaron Roth, 2014</a>
+<a target="_blank" href="https://www.tau.ac.il/~saharon/BigData2015/privacybook.pdf">The Algorithmic Foundations of Differential Privacy, Cynthia Dwork, Aaron Roth, 2014</a>:
+A good introduction to differential privacy. Doesn't take into account the state of the art since the field has evolved a lot in the recent years.
 <br/>
-<a target="_blank" href="https://arxiv.org/abs/1710.00901">Prochlo: Strong Privacy for Analytics in the Crowd, Bittau et al., 2017</a>
+<a target="_blank" href="https://arxiv.org/abs/1710.00901">Prochlo: Strong Privacy for Analytics in the Crowd, Bittau et al., 2017</a>:
+
 
 <h4> General privacy </h4>
 
-<h5> Graph privacy </h5>
+<h5> (Social) Graph privacy </h5>
+
+<h5> Fingerprinting </h5>
 
 <h5> Acoustic Cross-Device Tracking </h5>
 
-<a target="_blank" href="https://caslab.csl.yale.edu/publications/matyunin2018zeropermission.pdf">Zero-Permission Acoustic Cross-Device Tracking, Nikolay Matyunin, Jakub Szefer, Stefan Katzenbeisser, 2018</a>
+<a target="_blank" href="https://caslab.csl.yale.edu/publications/matyunin2018zeropermission.pdf">Zero-Permission Acoustic Cross-Device Tracking, Nikolay Matyunin, Jakub Szefer, Stefan Katzenbeisser, 2018</a>: 
+Presents how to perform acoustic cross-device tracking using gyroscopic sensor perturbation with ultrasonic sounds. At the time of the paper, 
+applications did not need user's permission to access sensors like gyroscopes.
+<br/>
+
+<h5> Contact Tracing </h5>
+<a target="_blank" href="https://hal.inria.fr/hal-02611265/document">ROBERT: ROBust and privacy-presERving proximityTracing, Claude Castelluccia, Nataliia Bielova, Antoine Boutet, Mathieu Cunche,Cédric Lauradoux, Daniel Le Métayer, Vincent Roca, 2019</a>:
+Push/Pull approach of contact tracing with no linkage memory approach of contact tracing. This is the technology used by the french "Tous Anti Covid" app.
+It doesn't use Apple or Google API's and hence works on Android phones without Google Play services. 
+<br/>
 
 <h4> Historical attacks </h4>
 
@@ -68,7 +93,7 @@ on differential privacy.
 <br/>
 <a target="_blank" href="https://www.youtube.com/channel/UCs6KfncB4OV6Vug4o_bzijg">Techlore's</a> and 
 <a target="_blank" href="https://www.youtube.com/channel/UCjr2bPAyPV7t35MvcgT3W8Q">The Hated One's</a>:
-Two youtube channels that cover privacy, security and FOSS news and present user-friendly 
+Two youtube channels that cover privacy, security and FOSS news and present some user-friendly 
 privacy-preserving tools.
 
 <br/>
