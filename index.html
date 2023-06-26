@@ -98,12 +98,6 @@
       text-align: left;
     }
   </style>
-  <script type="text/javascript">
-    function resizeIframe(obj){
-       obj.style.height = 0;
-       obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
-    }
-  </script>
 </head>
 <body>
   <nav class="nav">
@@ -154,8 +148,15 @@
     <div class="section" id="publications">
       <h2>Publications</h2>
       <ul>
-        <!--<iframe src="https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_resume=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=date_publi&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css" id="Iframe" frameborder="0" scrolling="no" onload='resizeIframe(this)' />-->
-        <iframe width="98%" height=1200vh src="https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_resume=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=date_publi&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css" id="Iframe"></iframe>
+        <iframe width="98%" height=1200vh src="https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_resume=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=date_publi&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css" id="#child-iframe"></iframe>
+        <script>
+        	let iframe = document.querySelector("#child-iframe");
+        
+        	iframe.addEventListener('load', function() {
+        		iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
+        		iframe.style.width = iframe.contentDocument.body.scrollWidth + 'px';
+        	});	
+        </script>
       </ul>
     </div>
     <div class="section" id="teaching">
