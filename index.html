@@ -152,11 +152,11 @@
       <ul>
         <!--<iframe width="98%" height=1200vh src="https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_resume=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=date_publi&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css" id="#child-iframe"></iframe>-->
         <div id="content">
-        <?php
-        $url = 'https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_resume=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=date_publi&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css';
-        $http_page = file_get_contents($url,FILE_USE_INCLUDE_PATH);
-        echo $http_page;
-        ?>
+          <?php
+            $url = 'http://.../Public/afficheRequetePubli.php?idHal=clement-lalanne';
+            $http_page = file_get_contents($url,FILE_USE_INCLUDE_PATH);
+            echo $http_page;
+          ?>
         </div>
       </ul>
     </div>
