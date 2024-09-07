@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mathematics of Machine Learning Projects M2 MAPI3 (Paul Sabatier, 2024-2025)</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <main class="main">
+            <div id="toptitle">
+                <h1>Mathematics of Machine Learning Projects M2 MAPI3 (Paul Sabatier, 2024-2025)</h1>
+
+                <strong>Lecturers : </strong> <a href="../../index.html" target="_blank" rel="noopener noreferrer">Clément Lalanne</a>
+            </div>
+            <div id="content">
+                <!-- Content specific to this lecture -->
+                <h2>Overview</h2>
+                <p>This course is designed to provide hands-on experience and theoretical understanding in the field of machine learning. Students will work in groups of 2 or 3 on either practical or theoretical projects, which will be presented to the class.</p>
+            </div>
+
+            <h2>Evaluation</h2>
+            <ul>
+                <li><strong>Practical Projects</strong>: Choose a challenge from <a href="https://challengedata.ens.fr/" target="_blank" rel="noopener noreferrer">Challenge Data</a> and propose a solution using machine learning techniques. Evaluation will be based on:
+                    <ul>
+                        <li><strong>Creativity</strong>: Originality and innovation in the approach.</li>
+                        <li><strong>Problem-Solving Skills</strong>: Effectiveness in addressing the chosen challenge.</li>
+                        <li><strong>Technical Implementation</strong>: Quality and rigor of the machine learning methods used.</li>
+                        <li><strong>Presentation Quality</strong>: Clarity, organization, and accessibility of the presentation to classmates.</li>
+                        <li><strong>Engagement</strong>: Ability to engage the audience and facilitate understanding.</li>
+                        <li><strong>Mathematical Highlight</strong>: Include at least one mathematical highlight to emphasize important mathematical concepts or techniques relevant to the project.</li>
+                    </ul>
+                </li>
+
+                <li><strong>Theoretical Projects</strong>: Explore an advanced ML topic, analyze recent research, and present your findings. Evaluation will be based on:
+                    <ul>
+                        <li><strong>Depth of Understanding</strong>: Thoroughness in exploring the topic and current research.</li>
+                        <li><strong>Critical Analysis</strong>: Quality of analysis and critique of different approaches.</li>
+                        <li><strong>Clarity of Presentation</strong>: Logical structure, use of visual aids, and accessibility to classmates.</li>
+                        <li><strong>Presentation Quality</strong>: Ability to explain complex concepts in an understandable manner.</li>
+                        <li><strong>Engagement</strong>: Effectiveness in engaging the audience and fostering interest in the topic.</li>
+                        <li><strong>Mathematical Highlight</strong>: Include at least one mathematical highlight to emphasize important mathematical concepts or techniques relevant to the topic.</li>
+                    </ul>
+                </li>
+            </ul>
+
+
+            <h2>Theoretical Projects</h2>
+
+            <ul>
+            
+                <li><strong>Meta-Learning</strong><br>
+                    Motivation: Improves learning efficiency by enabling models to learn how to learn from previous tasks, useful for few-shot and fast adaptation scenarios. <br>
+                    
+                        * Finn, C. et al. "Model-agnostic meta-learning for fast adaptation of deep networks." ICML, 2017. <br>
+                        * Thrun, S., Pratt, L. "Learning to learn." Springer, 1998. <br>
+                        * Vinyals, O. et al. "Matching networks for one-shot learning." NeurIPS, 2016.</li>
+            
+                <li><strong>Self-Supervised Learning</strong><br>
+                    Motivation: Learns from unlabeled data by creating surrogate tasks, offering a powerful way to scale learning when labeled data is scarce. <br>
+                    
+                        * Doersch, C. et al. "Unsupervised visual representation learning by context prediction." ICCV, 2015. <br>
+                        * Chen, X. et al. "Big self-supervised models are strong semi-supervised learners." NeurIPS, 2020. <br>
+                        * Grill, J. B. et al. "Bootstrap your own latent: A new approach to self-supervised learning." NeurIPS, 2020.</li>
+            
+                <li><strong>Uncertainty Estimation in ML</strong><br>
+                    Motivation: Quantifies the uncertainty in model predictions, essential for safety-critical applications and improving model reliability. <br>
+                    
+                        * Gal, Y., Ghahramani, Z. "Dropout as a Bayesian approximation: Representing model uncertainty in deep learning." ICML, 2016. <br>
+                        * Lakshminarayanan, B. et al. "Simple and scalable predictive uncertainty estimation using deep ensembles." NeurIPS, 2017. <br>
+                        * Kendall, A. et al. "What uncertainties do we need in Bayesian deep learning for computer vision?" NeurIPS, 2017.</li>
+            
+                <li><strong>Causal Inference in ML</strong><br>
+                    Motivation: Enables models to learn cause-effect relationships from data, important for tasks like decision-making, policy evaluation, and understanding model behavior. <br>
+                    
+                        * Pearl, J. "Causality: Models, reasoning, and inference." Cambridge University Press, 2009. <br>
+                        * Peters, J. et al. "Elements of causal inference: Foundations and learning algorithms." MIT Press, 2017. <br>
+                        * Spirtes, P. et al. "Causation, prediction, and search." MIT Press, 2000.</li>
+
+                <li><strong>Foundation Models and Large Language Models (LLMs)</strong><br>
+                    Motivation: Large pre-trained models, such as GPT and BERT, are increasingly used as foundation models across many domains due to their ability to generalize across tasks with minimal fine-tuning. <br>
+                    
+                        * Brown, T. et al. "Language models are few-shot learners." NeurIPS, 2020. <br>
+                        * Bommasani, R. et al. "On the opportunities and risks of foundation models." arXiv, 2021. <br>
+                        * Devlin, J. et al. "BERT: Pre-training of deep bidirectional transformers for language understanding." NAACL-HLT, 2019.</li>
+
+                <li><strong>Differential Privacy in ML</strong><br>
+                    Motivation: Protects the privacy of individual data points in training sets while allowing models to learn meaningful patterns. It is crucial for legal and ethical compliance in sensitive domains. <br>
+                    
+                        * Dwork, C. et al. "Calibrating noise to sensitivity in private data analysis." TCC, 2006. <br>
+                        * Abadi, M. et al. "Deep learning with differential privacy." CCS, 2016. <br>
+                        * Bassily, R. et al. "Private Empirical Risk Minimization." NeurIPS, 2014.</li>
+            
+                <li><strong>Robustness and Adversarial Attacks</strong><br>
+                    Motivation: Ensures models perform reliably under adversarial conditions, such as attacks designed to fool the model into making incorrect predictions. <br>
+                    
+                        * Goodfellow, I. et al. "Explaining and harnessing adversarial examples." ICLR, 2015. <br>
+                        * Madry, A. et al. "Towards deep learning models resistant to adversarial attacks." ICLR, 2018. <br>
+                        * Szegedy, C. et al. "Intriguing properties of neural networks." ICLR, 2014.</li>
+            
+                <li><strong>Multimodal Learning</strong><br>
+                    Motivation: Integrates information from multiple data sources or modalities (e.g., text, images, and audio) to create more robust and informed models. <br>
+                    
+                        * Ngiam, J. et al. "Multimodal deep learning." ICML, 2011. <br>
+                        * Baltrušaitis, T. et al. "Multimodal machine learning: A survey and taxonomy." IEEE TPAMI, 2018. <br>
+                        * Radford, A. et al. "Learning transferable visual models from natural language supervision." ICML, 2021.</li>
+            
+                <li><strong>Fairness in Machine Learning</strong><br>
+                    Motivation: Develops methods to ensure that machine learning models make unbiased decisions and avoid discriminatory outcomes. <br>
+                    
+                        * Hardt, M. et al. "Equality of opportunity in supervised learning." NeurIPS, 2016. <br>
+                        * Barocas, S. et al. "Fairness and machine learning." fairmlbook.org, 2019. <br>
+                        * Binns, R. "Fairness in machine learning: Lessons from political philosophy." Proceedings of the 2018 Conference on Fairness, Accountability, and Transparency, 2018.</li>
+            
+                <li><strong>Reinforcement Learning with Function Approximation</strong><br>
+                    Motivation: Extends reinforcement learning to large-scale or continuous environments using function approximation methods like deep learning. <br>
+                    
+                        * Mnih, V. et al. "Human-level control through deep reinforcement learning." Nature, 2015. <br>
+                        * Sutton, R. S. et al. "Generalization in reinforcement learning: Successful examples using sparse coarse coding." NeurIPS, 1996. <br>
+                        * Lillicrap, T. P. et al. "Continuous control with deep reinforcement learning." ICLR, 2016.</li>
+            
+                <li><strong>Graph Neural Networks (GNNs)</strong><br>
+                    Motivation: Models data structured as graphs, allowing for the incorporation of relational and spatial information, useful for many domains like social networks and molecular biology. <br>
+                    
+                        * Kipf, T. N., Welling, M. "Semi-supervised classification with graph convolutional networks." ICLR, 2017. <br>
+                        * Scarselli, F. et al. "The graph neural network model." IEEE Transactions on Neural Networks, 2008. <br>
+                        * Hamilton, W. et al. "Inductive representation learning on large graphs." NeurIPS, 2017.</li>
+            
+                <li><strong>Nonconvex Optimization in ML</strong><br>
+                    Motivation: Explores optimization methods for nonconvex functions, which arise frequently in deep learning and other complex machine learning models. <br>
+                    
+                        * Shalev-Shwartz, S. et al. "Stochastic dual coordinate ascent methods for regularized loss." JMLR, 2013. <br>
+                        * Kingma, D. P., Ba, J. "Adam: A method for stochastic optimization." ICLR, 2015. <br>
+                        * Bottou, L. et al. "Optimization methods for large-scale machine learning." SIAM Review, 2018.</li>
+            
+                <li><strong>Bayesian Deep Learning</strong><br>
+                    Motivation: Combines the uncertainty quantification benefits of Bayesian methods with the expressive power of deep learning, providing robust uncertainty estimates. <br>
+                    
+                        * Blundell, C. et al. "Weight uncertainty in neural networks." ICML, 2015. <br>
+                        * Neal, R. "Bayesian learning for neural networks." Springer, 2012. <br>
+                        * Gal, Y., Ghahramani, Z. "Bayesian convolutional neural networks with Bernoulli approximate variational inference." ICLR, 2016.</li>
+            
+                <li><strong>AutoML (Automated Machine Learning)</strong><br>
+                    Motivation: Automates the process of model selection, hyperparameter tuning, and feature engineering, making ML more accessible and efficient. <br>
+                    
+                        * Zoph, B., Le, Q. V. "Neural architecture search with reinforcement learning." ICLR, 2017. <br>
+                        * Feurer, M. et al. "Auto-sklearn: Efficient and robust automated machine learning." NeurIPS, 2015. <br>
+                        * Hutter, F. et al. "Automated machine learning: Methods, systems, challenges." Springer, 2019.</li>
+            
+                <li><strong>Active Learning</strong><br>
+                    Motivation: Selectively queries the most informative data points for labeling, reducing the amount of labeled data needed to train models. <br>
+                    
+                        * Settles, B. "Active learning literature survey." University of Wisconsin-Madison, 2010. <br>
+                        * Cohn, D. A. et al. "Active learning with statistical models." JMLR, 1996. <br>
+                        * Sener, O., Savarese, S. "Active learning for convolutional neural networks: A core-set approach." ICLR, 2018.</li>
+            
+                <li><strong>Sparse Learning</strong><br>
+                    Motivation: Introduces sparsity in model weights or data, leading to more interpretable models and reducing computational complexity. <br>
+                    
+                        * Tibshirani, R. "Regression shrinkage and selection via the lasso." J. Royal Stat. Soc., 1996. <br>
+                        * Lee, N. et al. "SNIP: Single-shot network pruning based on connection sensitivity." ICLR, 2019. <br>
+                        * Zhang, T. et al. "Sparse coding and its applications in computer vision." Journal of Visual Communication and Image Representation, 2010.</li>
+            
+                <li><strong>Contrastive Learning</strong><br>
+                    Motivation: Learns useful representations by maximizing similarity between positive pairs while minimizing it between negative pairs, often in self-supervised settings. <br>
+                    
+                        * Hadsell, R. et al. "Dimensionality reduction by learning an invariant mapping." CVPR, 2006. <br>
+                        * Chen, T. et al. "A simple framework for contrastive learning of visual representations." ICML, 2020. <br>
+                        * He, K. et al. "Momentum contrast for unsupervised visual representation learning." CVPR, 2020.</li>
+            
+                <li><strong>Energy-Based Models</strong><br>
+                    Motivation: Uses energy functions to model complex dependencies between variables, allowing for a unified view of various ML tasks like classification and generation. <br>
+                    
+                        * LeCun, Y. et al. "A tutorial on energy-based learning." Predicting Structured Data, 2006. <br>
+                        * Ng, A. Y., Jordan, M. I. "On discriminative vs. generative classifiers: A comparison of logistic regression and naive Bayes." NeurIPS, 2002. <br>
+                        * Hinton, G. E. "Training products of experts by minimizing contrastive divergence." Neural Computation, 2002.</li>
+
+                <li><strong>Few-Shot Learning</strong><br>
+                    Motivation: Addresses the problem of learning from only a few labeled examples, making it highly valuable in settings where data collection is expensive or time-consuming. <br>
+                    
+                        * Lake, B. M. et al. "Human-level concept learning through probabilistic program induction." Science, 2015. <br>
+                        * Vinyals, O. et al. "Matching networks for one-shot learning." NeurIPS, 2016. <br>
+                        * Snell, J. et al. "Prototypical networks for few-shot learning." NeurIPS, 2017.</li>
+            
+                <li><strong>Neural Architecture Search (NAS)</strong><br>
+                    Motivation: Automates the design of neural network architectures, often outperforming manually crafted models and leading to more efficient architectures. <br>
+                    
+                        * Zoph, B., Le, Q. V. "Neural architecture search with reinforcement learning." ICLR, 2017. <br>
+                        * Liu, H. et al. "DARTS: Differentiable architecture search." ICLR, 2019. <br>
+                        * Real, E. et al. "Regularized evolution for image classifier architecture search." AAAI, 2019.</li>
+            
+                <li><strong>Imitation Learning</strong><br>
+                    Motivation: Enables agents to learn behaviors by imitating expert demonstrations, useful in robotics, gaming, and autonomous systems. <br>
+                    
+                        * Ross, S. et al. "A reduction of imitation learning and structured prediction to no-regret online learning." AISTATS, 2011. <br>
+                        * Ho, J., Ermon, S. "Generative adversarial imitation learning." NeurIPS, 2016. <br>
+                        * Pomerleau, D. A. "Efficient training of artificial neural networks for autonomous navigation." Neural Computation, 1991.</li>
+            
+                <li><strong>Invariant Representation Learning</strong><br>
+                    Motivation: Learns representations that are invariant to specific transformations (e.g., rotation, scaling), improving model generalization across tasks. <br>
+                    
+                        * Lenc, K., Vedaldi, A. "Understanding image representations by measuring their equivariance and equivalence." CVPR, 2015. <br>
+                        * Wang, X. et al. "Invariant information clustering for unsupervised image classification and segmentation." ICCV, 2019. <br>
+                        * Cohen, T. S., Welling, M. "Group equivariant convolutional networks." ICML, 2016.</li>
+            
+                <li><strong>Transfer Learning</strong><br>
+                    Motivation: Reuses a pre-trained model for a new, related task, significantly reducing the need for large amounts of data and computational resources. <br>
+                    
+                        * Pan, S. J., Yang, Q. "A survey on transfer learning." IEEE TKDE, 2010. <br>
+                        * Yosinski, J. et al. "How transferable are features in deep neural networks?" NeurIPS, 2014. <br>
+                        * Bengio, Y. "Deep learning of representations for unsupervised and transfer learning." ICML Workshop on Unsupervised and Transfer Learning, 2012.</li>
+            
+                <li><strong>Neural Ordinary Differential Equations (Neural ODEs)</strong><br>
+                    Motivation: Models continuous-time dynamics with neural networks, enabling the solution of complex dynamical systems and memory-efficient learning. <br>
+                    
+                        * Chen, T. Q. et al. "Neural ordinary differential equations." NeurIPS, 2018. <br>
+                        * Dupont, E. et al. "Augmented neural ODEs." NeurIPS, 2019. <br>
+                        * Rubanova, Y. et al. "Latent ordinary differential equations for irregularly-sampled time series." NeurIPS, 2019.</li>
+            
+                <li><strong>Deep Reinforcement Learning in Continuous Control</strong><br>
+                    Motivation: Applies deep reinforcement learning to environments with continuous action spaces, which is crucial for applications like robotics and autonomous driving. <br>
+                    
+                        * Lillicrap, T. P. et al. "Continuous control with deep reinforcement learning." ICLR, 2016. <br>
+                        * Silver, D. et al. "Deterministic policy gradient algorithms." ICML, 2014. <br>
+                        * Haarnoja, T. et al. "Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor." ICML, 2018.</li>
+            
+                <li><strong>Continual Learning</strong><br>
+                    Motivation: Allows models to learn continuously from a stream of data, enabling them to retain and integrate knowledge without forgetting past information. <br>
+                    
+                        * Kirkpatrick, J. et al. "Overcoming catastrophic forgetting in neural networks." PNAS, 2017. <br>
+                        * Lopez-Paz, D., Ranzato, M. "Gradient episodic memory for continual learning." NeurIPS, 2017. <br>
+                        * Parisi, G. I. et al. "Continual lifelong learning with neural networks: A review." Neural Networks, 2019.</li>
+            
+                <li><strong>Representation Learning for Graphs</strong><br>
+                    Motivation: Focuses on learning useful embeddings for graph-structured data, crucial for applications like social networks, biological networks, and knowledge graphs. <br>
+                    
+                        * Hamilton, W. et al. "Inductive representation learning on large graphs." NeurIPS, 2017. <br>
+                        * Kipf, T. N., Welling, M. "Variational graph auto-encoders." NeurIPS, 2016. <br>
+                        * Grover, A., Leskovec, J. "node2vec: Scalable feature learning for networks." KDD, 2016.</li>
+            
+                <li><strong>Federated Learning</strong><br>
+                    Motivation: Trains models across decentralized devices or servers holding local data samples without sharing them, enhancing privacy while still enabling collaborative learning. <br>
+                    
+                        * McMahan, B. et al. "Communication-efficient learning of deep networks from decentralized data." AISTATS, 2017. <br>
+                        * Konecny, J. et al. "Federated learning: Strategies for improving communication efficiency." NeurIPS Workshop, 2016. <br>
+                        * Yang, Q. et al. "Federated learning: Challenges, methods, and future directions." IEEE SPM, 2019.</li>
+            
+                <li><strong>Neuro-Symbolic AI</strong><br>
+                    Motivation: Combines neural networks with symbolic reasoning to integrate learning and logic, aiming for explainability and robustness in AI systems. <br>
+                    
+                        * Mao, J. et al. "The neuro-symbolic concept learner: Interpreting scenes, words, and sentences from natural supervision." ICLR, 2019. <br>
+                        * Garcez, A. S. d. et al. "Neural-symbolic learning and reasoning: Contributions and challenges." AAAI, 2015. <br>
+                        * Besold, T. R. et al. "Neural-symbolic learning and reasoning: A survey and interpretation." Frontiers in AI, 2017.</li>
+            
+                <li><strong>Prompt Engineering</strong><br>
+                    Motivation: With the rise of large language models, prompt engineering has become crucial for guiding these models to perform specific tasks effectively. <br>
+                    
+                        * Liu, P. et al. "Pre-train, prompt, and predict: A systematic survey of prompting methods in natural language processing." arXiv, 2021. <br>
+                        * Reynolds, L., McDonell, K. "Prompt programming for large language models: Beyond the few-shot paradigm." arXiv, 2021. <br>
+                        * Schick, T., Schütze, H. "Exploiting cloze-questions for few-shot text classification and natural language inference." EACL, 2021.</li>
+            
+                <li><strong>Explainable AI (XAI)</strong><br>
+                    Motivation: As machine learning models, especially deep neural networks, become more complex, explainability is crucial for ensuring transparency, trust, and adoption in real-world applications. <br>
+                    
+                        * Ribeiro, M. T. et al. "Why should I trust you? Explaining the predictions of any classifier." KDD, 2016. <br>
+                        * Samek, W. et al. "Explainable AI: Interpreting, explaining and visualizing deep learning models." ITU Journal, 2017. <br>
+                        * Doshi-Velez, F., Kim, B. "Towards a rigorous science of interpretable machine learning." arXiv, 2017.</li>
+            
+                <li><strong>AI Alignment and Ethics</strong><br>
+                    Motivation: AI alignment ensures that powerful AI systems act in ways that are beneficial to humans, addressing safety and ethical concerns as these technologies become more integrated into society. <br>
+                    
+                        * Russell, S. "Human compatible: Artificial intelligence and the problem of control." Viking, 2019. <br>
+                        * Bostrom, N. "Superintelligence: Paths, dangers, strategies." Oxford University Press, 2014. <br>
+                        * Gabriel, I. "Artificial intelligence, values, and alignment." Minds and Machines, 2020.</li>
+            
+                <li><strong>Neuromorphic Computing</strong><br>
+                    Motivation: Inspired by the structure of the human brain, neuromorphic computing aims to develop hardware that mimics neural processes, enabling more efficient AI with low energy consumption. <br>
+                    
+                        * Indiveri, G. et al. "Neuromorphic silicon neurons: A survey of models, learning methods, and applications." IEEE, 2011. <br>
+                        * Davies, M. et al. "Loihi: A neuromorphic manycore processor with on-chip learning." IEEE Micro, 2018. <br>
+                        * Merolla, P. A. et al. "A million spiking-neuron integrated circuit with a scalable communication network and interface." Science, 2014.</li>
+            
+                <li><strong>Quantum Machine Learning</strong><br>
+                    Motivation: Quantum computing promises exponential speedups for certain types of computations, which could revolutionize machine learning by solving problems intractable for classical computers. <br>
+                    
+                        * Biamonte, J. et al. "Quantum machine learning." Nature, 2017. <br>
+                        * Schuld, M., Petruccione, F. "Supervised learning with quantum computers." Springer, 2018. <br>
+                        * Havlíček, V. et al. "Supervised learning with quantum-enhanced feature spaces." Nature, 2019.</li>
+            </ul>
+            
+
+        </main>
+    </div>
+</body>
+</html>
