@@ -1,94 +1,107 @@
 .container {
-    overflow: scroll; /* add a scroll bar to the container */
-    background-color: rgb(255, 255, 255);
-    font-family: Georgia, serif;
-    padding: 0 90px 0;
-  }
-  .title {
-    font-size: 2em;
-  }
-  .nav {
-    width: 130px;
-    background-color: rgb(255, 255, 255);
-    padding: 20px;
-    border: 1px solid rgb(0, 0, 0);
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-  }
-  .nav h3 {
-    font-size: 1.5em;
-    margin: 0 -10px;
-    border-bottom: 1px solid black;
-  }
-  .nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .nav li {
-    font-size: 1em;
-    margin: 0 -10px;
-  }
-  .nav a {
-    text-decoration: none;
-    color: black;
-  }
-  .main {
-    margin: 0 -20px;
-    background-color: rgb(255, 255, 255);
-    width: 100%;
-  }
-  .main h1 {
-    color: rgb(27, 46, 129);
-    border-bottom: 1px double rgb(27, 46, 129);
-  }
-  .section {
-    margin: 20px 0;
-  }
-  .section h2 {
-    color: rgb(27, 46, 129);
-    font-size: 1.5em;
-    margin: 10px 0;
-    border-bottom: 1px solid rgb(27, 46, 129);
-  }
-  .section p {
-    font-size: 1.2em;
-    line-height: 1.5;
-  }
-  .section ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .section li {
-    margin: 10px 0;
-  }
-  .section a {
-    color: rgb(83, 69, 218);
-    text-decoration: none;
-  }
-  .presentation {
-    display: flex;
-  align-items: center;
-  text-align: center;
-  }
-  .presentation a {
-    color: rgb(60, 48, 165);
-    text-decoration: none;
-  }
-  .presentation img {
-    margin-right: 30px;
-    display: block;
-  }
-  .presentation p {
-    font-size: 1em;
-    text-align: left;
-  }
-  .center {
-    display: block;
+  overflow: scroll; /* add a scroll bar to the container */
+  background-color: rgb(255, 255, 255);
+  font-family: Georgia, serif;
+  padding: 0 90px 0;
+}
+.title {
+  font-size: 2em;
+}
+.nav {
+  width: 130px;
+  background-color: rgb(255, 255, 255);
+  padding: 20px;
+  border: 1px solid rgb(0, 0, 0);
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+.nav h3 {
+  font-size: 1.5em;
+  margin: 0 -10px;
+  border-bottom: 1px solid black;
+}
+.nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav li {
+  font-size: 1em;
+  margin: 0 -10px;
+}
+.nav a {
+  text-decoration: none;
+  color: black;
+}
+.main {
+  margin: 0 -20px;
+  background-color: rgb(255, 255, 255);
+  width: 100%;
+}
+.main h1 {
+  color: rgb(27, 46, 129);
+  border-bottom: 1px double rgb(27, 46, 129);
+}
+.section {
+  margin: 20px 0;
+}
+.section h2 {
+  color: rgb(27, 46, 129);
+  font-size: 1.5em;
+  margin: 10px 0;
+  border-bottom: 1px solid rgb(27, 46, 129);
+}
+.section p {
+  font-size: 1.2em;
+  line-height: 1.5;
+}
+.section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.section li {
+  margin: 10px 0;
+}
+.section a {
+  color: rgb(83, 69, 218);
+  text-decoration: none;
+}
+.presentation {
+  display: flex;
+align-items: center;
+text-align: center;
+}
+.presentation a {
+  color: rgb(60, 48, 165);
+  text-decoration: none;
+}
+.presentation img {
+  margin-right: 30px;
+  display: block;
+}
+.presentation p {
+  font-size: 1em;
+  text-align: left;
+}
+.center {
+  display: block;
 margin-left: auto;
 margin-right: auto;
 width: 80%;
-  }
+}
+
+.section ul ul {
+  list-style: disc;
+  padding-left: 40px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+/* Optional: smaller font or styling for subitems */
+.section ul ul li {
+  font-size: 0.95em;
+  margin: 3px 0;
+}
