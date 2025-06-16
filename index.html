@@ -6,105 +6,112 @@
   <link rel="stylesheet" href="css/styles.css">
   <style>
     body {
-    width: 100%;
-    background-color: rgb(255, 255, 255);
-    font-family: Georgia, serif;
-    border-left: 1px solid grey;
-    padding: 0 100px 0;
-  }
+      width: 100%;
+      background-color: rgb(255, 255, 255);
+      font-family: Georgia, serif;
+      margin: 0;
+      padding: 0;
+    }
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <h3>Menu</h3>
-    <ul>
-        <li><a href="index.html">🏠 Home</a></li>
-        <li><a href="index.html#news">📰 News</a></li>
-        <li><a href="index.html#publications">📖 Publications</a></li>
-        <li><a href="index.html#teaching">🏫 Teaching</a></li>
-        <li><a href="index.html#curriculum">🎓 Curriculum</a></li>
-    </ul>
-    <h3>Links</h3>
-    <ul>
-        <li><a target ="_blank" href ="https://scholar.google.com/citations?user=uGRMC34AAAAJ&hl">Google Scholar</a></li>
-        <li><a target="_blank" href="https://www.linkedin.com/in/clement-lalanne-cs-maths/">Linkedin</a></li>
-        <li><a target="_blank" href="https://github.com/clemlal">Github</a></li>
-    </ul>
-</nav>
-
+  <!-- Top horizontal navigation -->
+  <div class="top-nav">
+    <div class="nav-container">
+      <div class="nav-section">
+        <h3>Menu</h3>
+        <ul>
+          <li><a href="index.html">🏠 Home</a></li>
+          <li><a href="index.html#news">📰 News</a></li>
+          <li><a href="index.html#publications">📖 Publications</a></li>
+          <li><a href="index.html#teaching">🏫 Teaching</a></li>
+          <li><a href="index.html#curriculum">🎓 Curriculum</a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <h3>Links</h3>
+        <ul>
+          <li><a target="_blank" href="https://scholar.google.com/citations?user=uGRMC34AAAAJ&hl">Google Scholar</a></li>
+          <li><a target="_blank" href="https://www.linkedin.com/in/clement-lalanne-cs-maths/">Linkedin</a></li>
+          <li><a target="_blank" href="https://github.com/clemlal">Github</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <div class="container">
-  <main class="main">
-    <div id="toptitle">
-      <h1>Clément Lalanne</h1>
-    </div>
-    <div class="presentation" style="display: flex;">
-      <img src="photos/photo.jpg" alt="My Photo" style="width: 250px;">
-      <p>Assistant Professor (MCF) @ <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">University of Toulouse</a>, associate to <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institute of Mathematics of Toulouse</a>.<br>
-          AI co-chair @ <a href="https://aniti.univ-toulouse.fr/" target="_blank" rel="noopener noreferrer">ANITI</a>.<br>
-          My work focuses on Differential Privacy, Learning Theory, Statistics and Optimization. <br><br>
-          <strong>Contact :</strong><br> ✉ clement.lalanne@math.univ-toulouse.fr <br>☎ +33 5 61 55 76 52
-    </div>
-    <div class="section" id="news">
-      <h2>News</h2>
-      <ul>
-        <li>* <strong>May 2025</strong> The preprint for our article <a href="https://hal.science/hal-04923829v2" target="_blank" rel="noopener noreferrer">Learning with Differentially Private (Sliced) Wasserstein Gradients</a> (David Rodríguez-Vítores, Clément Lalanne, Jean-Michel Loubes) just got updated, including some interesting new experiments on private sliced-Wasserstein autoencoders !</li>
-        <li>* <strong>May 2025</strong> Our article <a href="https://hal.science/hal-04923578v1" target="_blank" rel="noopener noreferrer">On the Private Estimation of Smooth Transport Maps</a> (Clément Lalanne, Franck Iutzeler, Jean-Michel Loubes, Julien Chhor) just got accepted to <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML</a> ! The camera-ready version of the article should soon be available, including some nice additions following the discussions with the reviewers. See you in Vancouver :)</li>
-        <li>* <strong>January 2025</strong> The preprint for our new paper <a href="https://hal.science/hal-04923578v1" target="_blank" rel="noopener noreferrer">On the Private Estimation of Smooth Transport Maps</a> (Clément Lalanne, Franck Iutzeler, Jean-Michel Loubes, Julien Chhor) is now available. Check it out!</li>
-        <li>* <strong>January 2025</strong> The preprint for our new paper <a href="https://hal.science/hal-04923829v1" target="_blank" rel="noopener noreferrer">Learning with Differentially Private (Sliced) Wasserstein Gradients</a> (David Rodríguez-Vítores, Clément Lalanne, Jean-Michel Loubes) is now available. Read it now!</li>
-        <li>* <strong>September 2024</strong> I am thrilled to announce that I started a new position as a Maître de Conférences (french equivalent of Assistant Professor) at <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">Université Toulouse 3 Paul Sabatier</a> in Applied Mathematics. I will be pursuing my research within the <a href="https://www.math.univ-toulouse.fr/en/recherche/teams/statistiques-et-optimisation/" target="_blank" rel="noopener noreferrer">Statistics and Optimization</a> team of the <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institut de Mathématiques de Toulouse</a>.</li>
-        <li>* <strong>July 2024</strong> What a week at <a href="https://icml.cc/Conferences/2024" target="_blank" rel="noopener noreferrer">ICML 2024</a> in Vienna, Austria where I presented a poster for our article <a href="https://icml.cc/virtual/2024/poster/34196" target="_blank" rel="noopener noreferrer">Privately Learning Smooth Distributions on the Hypercube by Projections</a>. Congratulations to the researchers for the high level of the presentations and to the organization team. <br> 
-          <div class="center"> <img src="photos/ICML2024_2.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_3.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_1.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_4.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_5.jpg" alt="My Photo" style="height: 150px;" > </div> </li>
-        <li>* <strong>May 2024</strong> Our article <a href="https://hal.science/hal-04549279" target="_blank" rel="noopener noreferrer">Privately Learning Smooth Distributions on the Hypercube by Projections</a> just got accepted to the 41st <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">International Conference on Machine Learning</a>. Looking forward to present our work in Vienna. Huge thanks to my coauthor <a href="https://perso.math.univ-toulouse.fr/gadat/" target="_blank" rel="noopener noreferrer">Sébastien Gadat</a>, and to the reviewers for the useful inputs and suggestions.</li>
-        <li><a href="news_archive.html">📰 News Archive</a></li>
-      </ul>
-    </div>
-
-    <div class="section" id="publications">
-      <h2>Publications</h2>
-      <ul>
-        <iframe width="98%" height=2600vh src="https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne%3B1332508&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_DOI=oui&CB_resume=oui&CB_typdoc=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=titre&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css"></iframe>
-      </ul>
-    </div>
-    
-    <div class="section" id="teaching">
-      <h2>Teaching</h2>
-      <ul>
-        <li>* <strong>Mathematical Methods for Supervised Learning (M1 SID University of Toulouse) : </strong> <a href="teaching/2024_2025_SID_Supervised_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>.</li>
-
-        <li>* <strong>Mathematics of Machine Learning (M2 MAPI3 University of Toulouse) : </strong> <a href="teaching/2024_2025_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>, <a href="teaching/2024_2025_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects 2024-2025</a>.</li>
-
-        <li><a href="teaching_archive.html">📰 Teaching Archive</a></li>
-
-      </ul>
-    </div>
-    <div class="section" id="curriculum">
-      <h2>Curriculum</h2>
-      <ul>
-        <li>* <strong>2024-Today :</strong> Assistant Professor (MCF) in Applied Mathematics at <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">University of Toulouse</a> and <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institute of Mathematics of Toulouse</a></li>
-        <li>* <strong>2023-2024 :</strong> Postdoc @ <a href="https://www.ut-capitole.fr/home/the-university/faculties-schools/toulouse-school-of-economics-tse" target="_blank" rel="noopener noreferrer">Toulouse School of Economics (Toulouse Capitole University)</a> with <a href="https://www.tse-fr.eu/fr/people/jerome-bolte" target="_blank" rel="noopener noreferrer">Jérôme Bolte</a> and <a href="https://perso.math.univ-toulouse.fr/gadat/" target="_blank" rel="noopener noreferrer" >Sébastien Gadat</a></li>
-        <li>* <strong>2020-2023 :</strong> PhD in Computer Science @ <a href="http://www.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">ENS Lyon</a> under the supervision of
-          <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/index.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a> and
-          <a href="https://people.irisa.fr/Remi.Gribonval/" target="_blank" rel="noopener noreferrer" >Rémi Gribonval</a> among the <a href="https://www.inria.fr/fr/ockham" target="_blank" rel="noopener noreferrer">Inria OCKHAM team</a></li>
+    <main class="main">
+      <div id="toptitle">
+        <h1>Clément Lalanne</h1>
+      </div>
+      <div class="presentation">
+        <img src="photos/photo.jpg" alt="My Photo" style="width: 250px;">
+        <p>Assistant Professor (MCF) @ <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">University of Toulouse</a>, associate to <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institute of Mathematics of Toulouse</a>.<br>
+            AI co-chair @ <a href="https://aniti.univ-toulouse.fr/" target="_blank" rel="noopener noreferrer">ANITI</a>.<br>
+            My work focuses on Differential Privacy, Learning Theory, Statistics and Optimization. <br><br>
+            <strong>Contact :</strong><br> ✉ clement.lalanne@math.univ-toulouse.fr <br>☎ +33 5 61 55 76 52
+        </p>
+      </div>
+      
+      <div class="section" id="news">
+        <h2>News</h2>
         <ul>
-          <li><strong>2023 :</strong> I successfully defended my PhD thesis in computer science titled "On the tradeoffs of statistical learning with privacy" on October 4th 2023. You may find the manuscript <a href="https://hal.science/tel-04431813" target="_blank" rel="noopener noreferrer">here</a>, and the slides <a href="randomDocuments/PhDDefense.pdf" target="_blank" rel="noopener noreferrer">here</a></li>
-          <li><strong>2023 :</strong> Laureate of the <a href="https://fr.wikipedia.org/wiki/Agr%C3%A9gation_de_math%C3%A9matiques" target="_blank" rel="noopener noreferrer">Agrégation Externe de Mathématiques</a></li>
-          <li><strong>2020-2023 :</strong> Teacher Assistant @ ENS Lyon. Topics : Machine Learning, Optimization, Data Bases and Data Mining, Competitive Programming, System Programming</li> 
+          <li><strong>May 2025</strong> The preprint for our article <a href="https://hal.science/hal-04923829v2" target="_blank" rel="noopener noreferrer">Learning with Differentially Private (Sliced) Wasserstein Gradients</a> (David Rodríguez-Vítores, Clément Lalanne, Jean-Michel Loubes) just got updated, including some interesting new experiments on private sliced-Wasserstein autoencoders !</li>
+          <li><strong>May 2025</strong> Our article <a href="https://hal.science/hal-04923578v1" target="_blank" rel="noopener noreferrer">On the Private Estimation of Smooth Transport Maps</a> (Clément Lalanne, Franck Iutzeler, Jean-Michel Loubes, Julien Chhor) just got accepted to <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML</a> ! The camera-ready version of the article should soon be available, including some nice additions following the discussions with the reviewers. See you in Vancouver :)</li>
+          <li><strong>January 2025</strong> The preprint for our new paper <a href="https://hal.science/hal-04923578v1" target="_blank" rel="noopener noreferrer">On the Private Estimation of Smooth Transport Maps</a> (Clément Lalanne, Franck Iutzeler, Jean-Michel Loubes, Julien Chhor) is now available. Check it out!</li>
+          <li><strong>January 2025</strong> The preprint for our new paper <a href="https://hal.science/hal-04923829v1" target="_blank" rel="noopener noreferrer">Learning with Differentially Private (Sliced) Wasserstein Gradients</a> (David Rodríguez-Vítores, Clément Lalanne, Jean-Michel Loubes) is now available. Read it now!</li>
+          <li><strong>September 2024</strong> I am thrilled to announce that I started a new position as a Maître de Conférences (french equivalent of Assistant Professor) at <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">Université Toulouse 3 Paul Sabatier</a> in Applied Mathematics. I will be pursuing my research within the <a href="https://www.math.univ-toulouse.fr/en/recherche/teams/statistiques-et-optimisation/" target="_blank" rel="noopener noreferrer">Statistics and Optimization</a> team of the <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institut de Mathématiques de Toulouse</a>.</li>
+          <li><strong>July 2024</strong> What a week at <a href="https://icml.cc/Conferences/2024" target="_blank" rel="noopener noreferrer">ICML 2024</a> in Vienna, Austria where I presented a poster for our article <a href="https://icml.cc/virtual/2024/poster/34196" target="_blank" rel="noopener noreferrer">Privately Learning Smooth Distributions on the Hypercube by Projections</a>. Congratulations to the researchers for the high level of the presentations and to the organization team. <br> 
+            <div class="center"> <img src="photos/ICML2024_2.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_3.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_1.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_4.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_5.jpg" alt="My Photo" style="height: 150px;" > </div> </li>
+          <li><strong>May 2024</strong> Our article <a href="https://hal.science/hal-04549279" target="_blank" rel="noopener noreferrer">Privately Learning Smooth Distributions on the Hypercube by Projections</a> just got accepted to the 41st <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">International Conference on Machine Learning</a>. Looking forward to present our work in Vienna. Huge thanks to my coauthor <a href="https://perso.math.univ-toulouse.fr/gadat/" target="_blank" rel="noopener noreferrer">Sébastien Gadat</a>, and to the reviewers for the useful inputs and suggestions.</li>
+          <li><a href="news_archive.html">📰 News Archive</a></li>
         </ul>
-        <li>* <strong>2016-2020 :</strong> Undergrad @ <a href="https://www.ens.psl.eu/" target="_blank" rel="noopener noreferrer">ENS Ulm</a>; Civil Servant Student (Normalien) in Computer Science (major) and Mathematics (minor)</li>
+      </div>
+
+      <div class="section" id="publications">
+        <h2>Publications</h2>
         <ul>
-          <li><strong>2020 :</strong> M.S. (Diplôme de l'ENS) in Computer Science with a minor in Mathematics from <a href="https://www.ens.psl.eu/" target="_blank" rel="noopener noreferrer">ENS Ulm</a></li>
-          <li><strong>2019 :</strong> M.S. in Applied Mathematics, <a href="https://www.master-mva.com/" target="_blank" rel="noopener noreferrer">MVA</a> from <a href="https://ens-paris-saclay.fr/" target="_blank" rel="noopener noreferrer">ENS Paris-Saclay</a></li>
-          <li><strong>2019 :</strong> Internship : Nystagmus waveform extraction using convolutional dictionary learning with detrending, supervised by <a href="https://nvayatis.perso.math.cnrs.fr/" target="_blank" rel="noopener noreferrer">Nicolas Vayatis</a>, <a href="http://www.laurentoudre.fr/" target="_blank" rel="noopener noreferrer">Laurent Oudre</a> and <a href="https://tommoral.github.io/about.html" target="_blank" rel="noopener noreferrer">Thomas Moreau</a>,  <a href="http://cmla.ens-paris-saclay.fr/version-anglaise/" target="_blank" rel="noopener noreferrer">CMLA</a></li>
-          <li><strong>2018 :</strong> Internship : Storage-optimal continuous optimization, supervised by <a href="https://people.epfl.ch/volkan.cevher" target="_blank" rel="noopener noreferrer">Volkan Cevher</a>, <a href="https://www.epfl.ch/fr/" target="_blank" rel="noopener noreferrer">EPFL</a> in <a href="https://www.epfl.ch/labs/lions/" target="_blank" rel="noopener noreferrer">LIONS</a> team</li>
-          <li><strong>2017 :</strong> Internship : De-anonymization and privacy: Study of a random graph model, supervised by <a href="https://pagespro.isae-supaero.fr/florian-simatos/?lang=fr" target="_blank" rel="noopener noreferrer">Florian Simatos</a>, <a href="https://www.isae-supaero.fr/en/research/departments/department-of-complex-systems-engineering-disc-94/department-of-complex-systems-engineering-disc/" target="_blank" rel="noopener noreferrer">DISC</a> of <a href="https://www.isae-supaero.fr/fr/" target="_blank" rel="noopener noreferrer">ISAE Supaero</a></li>
+          <iframe width="98%" height=3000vh src="https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne%3B1332508&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_DOI=oui&CB_resume=oui&CB_typdoc=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=titre&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css"></iframe>
         </ul>
-        <li>* <strong>2013-2016 :</strong> <a href="https://en.wikipedia.org/wiki/Classe_préparatoire_aux_grandes_écoles" target="_blank" rel="noopener noreferrer">CPGE</a> MP* @ <a href="https://www.louislegrand.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis-Le-Grand</a> & MPSI/MP @ <a href="https://www.lyceelouisbarthou.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis Barthou</a></li>
-      </ul>
-    </div>
-  </main>
+      </div>
+      
+      <div class="section" id="teaching">
+        <h2>Teaching</h2>
+        <ul>
+          <li><strong>Mathematical Methods for Supervised Learning (M1 SID University of Toulouse) : </strong> <a href="teaching/2024_2025_SID_Supervised_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>.</li>
+
+          <li><strong>Mathematics of Machine Learning (M2 MAPI3 University of Toulouse) : </strong> <a href="teaching/2024_2025_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>, <a href="teaching/2024_2025_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects 2024-2025</a>.</li>
+
+          <li><a href="teaching_archive.html">📰 Teaching Archive</a></li>
+
+        </ul>
+      </div>
+      <div class="section" id="curriculum">
+        <h2>Curriculum</h2>
+        <ul>
+          <li><strong>2024-Today :</strong> Assistant Professor (MCF) in Applied Mathematics at <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">University of Toulouse</a> and <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institute of Mathematics of Toulouse</a></li>
+          <li><strong>2023-2024 :</strong> Postdoc @ <a href="https://www.ut-capitole.fr/home/the-university/faculties-schools/toulouse-school-of-economics-tse" target="_blank" rel="noopener noreferrer">Toulouse School of Economics (Toulouse Capitole University)</a> with <a href="https://www.tse-fr.eu/fr/people/jerome-bolte" target="_blank" rel="noopener noreferrer">Jérôme Bolte</a> and <a href="https://perso.math.univ-toulouse.fr/gadat/" target="_blank" rel="noopener noreferrer" >Sébastien Gadat</a></li>
+          <li><strong>2020-2023 :</strong> PhD in Computer Science @ <a href="http://www.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">ENS Lyon</a> under the supervision of
+            <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/index.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a> and
+            <a href="https://people.irisa.fr/Remi.Gribonval/" target="_blank" rel="noopener noreferrer" >Rémi Gribonval</a> among the <a href="https://www.inria.fr/fr/ockham" target="_blank" rel="noopener noreferrer">Inria OCKHAM team</a></li>
+          <ul>
+            <li><strong>2023 :</strong> I successfully defended my PhD thesis in computer science titled "On the tradeoffs of statistical learning with privacy" on October 4th 2023. You may find the manuscript <a href="https://hal.science/tel-04431813" target="_blank" rel="noopener noreferrer">here</a>, and the slides <a href="randomDocuments/PhDDefense.pdf" target="_blank" rel="noopener noreferrer">here</a></li>
+            <li><strong>2023 :</strong> Laureate of the <a href="https://fr.wikipedia.org/wiki/Agr%C3%A9gation_de_math%C3%A9matiques" target="_blank" rel="noopener noreferrer">Agrégation Externe de Mathématiques</a></li>
+            <li><strong>2020-2023 :</strong> Teacher Assistant @ ENS Lyon. Topics : Machine Learning, Optimization, Data Bases and Data Mining, Competitive Programming, System Programming</li> 
+          </ul>
+          <li><strong>2016-2020 :</strong> Undergrad @ <a href="https://www.ens.psl.eu/" target="_blank" rel="noopener noreferrer">ENS Ulm</a>; Civil Servant Student (Normalien) in Computer Science (major) and Mathematics (minor)</li>
+          <ul>
+            <li><strong>2020 :</strong> M.S. (Diplôme de l'ENS) in Computer Science with a minor in Mathematics from <a href="https://www.ens.psl.eu/" target="_blank" rel="noopener noreferrer">ENS Ulm</a></li>
+            <li><strong>2019 :</strong> M.S. in Applied Mathematics, <a href="https://www.master-mva.com/" target="_blank" rel="noopener noreferrer">MVA</a> from <a href="https://ens-paris-saclay.fr/" target="_blank" rel="noopener noreferrer">ENS Paris-Saclay</a></li>
+            <li><strong>2019 :</strong> Internship : Nystagmus waveform extraction using convolutional dictionary learning with detrending, supervised by <a href="https://nvayatis.perso.math.cnrs.fr/" target="_blank" rel="noopener noreferrer">Nicolas Vayatis</a>, <a href="http://www.laurentoudre.fr/" target="_blank" rel="noopener noreferrer">Laurent Oudre</a> and <a href="https://tommoral.github.io/about.html" target="_blank" rel="noopener noreferrer">Thomas Moreau</a>,  <a href="http://cmla.ens-paris-saclay.fr/version-anglaise/" target="_blank" rel="noopener noreferrer">CMLA</a></li>
+            <li><strong>2018 :</strong> Internship : Storage-optimal continuous optimization, supervised by <a href="https://people.epfl.ch/volkan.cevher" target="_blank" rel="noopener noreferrer">Volkan Cevher</a>, <a href="https://www.epfl.ch/fr/" target="_blank" rel="noopener noreferrer">EPFL</a> in <a href="https://www.epfl.ch/labs/lions/" target="_blank" rel="noopener noreferrer">LIONS</a> team</li>
+            <li><strong>2017 :</strong> Internship : De-anonymization and privacy: Study of a random graph model, supervised by <a href="https://pagespro.isae-supaero.fr/florian-simatos/?lang=fr" target="_blank" rel="noopener noreferrer">Florian Simatos</a>, <a href="https://www.isae-supaero.fr/en/research/departments/department-of-complex-systems-engineering-disc-94/department-of-complex-systems-engineering-disc/" target="_blank" rel="noopener noreferrer">DISC</a> of <a href="https://www.isae-supaero.fr/fr/" target="_blank" rel="noopener noreferrer">ISAE Supaero</a></li>
+          </ul>
+          <li><strong>2013-2016 :</strong> <a href="https://en.wikipedia.org/wiki/Classe_préparatoire_aux_grandes_écoles" target="_blank" rel="noopener noreferrer">CPGE</a> MP* @ <a href="https://www.louislegrand.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis-Le-Grand</a> & MPSI/MP @ <a href="https://www.lyceelouisbarthou.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis Barthou</a></li>
+        </ul>
+      </div>
+    </main>
   </div>
 </body>
-
 
 </html>
