@@ -202,3 +202,28 @@
     display: block;
   }
 }
+
+.publication-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.publication-item {
+  margin-bottom: 1.5em;
+  line-height: calc(1em * 1.5);
+}
+.publication-item a {
+  color: #1a0dab;
+  text-decoration: none;
+}
+.publication-item a:hover {
+  text-decoration: underline;
+}
+.loading {
+  color: #666;
+  font-style: italic;
+}
+.error {
+  color: #d00;
+  font-weight: bold;
+}
