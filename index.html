@@ -7,10 +7,34 @@
   <style>
     body {
       width: 100%;
-      background-color: rgb(255, 255, 255);
+      background-color: #fff;
       font-family: Georgia, serif;
       margin: 0;
       padding: 0;
+    }
+    .publication-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .publication-item {
+      margin-bottom: 1.5em;
+      line-height: calc(1em * 1.5);
+    }
+    .publication-item a {
+      color: #1a0dab;
+      text-decoration: none;
+    }
+    .publication-item a:hover {
+      text-decoration: underline;
+    }
+    .loading {
+      color: #666;
+      font-style: italic;
+    }
+    .error {
+      color: #d00;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -60,7 +84,8 @@
           <li><strong>May 2025</strong> Our article <a href="https://hal.science/hal-04923578v1" target="_blank" rel="noopener noreferrer">On the Private Estimation of Smooth Transport Maps</a> (Clément Lalanne, Franck Iutzeler, Jean-Michel Loubes, Julien Chhor) just got accepted to <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML</a> ! The camera-ready version of the article should soon be available, including some nice additions following the discussions with the reviewers. See you in Vancouver :)</li>
           <li><strong>January 2025</strong> The preprint for our new paper <a href="https://hal.science/hal-04923578v1" target="_blank" rel="noopener noreferrer">On the Private Estimation of Smooth Transport Maps</a> (Clément Lalanne, Franck Iutzeler, Jean-Michel Loubes, Julien Chhor) is now available. Check it out!</li>
           <li><strong>January 2025</strong> The preprint for our new paper <a href="https://hal.science/hal-04923829v1" target="_blank" rel="noopener noreferrer">Learning with Differentially Private (Sliced) Wasserstein Gradients</a> (David Rodríguez-Vítores, Clément Lalanne, Jean-Michel Loubes) is now available. Read it now!</li>
-          <li><strong>September 2024</strong> I am thrilled to announce that I started a new position as a Maître de Conférences (french equivalent of Assistant Professor) at <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">Université Toulouse 3 Paul Sabatier</a> in Applied Mathematics. I will be pursuing my research within the <a href="https://www.math.univ-toulouse.fr/en/recherche/teams/statistiques-et-optimisation/" target="_blank" rel="noopener noreferrer">Statistics and Optimization</a> team of the <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institut de Mathématiques de Toulouse</a>.</li>
+          <li><strong>September 2024</strong> I am thrilled to announce that I started a new position as a Maître de Conférences (french equivalent of Assistant Professor) at <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">Université Toulouse 3 Paul Sabatier</a> in Applied Mathematics. I will be pursuing my research within the <a href="https://www.math.univ-toulouse.fr/en/recherche/teams/statistiques-et-optimisation/" target="_blank" rel="noopener noreferrer">Statistics and Optimization</a> team of the <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institut de Mathématiques de Toulouse</a>.</li126256 · ENSFEA - École Nationale Supérieure de Formation de l'Enseignement Agricole de Toulouse-Auzeville (BP 22687 2 Route de Narbonne, 31326 Castanet Tolosan Cedex - France) StructId : 301788 ·
+
           <li><strong>July 2024</strong> What a week at <a href="https://icml.cc/Conferences/2024" target="_blank" rel="noopener noreferrer">ICML 2024</a> in Vienna, Austria where I presented a poster for our article <a href="https://icml.cc/virtual/2024/poster/34196" target="_blank" rel="noopener noreferrer">Privately Learning Smooth Distributions on the Hypercube by Projections</a>. Congratulations to the researchers for the high level of the presentations and to the organization team. <br> 
             <div class="center"> <img src="photos/ICML2024_2.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_3.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_1.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_4.jpg" alt="My Photo" style="height: 150px;" > <img src="photos/ICML2024_5.jpg" alt="My Photo" style="height: 150px;" > </div> </li>
           <li><strong>May 2024</strong> Our article <a href="https://hal.science/hal-04549279" target="_blank" rel="noopener noreferrer">Privately Learning Smooth Distributions on the Hypercube by Projections</a> just got accepted to the 41st <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">International Conference on Machine Learning</a>. Looking forward to present our work in Vienna. Huge thanks to my coauthor <a href="https://perso.math.univ-toulouse.fr/gadat/" target="_blank" rel="noopener noreferrer">Sébastien Gadat</a>, and to the reviewers for the useful inputs and suggestions.</li>
@@ -70,36 +95,35 @@
 
       <div class="section" id="publications">
         <h2>Publications</h2>
-        <ul>
-          <iframe width="98%" height=3000vh src="https://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php?idHal=clement-lalanne%3B1332508&CB_auteur=oui&CB_titre=oui&CB_article=oui&CB_DOI=oui&CB_resume=oui&CB_typdoc=oui&langue=Anglais&tri_exp=annee_publi&tri_exp2=typdoc&tri_exp3=titre&ordre_aff=TA&Fen=Aff&css=../css/VisuRubriqueEncadre.css"></iframe>
-        </ul>
+        <div class="publications-container">
+          <p class="loading">Loading publications...</p>
+          <ul class="publication-list" id="publication-list"></ul>
+        </div>
       </div>
       
       <div class="section" id="teaching">
         <h2>Teaching</h2>
         <ul>
           <li><strong>Mathematical Methods for Supervised Learning (M1 SID University of Toulouse) : </strong> <a href="teaching/2024_2025_SID_Supervised_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>.</li>
-
           <li><strong>Mathematics of Machine Learning (M2 MAPI3 University of Toulouse) : </strong> <a href="teaching/2024_2025_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>, <a href="teaching/2024_2025_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects 2024-2025</a>.</li>
-
           <li><a href="teaching_archive.html">📰 Teaching Archive</a></li>
-
         </ul>
       </div>
+      
       <div class="section" id="curriculum">
         <h2>Curriculum</h2>
         <ul>
           <li><strong>2024-Today :</strong> Assistant Professor (MCF) in Applied Mathematics at <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">University of Toulouse</a> and <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institute of Mathematics of Toulouse</a></li>
-          <li><strong>2023-2024 :</strong> Postdoc @ <a href="https://www.ut-capitole.fr/home/the-university/faculties-schools/toulouse-school-of-economics-tse" target="_blank" rel="noopener noreferrer">Toulouse School of Economics (Toulouse Capitole University)</a> with <a href="https://www.tse-fr.eu/fr/people/jerome-bolte" target="_blank" rel="noopener noreferrer">Jérôme Bolte</a> and <a href="https://perso.math.univ-toulouse.fr/gadat/" target="_blank" rel="noopener noreferrer" >Sébastien Gadat</a></li>
+          <li><strong>2023-2024 :</strong> Postdoc @ <a href="https://www.ut-capitole.fr/home/the-university/faculties-schools/toulouse-school-of-economics-tse" target="_blank" rel="noopener noreferrer">Toulouse School of Economics (Toulouse Capitole University)</a> with <a href="https://www.tse-fr.eu/fr/people/jerome-bolte" target="_blank" rel="noopener noreferrer">Jérôme Bolte</a> and <a href="https://perso.math.univ-toulouse.fr/gadat/" target="_blank" rel="noopener noreferrer">Sébastien Gadat</a></li>
           <li><strong>2020-2023 :</strong> PhD in Computer Science @ <a href="http://www.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">ENS Lyon</a> under the supervision of
             <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/index.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a> and
-            <a href="https://people.irisa.fr/Remi.Gribonval/" target="_blank" rel="noopener noreferrer" >Rémi Gribonval</a> among the <a href="https://www.inria.fr/fr/ockham" target="_blank" rel="noopener noreferrer">Inria OCKHAM team</a></li>
+            <a href="https://people.irisa.fr/Remi.Gribonval/" target="_blank" rel="noopener noreferrer">Rémi Gribonval</a> among the <a href="https://www.inria.fr/fr/ockham" target="_blank" rel="noopener noreferrer">Inria OCKHAM team</a></li>
           <ul>
             <li><strong>2023 :</strong> I successfully defended my PhD thesis in computer science titled "On the tradeoffs of statistical learning with privacy" on October 4th 2023. You may find the manuscript <a href="https://hal.science/tel-04431813" target="_blank" rel="noopener noreferrer">here</a>, and the slides <a href="randomDocuments/PhDDefense.pdf" target="_blank" rel="noopener noreferrer">here</a></li>
-            <li><strong>2023 :</strong> Laureate of the <a href="https://fr.wikipedia.org/wiki/Agr%C3%A9gation_de_math%C3%A9matiques" target="_blank" rel="noopener noreferrer">Agrégation Externe de Mathématiques</a></li>
+            <li><strong> Colonnes: 2023 :</strong> Laureate of the <a href="https://fr.wikipedia.org/wiki/Agr%C3%A9gation_de_math%C3%A9matiques" target="_blank" rel="noopener noreferrer">Agrégation Externe de Mathématiques</a></li>
             <li><strong>2020-2023 :</strong> Teacher Assistant @ ENS Lyon. Topics : Machine Learning, Optimization, Data Bases and Data Mining, Competitive Programming, System Programming</li> 
           </ul>
-          <li><strong>2016-2020 :</strong> Undergrad @ <a href="https://www.ens.psl.eu/" target="_blank" rel="noopener noreferrer">ENS Ulm</a>; Civil Servant Student (Normalien) in Computer Science (major) and Mathematics (minor)</li>
+          <li><strong>2016-2020 :</strong> Undergrad @ <a href="https://www.ens.psl.eu/" target="_blank" rel="noopener noreferrer">ENS Ulm</a>; Civil Servant standstill (Normalien) in Computer Science (major) and Mathematics (minor)</li>
           <ul>
             <li><strong>2020 :</strong> M.S. (Diplôme de l'ENS) in Computer Science with a minor in Mathematics from <a href="https://www.ens.psl.eu/" target="_blank" rel="noopener noreferrer">ENS Ulm</a></li>
             <li><strong>2019 :</strong> M.S. in Applied Mathematics, <a href="https://www.master-mva.com/" target="_blank" rel="noopener noreferrer">MVA</a> from <a href="https://ens-paris-saclay.fr/" target="_blank" rel="noopener noreferrer">ENS Paris-Saclay</a></li>
@@ -107,11 +131,89 @@
             <li><strong>2018 :</strong> Internship : Storage-optimal continuous optimization, supervised by <a href="https://people.epfl.ch/volkan.cevher" target="_blank" rel="noopener noreferrer">Volkan Cevher</a>, <a href="https://www.epfl.ch/fr/" target="_blank" rel="noopener noreferrer">EPFL</a> in <a href="https://www.epfl.ch/labs/lions/" target="_blank" rel="noopener noreferrer">LIONS</a> team</li>
             <li><strong>2017 :</strong> Internship : De-anonymization and privacy: Study of a random graph model, supervised by <a href="https://pagespro.isae-supaero.fr/florian-simatos/?lang=fr" target="_blank" rel="noopener noreferrer">Florian Simatos</a>, <a href="https://www.isae-supaero.fr/en/research/departments/department-of-complex-systems-engineering-disc-94/department-of-complex-systems-engineering-disc/" target="_blank" rel="noopener noreferrer">DISC</a> of <a href="https://www.isae-supaero.fr/fr/" target="_blank" rel="noopener noreferrer">ISAE Supaero</a></li>
           </ul>
-          <li><strong>2013-2016 :</strong> <a href="https://en.wikipedia.org/wiki/Classe_préparatoire_aux_grandes_écoles" target="_blank" rel="noopener noreferrer">CPGE</a> MP* @ <a href="https://www.louislegrand.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis-Le-Grand</a> & MPSI/MP @ <a href="https://www.lyceelouisbarthou.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis Barthou</a></li>
+          <li><strong>2013-2016 :</strong> <a href="https://en.wikipedia.org/wiki/Classe_pr%C3%A9paratoire_aux_grandes_%C3%A9coles" target="_blank" rel="noopener noreferrer">CPGE</a> MP* @ <a href="https://www.louislegrand.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis-Le-Grand</a> & MPSI/MP @ <a href="https://www.lyceelouisbarthou.fr/" target="_blank" rel="noopener noreferrer">Lycée Louis Barthou</a></li>
         </ul>
       </div>
     </main>
   </div>
-</body>
+  <script>
+    async function fetchPublications() {
+      const publicationList = document.getElementById('publication-list');
+      const loadingMessage = document.querySelector('.loading');
+      const errorMessage = document.createElement('p');
+      errorMessage.className = 'error';
 
+      // Manually add PhD thesis
+      const thesisEntry = `
+        <li class="publication-item">
+          <strong>On the tradeoffs of statistical learning with privacy</strong><br>
+          Clément Lalanne<br>
+          Type: PhD Thesis, Date: 2023-10-04<br>
+          <a href="https://hal.science/tel-04431813" target="_blank" rel="noopener noreferrer">View Thesis</a>
+        </li>
+      `;
+      
+      try {
+        const response = await fetch('https://api.archives-ouvertes.fr/search/?q=authIdHal_s:clement-lalanne&fl=title_s,authFullName_s,docType_s,publicationDate_s,doi_s,uri_s,journalTitle_s,conferenceTitle_s&sort=publicationDate_s%20desc');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        const docs = data.response?.docs || [];
+        
+        // Clear loading message
+        loadingMessage.style.display = 'none';
+        
+        // Map document types to user-friendly labels
+        const typeLabels = {
+          'ART': 'Journal Article',
+          'COMM': 'Conference Paper',
+          'THESE': 'PhD Thesis',
+          'OUV': 'Book',
+          'COUV': 'Book Chapter',
+          'OTHER': 'Other'
+        };
+
+        // Render publications, starting with thesis
+        let publicationsHTML = "";
+        if (docs.length > 0) {
+          publicationsHTML += docs.map(doc => {
+            const title = Array.isArray(doc.title_s) ? doc.title_s[0] : doc.title_s || 'Untitled';
+            const authors = Array.isArray(doc.authFullName_s) ? doc.authFullName_s.join(', ') : doc.authFullName_s || 'Unknown Author';
+            const type = typeLabels[doc.docType_s] || doc.docType_s || 'Unknown Type';
+            const date = doc.publicationDate_s || 'Unknown Date';
+            const doi = doc.doi_s ? `https://doi.org/${doc.doi_s}` : doc.uri_s || '#';
+            const venue = doc.journalTitle_s || doc.conferenceTitle_s || 'Unknown Venue';
+            
+            return `
+              <li class="publication-item">
+                <strong>${title}</strong><br>
+                ${authors}<br>
+                Type: ${type}, Date: ${date}<br>
+                Venue: ${venue}<br>
+                <a href="${doi}" target="_blank" rel="noopener noreferrer">View Publication</a>
+              </li>
+            `;
+          }).join('');
+        } else {
+          publicationsHTML += '<li>No additional publications found.</li>';
+        }
+
+        publicationsHTML += thesisEntry;
+        
+        publicationList.innerHTML = publicationsHTML;
+      } catch (error) {
+        console.error('Error fetching publications:', error);
+        loadingMessage.style.display = 'none';
+        errorMessage.textContent = 'Failed to load publications. Please try again later.';
+        publicationList.before(errorMessage);
+        // Still show thesis even if API fails
+        publicationList.innerHTML = thesisEntry;
+      }
+    }
+
+    // Fetch publications when the page loads
+    window.addEventListener('load', fetchPublications);
+  </script>
+</body>
 </html>
