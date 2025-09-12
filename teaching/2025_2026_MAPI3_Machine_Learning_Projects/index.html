@@ -9,7 +9,7 @@
     <div class="container">
         <main class="main">
             <div id="toptitle">
-                <h1>Mathematics of Machine Learning Projects M2 MAPI3 (Paul Sabatier, 2025-2026)</h1>
+                <h1>Mathematics of Machine Learning Projects M2 MAPI3 (Toulouse University, 2025-2026)</h1>
 
                 <strong>Lecturers : </strong> <a href="../../index.html" target="_blank" rel="noopener noreferrer">Clément Lalanne</a>
             </div>
@@ -55,17 +55,73 @@
             </ul>
 
             <h2>Students - Projects mapping</h2>
-                <li>...</li>
-            </ul>
-
-
-            <h2>Theoretical Projects</h2>
-            <strong>If you want to work on a subject that is not listed, ask me in advance.</strong>
             <ul>
                 <li>...</li>
             </ul>
-            
 
+            <h2>Theoretical Projects</h2>
+            <strong>If you want to work on a subject that is not listed, ask me in advance.</strong>
+            <ul class="project-list">
+                <li>
+                    <h3>Langevin Sampling and Denoising Autoencoders</h3>
+                    <p>Overdamped Langevin dynamics targets a density <em>π(x) ∝ e^{-U(x)}</em> via the SDE <em>dX_t = -∇U(X_t)dt + √2 dW_t</em>, with practical discretizations such as ULA/MALA and SGLD. Denoising autoencoders (DAEs) learn to predict clean data from noisy inputs; the denoising vector field approximates the score <em>∇ log p(x)</em>, linking DAEs to score matching and Langevin sampling via Tweedie’s formula.</p>
+                    <p><strong>Starter references:</strong> Welling &amp; Teh (2011) <em>Bayesian Learning via Stochastic Gradient Langevin Dynamics</em>; Vincent (2011) <em>A Connection Between Score Matching and Denoising Autoencoders</em>.</p>
+                </li>
+
+                <li>
+                    <h3>Variational Autoencoders (VAE)</h3>
+                    <p>VAEs posit a latent-variable model <em>p<sub>θ</sub>(x,z)=p(z)p<sub>θ</sub>(x|z)</em> and optimize the evidence lower bound (ELBO) using the reparameterization trick for low-variance gradients. Core topics include the ELBO–KL decomposition, amortized inference, posterior collapse, and expressivity via richer posteriors (normalizing flows) and tighter bounds (IWAE). Theoretical angles involve identifiability, variational gaps, and bits-back coding interpretations.</p>
+                    <p><strong>Starter references:</strong> Kingma &amp; Welling (2014) <em>Auto-Encoding Variational Bayes</em>.</p>
+                </li>
+
+                <li>
+                    <h3>Score-Based Diffusion Models</h3>
+                    <p>Score-based generative modeling learns the score <em>∇<sub>x</sub> log p_t(x)</em> across noise levels and samples via reverse-time SDEs or probability-flow ODEs. The framework unifies denoising score matching, annealed Langevin dynamics, and continuous-time diffusion, with precise links to Fokker–Planck equations and Girsanov’s theorem. Key questions include consistency of score estimators, stability of reverse SDE solvers, and likelihood computation.</p>
+                    <p><strong>Starter references:</strong> Hyvärinen (2005/2007) <em>Score Matching</em>; Song &amp; Ermon (2019) <em>Generative Modeling by Estimating Gradients of the Data Distribution</em>; Song et&nbsp;al. (2021) <em>Score-Based Generative Modeling through SDEs</em>; Song et&nbsp;al. (2020) <em>Improved Techniques for Training Score-Based Generative Models</em>.</p>
+                </li>
+
+                <li>
+                    <h3>Flow Matching (CNFs, CFM, Rectified Flows)</h3>
+                    <p>
+                        Flow Matching trains continuous normalizing flows by <em>regressing</em> a time-dependent
+                        velocity field along a chosen probability path between a simple base distribution and the
+                        data, avoiding ODE simulation during training. It connects to diffusion via the
+                        probability-flow ODE and admits practical variants: <em>conditional/generalized flow
+                        matching</em> for conditional tasks and <em>rectified flows</em> that learn near-straight
+                        trajectories for fast sampling. Typical mathematical highlights include deriving the FM
+                        objective from continuity equations and analyzing path choices (Gaussian vs. OT/displacement
+                        interpolation) and their impact on sample complexity and stability.
+                    </p>
+                    <p><strong>Starter references:</strong>
+                        <a href="https://arxiv.org/abs/2210.02747" target="_blank" rel="noopener noreferrer">
+                        Lipman et&nbsp;al., “Flow Matching for Generative Modeling” (2022)
+                        </a>;
+                        <a href="https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching/" target="_blank" rel="noopener noreferrer">
+                        Gagneux et&nbsp;al., “Improving &amp; A Visual Dive into Conditional Flow Matching (2025)
+                        </a>.
+                    </p>
+                </li>
+
+                <li>
+                    <h3>Denoising Diffusion Models (Discrete Setting)</h3>
+                    <p>For categorical/sequential data, the forward process is a time-inhomogeneous Markov chain (e.g., multinomial corruption) that gradually randomizes symbols; the reverse model learns transition probabilities back to data. Design issues include choosing the corruption family (absorbing vs non-absorbing), parameterizing reverse kernels, and training via variational bounds or score-style objectives on simplices. Applications span text, protein sequences, and graphs.</p>
+                    <p><strong>Starter references:</strong> Austin et&nbsp;al. (2021) <em>Structured Denoising Diffusion Models in Discrete State Spaces (D3PM)</em>.</p>
+                </li>
+
+                <li>
+                    <h3>Autoregressive Data Generation: RNNs and LSTMs</h3>
+                    <p>Autoregressive models factorize <em>p(x)</em> into products of conditionals (e.g., language models) and learn to predict the next token. Recurrent networks capture long-range dependencies through hidden states; LSTMs/GRUs mitigate vanishing gradients via gating mechanisms. Theoretical directions include expressivity, mixing properties of the induced Markov chains, and generalization under teacher forcing vs free-running.</p>
+                    <p><strong>Starter references:</strong> Hochreiter &amp; Schmidhuber (1997) <em>Long Short-Term Memory</em>; Bengio et&nbsp;al. (2003) <em>A Neural Probabilistic Language Model</em>; Mikolov et&nbsp;al. (2010) <em>RNN-Based Language Models</em>.</p>
+                </li>
+
+                <li>
+                    <h3>Autoregressive Data Generation: Transformer Architecture</h3>
+                    <p>Transformers replace recurrence with attention, enabling parallelizable sequence modeling with strong inductive biases for long-range dependencies. In the autoregressive regime, causal masking yields powerful language models whose performance scales predictably with data, model size, and compute. Theory topics include attention expressivity, context length extrapolation, and scaling/compute optimality.</p>
+                    <p><strong>Starter references:</strong> Vaswani et&nbsp;al. (2017) <em>Attention Is All You Need</em>.</p>
+                </li>
+
+                
+            </ul>
         </main>
     </div>
 </body>
