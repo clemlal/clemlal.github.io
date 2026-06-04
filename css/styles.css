@@ -227,3 +227,25 @@
   color: #d00;
   font-weight: bold;
 }
+
+.publication-year-block {
+  margin-bottom: 2rem;
+}
+
+.publication-year {
+  margin-bottom: 0.6rem;
+  font-size: 1.4rem;
+  color: rgb(27, 46, 129);
+  border-bottom: 1px solid rgb(27, 46, 129);
+  padding-bottom: 0.2rem;
+}
+
+
+.year-publication-list {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.publication-item {
+  margin-bottom: 1rem;
+}
