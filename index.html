@@ -136,7 +136,7 @@ async function fetchPublications() {
 
   try {
     const response = await fetch(
-      'https://api.archives-ouvertes.fr/search/?q=authIdHal_s:clement-lalanne&fl=title_s,authFullName_s,docType_s,publicationDate_s,doi_s,uri_s,journalTitle_s,conferenceTitle_s&sort=publicationDate_s%20desc'
+      'https://api.archives-ouvertes.fr/search/?q=authIdHal_s:clement-lalanne&fl=title_s,authFullName_s,docType_s,publicationDate_s,doi_s,uri_s,journalTitle_s,conferenceTitle_s&fq=-docType_s:LECTURE&sort=publicationDate_s%20desc'
     );
 
     if (!response.ok) {
@@ -191,6 +191,17 @@ async function fetchPublications() {
         Clément Lalanne<br>
         Type: PhD Thesis, Date: 2023-10-04<br>
         <a href="https://hal.science/tel-04431813" target="_blank" rel="noopener noreferrer">View Thesis</a>
+      </li>
+    `);
+
+    if (!grouped["2026"]) grouped["2026"] = [];
+    grouped["2026"].unshift(`
+      <li class="publication-item">
+        <strong>speedrun-dlm: A speedrun benchmark for diffusion language models</strong><br>
+        Antoine Gonon, Adrian Müller, Léon Zheng, Zebang Shen, Clément Lalanne, Ya-Ping Hsieh, Anthony Bardou, Nicolas Boumal<br>
+        Type: Software / Benchmark, Date: 2026<br>
+        Venue: GitHub (MIT license)<br>
+        <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">View Repository</a>
       </li>
     `);
 
