@@ -248,4 +248,44 @@
 
 .publication-item {
   margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.publication-details {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Colour is set inline per venue (js/venue-badges.js); this is the fallback. */
+.venue-badge {
+  flex: 0 0 6.5rem;
+  box-sizing: border-box;
+  margin-top: 0.1rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  background-color: rgb(27, 46, 129);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: default;
+}
+
+/* Narrow screens: badge above the entry to leave the text the full width. */
+@media (max-width: 480px) {
+  .publication-item {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .venue-badge {
+    flex: none;
+    min-width: 5.5rem;
+  }
 }

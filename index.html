@@ -120,7 +120,73 @@
       </div>
     </main>
   </div>
+  <script src="js/venue-badges.js"></script>
   <script>
+function renderPublication(pub) {
+  return `
+    <li class="publication-item">
+      ${venueBadgeHTML(pub.badge)}
+      <div class="publication-details">
+        <strong>${pub.title}</strong><br>
+        ${pub.authors}<br>
+        Type: ${pub.type}, Date: ${pub.date}<br>
+        ${pub.venue ? `Venue: ${pub.venue}<br>` : ''}
+        <a href="${pub.link}" target="_blank" rel="noopener noreferrer">${pub.linkText}</a>
+      </div>
+    </li>
+  `;
+}
+
+function renderPublicationList(publications) {
+  colorVenueBadges(publications);
+
+  const grouped = {};
+  publications.forEach(pub => {
+    const year = pub.date.slice(0, 4) || 'Unknown';
+    if (!grouped[year]) grouped[year] = [];
+    grouped[year].push(renderPublication(pub));
+  });
+
+  const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
+
+  let publicationsHTML = '';
+
+  years.forEach(year => {
+    publicationsHTML += `
+      <div class="publication-year-block">
+        <h3 class="publication-year">${year}</h3>
+        <ul class="year-publication-list">
+          ${grouped[year].join('')}
+        </ul>
+      </div>
+    `;
+  });
+
+  return publicationsHTML;
+}
+
+// Publications missing from HAL.
+const speedrunDlm = {
+  title: 'speedrun-dlm: A speedrun benchmark for diffusion language models',
+  authors: 'Antoine Gonon, Adrian Müller, Léon Zheng, Zebang Shen, Clément Lalanne, Ya-Ping Hsieh, Anthony Bardou, Nicolas Boumal',
+  type: 'Software / Benchmark',
+  date: '2026',
+  venue: 'GitHub (MIT license)',
+  link: 'https://github.com/agonon/speedrun-dlm',
+  linkText: 'View Repository',
+  badge: venueBadge([], 'SOFTWARE'),
+};
+
+const phdThesis = {
+  title: 'On the tradeoffs of statistical learning with privacy',
+  authors: 'Clément Lalanne',
+  type: 'PhD Thesis',
+  date: '2023-10-04',
+  link: 'https://hal.science/tel-04431813',
+  linkText: 'View Thesis',
+  badge: venueBadge([], 'THESE'),
+};
+
 async function fetchPublications() {
   const publicationList = document.getElementById('publication-list');
   const loadingMessage = document.querySelector('.loading');
@@ -151,69 +217,21 @@ async function fetchPublications() {
       UNDEFINED: 'Preprint'
     };
 
-    const grouped = {};
-
-    docs.forEach(doc => {
-      const title = doc.title_s || 'Untitled';
-      const authors = Array.isArray(doc.authFullName_s)
+    const halPublications = docs.map(doc => ({
+      title: doc.title_s || 'Untitled',
+      authors: Array.isArray(doc.authFullName_s)
         ? doc.authFullName_s.join(', ')
-        : (doc.authFullName_s || 'Unknown Authors');
-      const type = docTypes[doc.docType_s] || doc.docType_s || 'Unknown Type';
-      const date = doc.publicationDate_s || 'Unknown Date';
-      const year = date.slice(0, 4) || 'Unknown';
-      const doi = doc.doi_s ? `https://doi.org/${doc.doi_s}` : (doc.uri_s || '#');
-      const venue = doc.journalTitle_s || doc.conferenceTitle_s || 'Unknown Venue';
+        : (doc.authFullName_s || 'Unknown Authors'),
+      type: docTypes[doc.docType_s] || doc.docType_s || 'Unknown Type',
+      date: doc.publicationDate_s || 'Unknown Date',
+      venue: doc.journalTitle_s || doc.conferenceTitle_s || 'Unknown Venue',
+      link: doc.doi_s ? `https://doi.org/${doc.doi_s}` : (doc.uri_s || '#'),
+      linkText: 'View Publication',
+      badge: venueBadge([doc.conferenceTitle_s, doc.journalTitle_s], doc.docType_s),
+    }));
 
-      if (!grouped[year]) grouped[year] = [];
-
-      grouped[year].push(`
-        <li class="publication-item">
-          <strong>${title}</strong><br>
-          ${authors}<br>
-          Type: ${type}, Date: ${date}<br>
-          Venue: ${venue}<br>
-          <a href="${doi}" target="_blank" rel="noopener noreferrer">View Publication</a>
-        </li>
-      `);
-    });
-
-    if (!grouped["2023"]) grouped["2023"] = [];
-    grouped["2023"].push(`
-      <li class="publication-item">
-        <strong>On the tradeoffs of statistical learning with privacy</strong><br>
-        Clément Lalanne<br>
-        Type: PhD Thesis, Date: 2023-10-04<br>
-        <a href="https://hal.science/tel-04431813" target="_blank" rel="noopener noreferrer">View Thesis</a>
-      </li>
-    `);
-
-    if (!grouped["2026"]) grouped["2026"] = [];
-    grouped["2026"].unshift(`
-      <li class="publication-item">
-        <strong>speedrun-dlm: A speedrun benchmark for diffusion language models</strong><br>
-        Antoine Gonon, Adrian Müller, Léon Zheng, Zebang Shen, Clément Lalanne, Ya-Ping Hsieh, Anthony Bardou, Nicolas Boumal<br>
-        Type: Software / Benchmark, Date: 2026<br>
-        Venue: GitHub (MIT license)<br>
-        <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">View Repository</a>
-      </li>
-    `);
-
-    const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
-
-    let publicationsHTML = '';
-
-    years.forEach(year => {
-      publicationsHTML += `
-        <div class="publication-year-block">
-          <h3 class="publication-year">${year}</h3>
-          <ul class="year-publication-list">
-            ${grouped[year].join('')}
-          </ul>
-        </div>
-      `;
-    });
-
-    publicationList.innerHTML = publicationsHTML;
+    // HAL results are sorted newest first: the benchmark leads 2026, the thesis closes 2023.
+    publicationList.innerHTML = renderPublicationList([speedrunDlm, ...halPublications, phdThesis]);
     if (loadingMessage) loadingMessage.style.display = 'none';
 
   } catch (error) {
@@ -223,19 +241,7 @@ async function fetchPublications() {
     errorMessage.textContent = 'Unable to load publications automatically at the moment.';
     publicationList.before(errorMessage);
 
-    publicationList.innerHTML = `
-      <div class="publication-year-block">
-        <h3 class="publication-year">2023</h3>
-        <ul class="year-publication-list">
-          <li class="publication-item">
-            <strong>On the tradeoffs of statistical learning with privacy</strong><br>
-            Clément Lalanne<br>
-            Type: PhD Thesis, Date: 2023-10-04<br>
-            <a href="https://hal.science/tel-04431813" target="_blank" rel="noopener noreferrer">View Thesis</a>
-          </li>
-        </ul>
-      </div>
-    `;
+    publicationList.innerHTML = renderPublicationList([speedrunDlm, phdThesis]);
   }
 }
 
