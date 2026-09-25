@@ -1,6 +1,6 @@
 # clemlal.github.io
 
-Personal academic website of Clément Lalanne (Assistant Professor, University of Toulouse / Institut de Mathématiques de Toulouse), published at **https://clemlal.github.io** by GitHub Pages.
+Personal academic website of Clément Lalanne, published at **https://clemlal.github.io** by GitHub Pages.
 
 The site is plain static HTML, CSS and vanilla JavaScript: no framework, no build step, no dependencies. What is pushed to `master` is what gets served.
 
