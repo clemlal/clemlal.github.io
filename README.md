@@ -12,6 +12,7 @@ news_archive.html          Older news items, moved out of index.html
 teaching_archive.html      Past courses, moved out of index.html
 css/styles.css             The only stylesheet, shared by every page (course pages included)
 js/venue-badges.js         Venue list and rules for the coloured badges next to publications
+js/decision-boundary.js    Interactive neural-network demo in the presentation block
 photos/                    Profile picture and event photos used in the news
 randomDocuments/           Talk slides (.pdf and .key) and other documents linked from the page
 teaching/<year>_<course>/  One folder per course and academic year: index.html + all its materials
@@ -20,6 +21,14 @@ teaching/<year>_<course>/  One folder per course and academic year: index.html +
 ## Home page (`index.html`)
 
 Sections are `<div class="section" id="…">` blocks. The top navigation links to them by id (`#news`, `#publications`, `#teaching`, `#curriculum`).
+
+### Decision-boundary demo (`js/decision-boundary.js`)
+
+The box to the right of the presentation text (below it on narrow screens) is a small interactive demo. Visitors add circles and crosses by clicking, and a 2 → 16 → 16 → 1 tanh network is trained on them by full-batch gradient descent on the logistic loss. The shading shows the predicted probability and the dark curve is the decision boundary. "Reset" restarts from new random weights and keeps the points; "Clear" removes the points.
+
+- Markup: the `<figure class="gd-demo">` in the presentation block. Styles: the `.gd-*` rules in `css/styles.css`.
+- Tuning: the constants at the top of the script. `STEP_SIZE` and `STEPS_PER_FRAME` set how fast the boundary forms (about 2 s with the defaults). `ITERATIONS_PER_RUN` is how long training runs before stopping, until a point is added. The starting points come from `twoMoons`.
+- Training pauses while the box is off screen. Visitors with "reduce motion" enabled see only the trained result.
 
 ### News
 

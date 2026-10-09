@@ -148,6 +148,77 @@
   margin: 0;
 }
 
+/* Side by side: the text takes the free width, and the demo wraps to its own
+   line when the text would get narrower than 18em. */
+@media (min-width: 769px) {
+  .presentation {
+    flex-wrap: wrap;
+  }
+
+  .presentation p {
+    flex: 1 1 18em;
+  }
+}
+
+/* Decision-boundary demo in the presentation block (js/decision-boundary.js) */
+.gd-demo {
+  flex-shrink: 0;
+  width: 250px;
+  max-width: 100%;
+  margin: 0;
+}
+
+.gd-demo canvas {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid rgb(230, 232, 235);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: #fff;
+  cursor: crosshair;
+  touch-action: manipulation;
+}
+
+.gd-controls {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.gd-controls button {
+  flex: 1;
+  padding: 3px 0;
+  border: 1px solid rgb(27, 46, 129);
+  border-radius: 4px;
+  background-color: #fff;
+  color: rgb(27, 46, 129);
+  font-family: Georgia, serif;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.gd-controls button:hover {
+  background-color: rgb(235, 238, 248);
+}
+
+.gd-controls button[aria-pressed="true"] {
+  background-color: rgb(27, 46, 129);
+  color: #fff;
+}
+
+.gd-demo figcaption {
+  margin-top: 6px;
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: #555;
+}
+
+.gd-status {
+  font-variant-numeric: tabular-nums;
+}
+
 .center {
   display: block;
   margin: 15px auto;

@@ -46,13 +46,29 @@
         <h1>Clément Lalanne</h1>
       </div>
       <div class="presentation">
-        <img src="photos/photo4.png" alt="My Photo" style="width: 250px;">
+        <img src="photos/photo2.png" alt="My Photo" style="width: 250px;">
         <p>Assistant Professor (MCF) @ <a href="https://www.univ-tlse3.fr/home" target="_blank" rel="noopener noreferrer">University of Toulouse</a>, associate to <a href="https://www.math.univ-toulouse.fr/en/" target="_blank" rel="noopener noreferrer">Institute of Mathematics of Toulouse</a>.<br>
             AI co-chair @ <a href="https://aniti.univ-toulouse.fr/" target="_blank" rel="noopener noreferrer">ANITI</a>.<br>
-            My work focuses on Machine Learning, Differential Privacy, Statistics and Optimization. <br><br>
+            My work focuses on Machine Learning, Trustworthy AI, Statistics and Optimization. <br><br>
             <strong>Contact :</strong><br> ✉ clement.lalanne@math.univ-toulouse.fr <br>☎ +33 5 61 55 76 52
         </p>
+        <!-- Interactive demo, see js/decision-boundary.js -->
+        <figure class="gd-demo">
+          <canvas role="img" aria-label="A small neural network learning, by gradient descent, a decision boundary between circles and crosses"></canvas>
+          <div class="gd-controls">
+            <button type="button" data-label="1" aria-pressed="true" title="Clicks in the box add circles">● Circle</button>
+            <button type="button" data-label="0" aria-pressed="false" title="Clicks in the box add crosses">✕ Cross</button>
+            <button type="button" data-action="reset" title="Restart gradient descent from new random weights">↻ Reset</button>
+            <button type="button" data-action="clear" title="Remove all the points">Clear</button>
+          </div>
+          <figcaption>
+            <span class="gd-status"></span><br>
+            Click in the box to add points: a small neural network learns to separate ● from ✕ by gradient descent.
+          </figcaption>
+        </figure>
       </div>
+
+      
       
       <div class="section" id="news">
         <h2>News</h2>
@@ -120,6 +136,7 @@
       </div>
     </main>
   </div>
+  <script src="js/decision-boundary.js"></script>
   <script src="js/venue-badges.js"></script>
   <script>
 function renderPublication(pub) {
