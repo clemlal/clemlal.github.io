@@ -275,18 +275,20 @@
     text-align: center;
   }
   
-  .nav-section li {
-    display: block;
-    margin: 3px 0;
-  }
-  
-  .nav-section h3 {
-    display: block;
-    margin-bottom: 8px;
-  }
-  
+  /* The links follow the section title and wrap onto as many lines as needed. */
   .nav-section ul {
-    display: block;
+    display: inline;
+  }
+
+  .nav-section li {
+    margin-right: 12px;
+    line-height: 1.8;
+  }
+
+  /* A row of news photos keeps its height and scrolls sideways. */
+  .center {
+    white-space: nowrap;
+    overflow-x: auto;
   }
 }
 
