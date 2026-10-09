@@ -25,7 +25,8 @@
   const root = document.querySelector('.gd-demo');
   if (!root) return;
 
-  const canvas = root.querySelector('canvas');
+  const box = root.querySelector('.gd-box');
+  const canvas = box.querySelector('canvas');
   const ctx = canvas.getContext('2d');
   const status = root.querySelector('.gd-status');
   const classButtons = root.querySelectorAll('button[data-label]');
@@ -266,17 +267,21 @@
     resume();
   }
 
+  // The box's size comes from the layout only (see .gd-box in css/styles.css),
+  // so setting the canvas's pixel dimensions here cannot resize it again. The
+  // cap is a second safeguard against huge bitmaps, which iOS refuses to draw.
   function resize() {
-    const dpr = window.devicePixelRatio || 1;
-    size = canvas.clientWidth;
-    canvas.width = canvas.height = Math.round(size * dpr);  // also resets the context
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    size = box.clientWidth;
+    if (!size) return;
+    canvas.width = canvas.height = Math.min(Math.round(size * (window.devicePixelRatio || 1)), 1024);
+    const scale = canvas.width / size;
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);  // setting the width reset the context anyway
   }
 
   canvas.addEventListener('click', event => {
     const rect = canvas.getBoundingClientRect();
-    const x = 2 * (event.clientX - rect.left - canvas.clientLeft) / size - 1;
-    const y = 1 - 2 * (event.clientY - rect.top - canvas.clientTop) / size;
+    const x = 2 * (event.clientX - rect.left) / rect.width - 1;
+    const y = 1 - 2 * (event.clientY - rect.top) / rect.height;
     if (Math.abs(x) > 1 || Math.abs(y) > 1) return;
     points.push({ x, y, label });
     train();
@@ -305,10 +310,10 @@
   new ResizeObserver(() => {
     resize();
     if (!running) draw();
-  }).observe(canvas);
+  }).observe(box);
 
   new IntersectionObserver(entries => {
     visible = entries[entries.length - 1].isIntersecting;
     resume();
-  }).observe(canvas);
+  }).observe(box);
 })();

@@ -168,15 +168,26 @@
   margin: 0;
 }
 
-.gd-demo canvas {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  aspect-ratio: 1;
-  border: 1px solid rgb(230, 232, 235);
+/* Square box (padding-top: 100% of the width) with the canvas laid over it.
+   Being absolutely positioned, the canvas never sizes the page: if its size
+   could follow its pixel dimensions, which the script sets from its size, it
+   would grow without bound (seen on iPhones). The border is a shadow ring so
+   that the box stays exactly square. */
+.gd-box {
+  position: relative;
+  padding-top: 100%;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 0 0 1px rgb(230, 232, 235), 0 4px 8px rgba(0,0,0,0.1);
   background-color: #fff;
+  overflow: hidden;
+}
+
+.gd-box canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   cursor: crosshair;
   touch-action: manipulation;
 }
