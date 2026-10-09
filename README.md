@@ -130,6 +130,7 @@ The Teaching section lists the current academic year's courses and links to `tea
 - One stylesheet for the whole site, course pages included, so a change affects every page. `index.html` and the archive pages also have a small inline `<style>` for `body`.
 - Palette: navy `rgb(27, 46, 129)` for headings, rules and bullets, and purple `rgb(83, 69, 218)` for links. Georgia serif throughout; the venue badges use a system sans-serif.
 - Responsive rules: below 768px the navigation and the presentation block stack vertically; below 480px the venue badge moves above its publication.
+- **Gotcha:** the responsive rules only apply on phones to pages with `<meta name="viewport" content="width=device-width, initial-scale=1">` in their `<head>`. Without it, phones lay the page out 980px wide and zoom out. `index.html` has it; the archive and course pages don't yet.
 - **Gotcha:** `.section li` and `.section ul` are more specific than single-class rules such as `.publication-item` or `.year-publication-list`, so they win. For example, the publication list's left padding is the 20px from `.section ul`. Use a more specific selector to override them.
 
 ## Files and media

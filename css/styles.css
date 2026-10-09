@@ -229,6 +229,10 @@
   margin: 5px;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  /* News photos keep their inline height; on phones, wide ones are cropped
+     at the sides rather than overflowing the screen. */
+  max-width: calc(100% - 10px);
+  object-fit: cover;
 }
 
 .section ul ul {
@@ -256,6 +260,7 @@
 @media (max-width: 768px) {
   .presentation {
     flex-direction: column;
+    align-items: center;
     text-align: center;
   }
   
