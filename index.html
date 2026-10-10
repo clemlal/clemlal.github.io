@@ -76,7 +76,32 @@
       <div class="section" id="news">
         <h2>News</h2>
         <ul>
-          <li><strong>September 2026</strong> Our article <a href="https://hal.science/hal-05638043v1/document" target="_blank" rel="noopener noreferrer">Minimax Private Estimation of Smooth Optimal-Transport Maps</a> just got accepted to the 40th <a href="https://neurips.cc/" target="_blank" rel="noopener noreferrer">Conference on Neural Information Processing Systems</a> (NeurIPS 2026)! Looking forward to presenting our work in Paris. Huge thanks to my coauthors David Rodríguez-Vítores, <a href="https://www.iutzeler.org/" target="_blank" rel="noopener noreferrer">Franck Iutzeler</a> and <a href="https://perso.math.univ-toulouse.fr/loubes/" target="_blank" rel="noopener noreferrer">Jean-Michel Loubes</a>, and to the reviewers for their useful suggestions.</li>
+          <li><strong>September 2026</strong> Our article <a href="https://hal.science/hal-05638043v1/document" target="_blank" rel="noopener noreferrer">Minimax Private Estimation of Smooth Optimal-Transport Maps</a> just got accepted to the 40th <a href="https://neurips.cc/" target="_blank" rel="noopener noreferrer">Conference on Neural Information Processing Systems</a> (NeurIPS 2026)! Looking forward to presenting our work in Paris. Huge thanks to my coauthors David Rodríguez-Vítores, <a href="https://www.iutzeler.org/" target="_blank" rel="noopener noreferrer">Franck Iutzeler</a> and <a href="https://perso.math.univ-toulouse.fr/loubes/" target="_blank" rel="noopener noreferrer">Jean-Michel Loubes</a>, and to the reviewers for their useful suggestions.
+          <!-- Interactive demo, see js/transport-map.js -->
+          <div class="ot-demo">
+            <div class="ot-title">Try it: private estimation of a one-dimensional transport map from n samples of each distribution.</div>
+            <svg viewBox="0 0 370 366" width="370" height="366" role="img" aria-label="Source and target densities with their samples, the true transport map and its private estimate"></svg>
+            <div class="ot-side">
+              <label class="ot-control">Privacy budget <output data-for="eps"></output>
+                <input type="range" name="eps" min="-2" max="1" step="0.05" value="0">
+              </label>
+              <label class="ot-control">Sample size <output data-for="n"></output>
+                <input type="range" name="n" min="2" max="4" step="0.05" value="3">
+              </label>
+              <button type="button" class="ot-resample">↻ New sample</button>
+              <div class="ot-status"></div>
+              <div class="ot-error"></div>
+              <div class="ot-legend">
+                <span><i class="ot-key-true"></i>true map T = F<sub>Y</sub><sup>−1</sup> ∘ F<sub>X</sub></span>
+                <span><i class="ot-key-estimate"></i>private estimate</span>
+                <span><i class="ot-key-ghost"></i>earlier samples</span>
+              </div>
+            </div>
+            <div class="ot-caption">
+              The optimal map sends each quantile of the source to the same quantile of the target. Our estimator privately estimates m − 1 quantiles of each sample (median first, then quartiles, …) and matches them, giving the orange staircase. Its error behaves like max(1/n, 1/(nε)²): privacy is free once ε ≳ 1/√n.
+            </div>
+          </div>
+        </li>
           <li><strong>September 2026</strong> Our article <a href="https://openreview.net/pdf?id=WLNBGbEQnV" target="_blank" rel="noopener noreferrer">Measuring Progress in Diffusion Language Model Pretraining</a> just got accepted to the NeurIPS 2026 workshop <a href="https://bento-neurips.github.io/" target="_blank" rel="noopener noreferrer">BeNTo: Beyond Next-Token Prediction — Diffusion &amp; Flow Models for Next-Generation Decoding</a>. The accompanying benchmark, <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">speedrun-dlm</a>, is open source. Huge thanks to my coauthors <a href="https://agonon.github.io/" target="_blank" rel="noopener noreferrer">Antoine Gonon</a>, <a href="https://adrianlmueller.github.io/" target="_blank" rel="noopener noreferrer">Adrian Müller</a>, <a href="https://leonzheng2.github.io/" target="_blank" rel="noopener noreferrer">Léon Zheng</a>, <a href="https://shenzebang.github.io/" target="_blank" rel="noopener noreferrer">Zebang Shen</a>, <a href="https://las.inf.ethz.ch/people/yaping-hsieh" target="_blank" rel="noopener noreferrer">Ya-Ping Hsieh</a>, <a href="https://abardou.github.io/" target="_blank" rel="noopener noreferrer">Anthony Bardou</a> and <a href="https://www.nicolasboumal.net/" target="_blank" rel="noopener noreferrer">Nicolas Boumal</a>!</li>
           <li><strong>July 2026</strong> Had a wonderful time at <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML 2026</a> in Seoul, South Korea, where I presented our article <a href="https://arxiv.org/abs/2602.11083" target="_blank" rel="noopener noreferrer">Token-Efficient Change Detection in LLM APIs</a> together with <a href="https://timotheechauvin.substack.com" target="_blank" rel="noopener noreferrer">Timothée Chauvin</a>, <a href="https://erwanlemerrer.github.io" target="_blank" rel="noopener noreferrer">Erwan Le Merrer</a> and Jean-Michel Loubes (joint work also with François Taïani and Gilles Tredan). It was a stimulating and inspiring week, full of great talks and rich discussions, and it was a real pleasure to reconnect with the community and meet so many brilliant people. <br>
           <div class="center"> <img src="photos/ICML2026_1.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_2.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_3.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_4.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_5.png" alt="My Photo" style="height: 100px;" > </div>
@@ -164,6 +189,7 @@
   </div>
   <script src="js/decision-boundary.js"></script>
   <script src="js/change-detection.js"></script>
+  <script src="js/transport-map.js"></script>
   <script src="js/venue-badges.js"></script>
   <script>
 function renderPublication(pub) {

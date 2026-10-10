@@ -14,6 +14,7 @@ css/styles.css             The only stylesheet, shared by every page (course pag
 js/venue-badges.js         Venue list and rules for the coloured badges next to publications
 js/decision-boundary.js    Interactive neural-network demo in the presentation block
 js/change-detection.js     Interactive LLM change-detection demo in the July 2026 news item
+js/transport-map.js        Interactive private transport-map demo in the September 2026 NeurIPS news item
 photos/                    Profile picture and event photos used in the news
 randomDocuments/           Talk slides (.pdf and .key) and other documents linked from the page
 teaching/<year>_<course>/  One folder per course and academic year: index.html + all its materials
@@ -38,6 +39,14 @@ The July 2026 news item (ICML) contains a demo of *Token-Efficient Change Detect
 - Markup: the `<div class="cd-demo">` at the end of that news item. Styles: the `.cd-*` rules in `css/styles.css`.
 - Tuning: the constants at the top of the script (`WORDS`, `DELTA`, `TOKENS`, `TESTS`, animation delays). With the defaults, a tie is detected in about 96% of tests at T = 0.05 and a non-tie almost never.
 - When this item moves to `news_archive.html`, move the demo's `<script>` tag along with it: the script does nothing on a page without the demo.
+
+### Transport-map demo (`js/transport-map.js`)
+
+The September 2026 NeurIPS news item contains a demo of *Minimax Private Estimation of Smooth Optimal-Transport Maps* in dimension 1. It plots the true map T = F_Y⁻¹ ∘ F_X between two fixed densities on [0, 1] (shown with their samples) and the paper's private estimator: m − 1 quantiles of each sample are estimated with the recursive ε-DP mechanism of Kaplan, Schnapp and Stemmer, and the estimate is the staircase that maps them onto each other. The animation reveals the recursion level by level (2, 4, 8, … steps), sends a few particles from the source through the estimate into the target, then reruns on fresh samples 6 times, leaving earlier estimates as faint staircases. Sliders set ε and n; the error is shown next to the non-private estimator's on the same data.
+
+- Markup: the `<div class="ot-demo">` in that news item. Styles: the `.ot-*` rules in `css/styles.css`.
+- Tuning: the constants at the top of the script (`SOURCE`, `TARGET`, timings, `RUNS`). The number of steps follows the paper, m ≈ min(√n, nε/10) rounded to a power of 2 (`levelsFor`).
+- As for the change-detection demo, move the `<script>` tag along with the item if it goes to `news_archive.html`.
 
 ### News
 
