@@ -890,6 +890,27 @@
   }
 }
 
+/* Announcement at the top of a course page (cancelled class, postponed exam...). */
+.notice {
+  margin: 20px 0;
+  padding: 12px 18px;
+  border: 2px solid rgb(214, 96, 52);
+  border-left-width: 8px;
+  border-radius: 6px;
+  background-color: rgb(253, 241, 235);
+  color: #333;
+  font-size: 1.1em;
+  line-height: 1.5;
+}
+
+.notice-title {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: rgb(170, 60, 25);
+}
+
 .center {
   display: block;
   margin: 15px auto;

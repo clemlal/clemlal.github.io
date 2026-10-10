@@ -139,6 +139,7 @@ The Teaching section lists the current academic year's courses and links to `tea
 - Folder name: `<start year>_<end year>_<programme>_<Course_Name>`, e.g. `2026_2027_MAPI3_Machine_Learning`. The folder holds `index.html` and every file the page links to (PDFs, notebooks), linked by bare file name.
 - Pages reach shared files with `../../` (`../../css/styles.css`, `../../index.html`).
 - Usual sections: Overview, Evaluation, Lectures, TDs / TPs, References and External Resources.
+- **Announcements** (cancelled class, postponed test): a `<div class="notice">` right after the title block, starting with a `<span class="notice-title">` heading; add `lang="fr"` when it is in French. Delete it once it is outdated.
 - **Releasing material during the semester.** Upcoming lectures and TDs are already listed, with their link inside an HTML comment:
   ```html
   <li><strong>Lecture 8</strong> <!-- <a href="….pdf" target="_blank" rel="noopener noreferrer">…</a> --></li>
