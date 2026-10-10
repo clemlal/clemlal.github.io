@@ -17,6 +17,7 @@ js/change-detection.js     Interactive LLM change-detection demo in the July 202
 js/transport-map.js        Interactive private transport-map demo in the September 2026 NeurIPS news item
 js/dlm-hellaswag.js        Interactive HellaSwag-scoring demo in the September 2026 BeNTo workshop news item
 js/sw-gradients.js         Interactive private sliced-Wasserstein demo in the June 2026 TMLR item of news_archive.html
+js/semidual-selection.js   Interactive private transport-potential selection demo in the July 2025 ICML item of news_archive.html
 photos/                    Profile picture and event photos used in the news
 randomDocuments/           Talk slides (.pdf and .key) and other documents linked from the page
 teaching/<year>_<course>/  One folder per course and academic year: index.html + all its materials
@@ -68,6 +69,13 @@ The June 2026 TMLR item at the top of `news_archive.html` contains a demo of *Le
 
 - Markup: the `<div class="sw-demo">` in that item; the archive loads the script at the end of the page. Styles: the `.sw-*` rules in `css/styles.css`.
 - Tuning: the constants at the top of the script (`STEPS`, `LEARNING_RATE`, `BETAS`, clipping radii `M` and `R`, `DELTA_DP`).
+
+### Semi-dual selection demo (`js/semidual-selection.js`, news archive)
+
+The July 2025 ICML item of `news_archive.html` contains a 1D version of the experiment of *On the Private Estimation of Smooth Transport Maps* (Section 6). The true potential and N candidates are random Gaussian attraction/repulsion potentials x²/2 + α e^(−(x−μ₁)²/2σ²) − α e^(−(x−μ₂)²/2σ²) on [−1/2, 1/2] (α = 0.005, σ = 0.1, μ ~ N(0, σ²), as in the paper). From n samples X uniform and Y = T₀(U), each candidate is scored by the clipped grid semi-dual (1/n)Σ clip f(Xᵢ) + (1/n)Σ clip f*(Yᵢ) (C = 0.25, 201-point grid), and the report-noisy-argmin with Laplace noise of scale 4C/(nε) picks one. The candidates are first examined one by one (about 3 s whatever N): each one's map, score and noisy score appear as it is examined, and the smallest score and noisy score so far are followed (navy and orange), so the orange candidate at the end of the scan is the first private draw. Seven more draws of the noise then run on the same data; the left chart shows the maps' displacements T(x) − x, the right one the sorted scores and their noisy versions. Sliders set ε, n and N.
+
+- Markup: the `<div class="sd-demo">` in that item; the archive loads the script at the end of the page. Styles: the `.sd-*` rules in `css/styles.css`.
+- Tuning: the constants at the top of the script (`GRID`, `ALPHA`, `SIGMA`, `C`, `POOL`, `ROUNDS`).
 
 ### News
 
