@@ -102,7 +102,29 @@
             </div>
           </div>
         </li>
-          <li><strong>September 2026</strong> Our article <a href="https://openreview.net/pdf?id=WLNBGbEQnV" target="_blank" rel="noopener noreferrer">Measuring Progress in Diffusion Language Model Pretraining</a> just got accepted to the NeurIPS 2026 workshop <a href="https://bento-neurips.github.io/" target="_blank" rel="noopener noreferrer">BeNTo: Beyond Next-Token Prediction — Diffusion &amp; Flow Models for Next-Generation Decoding</a>. The accompanying benchmark, <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">speedrun-dlm</a>, is open source. Huge thanks to my coauthors <a href="https://agonon.github.io/" target="_blank" rel="noopener noreferrer">Antoine Gonon</a>, <a href="https://adrianlmueller.github.io/" target="_blank" rel="noopener noreferrer">Adrian Müller</a>, <a href="https://leonzheng2.github.io/" target="_blank" rel="noopener noreferrer">Léon Zheng</a>, <a href="https://shenzebang.github.io/" target="_blank" rel="noopener noreferrer">Zebang Shen</a>, <a href="https://las.inf.ethz.ch/people/yaping-hsieh" target="_blank" rel="noopener noreferrer">Ya-Ping Hsieh</a>, <a href="https://abardou.github.io/" target="_blank" rel="noopener noreferrer">Anthony Bardou</a> and <a href="https://www.nicolasboumal.net/" target="_blank" rel="noopener noreferrer">Nicolas Boumal</a>!</li>
+          <li><strong>September 2026</strong> Our article <a href="https://openreview.net/pdf?id=WLNBGbEQnV" target="_blank" rel="noopener noreferrer">Measuring Progress in Diffusion Language Model Pretraining</a> just got accepted to the NeurIPS 2026 workshop <a href="https://bento-neurips.github.io/" target="_blank" rel="noopener noreferrer">BeNTo: Beyond Next-Token Prediction — Diffusion &amp; Flow Models for Next-Generation Decoding</a>. The accompanying benchmark, <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">speedrun-dlm</a>, is open source. Huge thanks to my coauthors <a href="https://agonon.github.io/" target="_blank" rel="noopener noreferrer">Antoine Gonon</a>, <a href="https://adrianlmueller.github.io/" target="_blank" rel="noopener noreferrer">Adrian Müller</a>, <a href="https://leonzheng2.github.io/" target="_blank" rel="noopener noreferrer">Léon Zheng</a>, <a href="https://shenzebang.github.io/" target="_blank" rel="noopener noreferrer">Zebang Shen</a>, <a href="https://las.inf.ethz.ch/people/yaping-hsieh" target="_blank" rel="noopener noreferrer">Ya-Ping Hsieh</a>, <a href="https://abardou.github.io/" target="_blank" rel="noopener noreferrer">Anthony Bardou</a> and <a href="https://www.nicolasboumal.net/" target="_blank" rel="noopener noreferrer">Nicolas Boumal</a>!
+          <!-- Interactive demo, see js/dlm-hellaswag.js -->
+          <div class="dlm-demo">
+            <div class="dlm-title">Try it: how a masked diffusion language model (D3PM) answers a HellaSwag question.</div>
+            <div class="dlm-main">
+              <div class="dlm-context"></div>
+              <div class="dlm-rows"></div>
+              <div class="dlm-status" aria-live="polite"></div>
+              <div class="dlm-legend">Colour of a masked word: probability the model gives to the right word, 0 <i></i> 1.</div>
+            </div>
+            <div class="dlm-side">
+              <label class="dlm-control">Training progress <output></output>
+                <input type="range" min="0" max="100" step="1" value="60">
+              </label>
+              <label class="dlm-check"><input type="checkbox" checked> Divide scores by the ending's length (norm)</label>
+              <div class="dlm-chart-title">Accuracy on the whole benchmark (illustrative)</div>
+              <svg class="dlm-chart" viewBox="0 0 260 128" width="260" height="128" role="img" aria-label="Illustrative HellaSwag accuracy along training, with the 25% chance level and the 27.5% speedrun target"></svg>
+            </div>
+            <div class="dlm-caption">
+              A diffusion model has no cheap likelihood, so each ending is masked at a random noise level and the model tries to recover it with the context in view. Its loss (for a masked D3PM, the cross-entropy of the masked words), averaged over a few draws and divided by the ending's length, scores the ending; the lowest score is the model's answer. The model here is a toy. Real HellaSwag questions are much harder: at the scale of our speedrun, models stay just above chance, and the speedrun measures how long training takes to reach 27.5% accuracy.
+            </div>
+          </div>
+        </li>
           <li><strong>July 2026</strong> Had a wonderful time at <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML 2026</a> in Seoul, South Korea, where I presented our article <a href="https://arxiv.org/abs/2602.11083" target="_blank" rel="noopener noreferrer">Token-Efficient Change Detection in LLM APIs</a> together with <a href="https://timotheechauvin.substack.com" target="_blank" rel="noopener noreferrer">Timothée Chauvin</a>, <a href="https://erwanlemerrer.github.io" target="_blank" rel="noopener noreferrer">Erwan Le Merrer</a> and Jean-Michel Loubes (joint work also with François Taïani and Gilles Tredan). It was a stimulating and inspiring week, full of great talks and rich discussions, and it was a real pleasure to reconnect with the community and meet so many brilliant people. <br>
           <div class="center"> <img src="photos/ICML2026_1.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_2.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_3.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_4.png" alt="My Photo" style="height: 100px;" > <img src="photos/ICML2026_5.png" alt="My Photo" style="height: 100px;" > </div>
           <!-- Interactive demo, see js/change-detection.js -->
@@ -131,9 +153,6 @@
             </div>
           </div>
         </li>
-          <li><strong>June 2026</strong> It was great to talk about change detection in LLMs at <a href="https://www.tse-fr.eu/fr" target="_blank" rel="noopener noreferrer">TSE</a>! Thanks to the organizers <a href="https://www.tse-fr.eu/fr/people/adrien-blanchet" target="_blank" rel="noopener noreferrer">Adrien Blanchet</a> and <a href="https://julienchhor.github.io" target="_blank" rel="noopener noreferrer">Julien Chhor</a>. Slides available in <a href="randomDocuments/Token-EfficientChangeDetectioninLLMAPIs.pdf" target="_blank" rel="noopener noreferrer">.pdf</a> and <a href="randomDocuments/Token-EfficientChangeDetectioninLLMAPIs.key" target="_blank" rel="noopener noreferrer">.key</a> formats.</li>          </li>
-          <li><strong>June 2026</strong> New preprint : <a href="https://hal.science/hal-05638043v1/document" target="_blank" rel="noopener noreferrer">Minimax Private Estimation of Smooth Optimal-Transport Maps </a> (Clément Lalanne, David Rodríguez-Vítores, Franck Iutzeler, Jean-Michel Loubes). </li>
-          <li><strong>May 2026</strong> Our article <a href="https://arxiv.org/abs/2602.11083" target="_blank" rel="noopener noreferrer">Token-Efficient Change Detection in LLM APIs</a> (Timothée Chauvin, Clément Lalanne, Erwan Le Merrer, Jean-Michel Loubes, François Taïani, Gilles Tredan) just got accepted to <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML</a> ! See you in Seoul :)</li>
           <!-- Archive -->
           <li><a href="news_archive.html">📰 News Archive</a></li>
         </ul>
@@ -190,6 +209,7 @@
   <script src="js/decision-boundary.js"></script>
   <script src="js/change-detection.js"></script>
   <script src="js/transport-map.js"></script>
+  <script src="js/dlm-hellaswag.js"></script>
   <script src="js/venue-badges.js"></script>
   <script>
 function renderPublication(pub) {

@@ -15,6 +15,7 @@ js/venue-badges.js         Venue list and rules for the coloured badges next to 
 js/decision-boundary.js    Interactive neural-network demo in the presentation block
 js/change-detection.js     Interactive LLM change-detection demo in the July 2026 news item
 js/transport-map.js        Interactive private transport-map demo in the September 2026 NeurIPS news item
+js/dlm-hellaswag.js        Interactive HellaSwag-scoring demo in the September 2026 BeNTo workshop news item
 photos/                    Profile picture and event photos used in the news
 randomDocuments/           Talk slides (.pdf and .key) and other documents linked from the page
 teaching/<year>_<course>/  One folder per course and academic year: index.html + all its materials
@@ -47,6 +48,15 @@ The September 2026 NeurIPS news item contains a demo of *Minimax Private Estimat
 - Markup: the `<div class="ot-demo">` in that news item. Styles: the `.ot-*` rules in `css/styles.css`.
 - Tuning: the constants at the top of the script (`SOURCE`, `TARGET`, timings, `RUNS`). The number of steps follows the paper, m ≈ min(√n, nε/10) rounded to a power of 2 (`levelsFor`).
 - As for the change-detection demo, move the `<script>` tag along with the item if it goes to `news_archive.html`.
+
+### HellaSwag demo (`js/dlm-hellaswag.js`)
+
+The September 2026 BeNTo workshop news item contains a demo of how *Measuring Progress in Diffusion Language Model Pretraining* scores a masked D3PM on HellaSwag. A HellaSwag-style question (invented, not from the dataset) has four endings. In each of K = 4 draws, every word of every ending is masked with probability t (the context stays visible), masked words are coloured by the probability the model gives to the right word, and each ending's score (cross-entropy of its masked words, averaged over the draws, divided by its length when "norm" is ticked) updates. The lowest score is the model's answer. A slider sets the training progress, and a small chart shows an illustrative accuracy curve with the 25% chance level and the paper's 27.5% speedrun target.
+
+- The model is a toy: the probability of a masked word mixes a uniform guess over GPT-2's vocabulary with a trained guess from the logits in `ENDINGS`, weighted by the training progress. The D3PM noise-level weight of the loss is left out. Only the chart's 25% and 27.5% levels are real.
+- Markup: the `<div class="dlm-demo">` in that news item. Styles: the `.dlm-*` rules in `css/styles.css`.
+- Tuning: the constants at the top of the script (`CONTEXT`, `ENDINGS`, `RIGHT`, `K`, timings).
+- Move the `<script>` tag along with the item if it goes to `news_archive.html`.
 
 ### News
 
