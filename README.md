@@ -50,7 +50,7 @@ The July 2026 news item (ICML) contains a demo of *Token-Efficient Change Detect
 The list is built at page load by the script at the bottom of `index.html`. There is no publication HTML to edit.
 
 1. **HAL.** Publications are fetched from the HAL API for author id `clement-lalanne` (all document types except `LECTURE`, newest first). To add or fix a paper, fix it on HAL and the site follows. `docTypes` maps HAL document codes (`ART`, `COMM`, `THESE`, …) to the text of the "Type:" line.
-2. **Manual entries.** Items missing from HAL are objects at the top of the script (currently `speedrunDlm` and `phdThesis`). To add one:
+2. **Manual entries.** Items missing from HAL are objects at the top of the script (currently `diffusionLmProgress`, `speedrunDlm` and `phdThesis`). To add one:
    ```js
    const myEntry = {
      title: '…',
@@ -63,7 +63,7 @@ The list is built at page load by the script at the bottom of `index.html`. Ther
      badge: venueBadge(['<venue title>'], 'ART'),    // HAL document type code, see below
    };
    ```
-   Then insert it in `renderPublicationList([speedrunDlm, ...halPublications, phdThesis])`. Its position in the array sets its position inside its year: before `...halPublications` means the top of its year, after means the bottom. Also add it to the fallback call in the `catch` block so it still shows when HAL is down. If a manual entry later appears on HAL, delete the manual object, otherwise it shows twice.
+   Then insert it in `renderPublicationList([diffusionLmProgress, speedrunDlm, ...halPublications, phdThesis])`. Its position in the array sets its position inside its year: before `...halPublications` means the top of its year, after means the bottom. Also add it to the fallback call in the `catch` block so it still shows when HAL is down. If a manual entry later appears on HAL, delete the manual object, otherwise it shows twice.
 3. **Fallback.** If HAL cannot be reached, an error message is shown and only the manual entries are listed.
 
 **Gotcha:** HAL returns at most 30 results unless the request sets `rows`. Once there are more than 30 publications on HAL, add `&rows=100` to the API URL in `fetchPublications`.
