@@ -230,6 +230,250 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Change-detection demo in the news (js/change-detection.js). Original model
+   in navy, changed model in orange. */
+.cd-demo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px 28px;
+  margin: 12px 0 4px;
+  padding: 14px;
+  border: 1px solid rgb(230, 232, 235);
+  border-radius: 8px;
+  background-color: rgb(248, 249, 250);
+  color: #333;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.cd-title {
+  flex: 1 1 100%;
+  font-weight: bold;
+  color: rgb(27, 46, 129);
+}
+
+.cd-simplex {
+  flex: 0 0 260px;
+  max-width: 100%;
+}
+
+.cd-simplex svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cd-triangle {
+  fill: #fff;
+  stroke: #aaa;
+}
+
+.cd-border-line {
+  stroke: #aaa;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.cd-border-line.cd-tied {
+  stroke: #333;
+  stroke-width: 2.5;
+}
+
+.cd-word {
+  font-family: Georgia, serif;
+  font-size: 15px;
+  text-anchor: middle;
+  fill: #333;
+}
+
+.cd-path {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-opacity: 0.5;
+}
+
+.cd-handle {
+  fill: rgba(255, 255, 255, 0.6);
+  stroke-width: 2;
+}
+
+.cd-dot {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.cd-temp {
+  display: block;
+  margin-top: 6px;
+}
+
+.cd-temp output {
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-temp input {
+  display: block;
+  width: 100%;
+  margin: 4px 0 0;
+  accent-color: rgb(27, 46, 129);
+}
+
+.cd-border {
+  margin-top: 4px;
+  min-height: 2.8em;
+  font-size: 0.9em;
+  color: #555;
+}
+
+/* Aligned at the bottom, so the bars line up when a title wraps. */
+.cd-hists {
+  flex: 1 1 280px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.cd-hist {
+  flex: 1;
+  min-width: 0;
+}
+
+.cd-hist-title {
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: rgb(27, 46, 129);
+}
+
+.cd-hist[data-model="1"] .cd-hist-title {
+  color: rgb(214, 96, 52);
+}
+
+.cd-bars,
+.cd-labels {
+  display: flex;
+  gap: 8px;
+}
+
+.cd-bars {
+  height: 150px;
+  border-bottom: 1px solid #999;
+}
+
+.cd-col {
+  position: relative;
+  flex: 1;
+}
+
+.cd-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 3px 3px 0 0;
+  background-color: rgb(27, 46, 129);
+}
+
+.cd-hist[data-model="1"] .cd-bar {
+  background-color: rgb(214, 96, 52);
+}
+
+.cd-tick {
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  border-top: 2px dashed #333;
+}
+
+.cd-count {
+  position: absolute;
+  left: 0;
+  right: 0;
+  font-size: 0.85em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-labels span {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.cd-verdict {
+  flex: 0 1 210px;
+}
+
+.cd-badge {
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.cd-badge[data-state="sampling"] {
+  background-color: rgb(233, 236, 239);
+  color: #666;
+}
+
+.cd-badge[data-state="detected"] {
+  background-color: rgb(214, 96, 52);
+  color: #fff;
+}
+
+.cd-badge[data-state="none"] {
+  border-color: rgb(27, 46, 129);
+  background-color: #fff;
+  color: rgb(27, 46, 129);
+}
+
+.cd-stats {
+  margin-top: 6px;
+  font-size: 0.85em;
+  color: #555;
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-history {
+  margin-top: 14px;
+  font-size: 0.9em;
+}
+
+.cd-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.cd-dots span {
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid #ccc;
+  border-radius: 50%;
+}
+
+.cd-dots span[data-state="detected"] {
+  border-color: rgb(214, 96, 52);
+  background-color: rgb(214, 96, 52);
+}
+
+.cd-dots span[data-state="none"] {
+  border-color: rgb(27, 46, 129);
+}
+
+.cd-caption {
+  flex: 1 1 100%;
+  font-size: 0.9em;
+  color: #555;
+}
+
 .center {
   display: block;
   margin: 15px auto;

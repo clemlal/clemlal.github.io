@@ -13,6 +13,7 @@ teaching_archive.html      Past courses, moved out of index.html
 css/styles.css             The only stylesheet, shared by every page (course pages included)
 js/venue-badges.js         Venue list and rules for the coloured badges next to publications
 js/decision-boundary.js    Interactive neural-network demo in the presentation block
+js/change-detection.js     Interactive LLM change-detection demo in the July 2026 news item
 photos/                    Profile picture and event photos used in the news
 randomDocuments/           Talk slides (.pdf and .key) and other documents linked from the page
 teaching/<year>_<course>/  One folder per course and academic year: index.html + all its materials
@@ -29,6 +30,14 @@ The box to the right of the presentation text (below it on narrow screens) is a 
 - Markup: the `<figure class="gd-demo">` in the presentation block. Styles: the `.gd-*` rules in `css/styles.css`.
 - Tuning: the constants at the top of the script. `STEP_SIZE` and `STEPS_PER_FRAME` set how fast the boundary forms (about 2 s with the defaults). `ITERATIONS_PER_RUN` is how long training runs before stopping, until a point is added. The starting points come from `twoMoons`.
 - Training pauses while the box is off screen. Visitors with "reduce motion" enabled see only the trained result.
+
+### Change-detection demo (`js/change-detection.js`)
+
+The July 2026 news item (ICML) contains a demo of *Token-Efficient Change Detection in LLM APIs*. A toy LLM answers "The sky is" with one of three words. Visitors drag a point in a triangle to set the next-word probabilities at temperature 1 and move a temperature slider. The script samples 20 tokens from the model and from a slightly changed copy (logits shifted by `DELTA`), then runs a two-sample permutation test at level 5%. It shows both histograms, the verdict and the number of detections over 20 tests. The dashed lines in the triangle are the border inputs (tied top words), where the change becomes detectable at low temperature.
+
+- Markup: the `<div class="cd-demo">` at the end of that news item. Styles: the `.cd-*` rules in `css/styles.css`.
+- Tuning: the constants at the top of the script (`WORDS`, `DELTA`, `TOKENS`, `TESTS`, animation delays). With the defaults, a tie is detected in about 96% of tests at T = 0.05 and a non-tie almost never.
+- When this item moves to `news_archive.html`, move the demo's `<script>` tag along with it: the script does nothing on a page without the demo.
 
 ### News
 
