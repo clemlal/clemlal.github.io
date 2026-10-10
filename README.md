@@ -16,6 +16,7 @@ js/decision-boundary.js    Interactive neural-network demo in the presentation b
 js/change-detection.js     Interactive LLM change-detection demo in the July 2026 news item
 js/transport-map.js        Interactive private transport-map demo in the September 2026 NeurIPS news item
 js/dlm-hellaswag.js        Interactive HellaSwag-scoring demo in the September 2026 BeNTo workshop news item
+js/sw-gradients.js         Interactive private sliced-Wasserstein demo in the June 2026 TMLR item of news_archive.html
 photos/                    Profile picture and event photos used in the news
 randomDocuments/           Talk slides (.pdf and .key) and other documents linked from the page
 teaching/<year>_<course>/  One folder per course and academic year: index.html + all its materials
@@ -43,20 +44,30 @@ The July 2026 news item (ICML) contains a demo of *Token-Efficient Change Detect
 
 ### Transport-map demo (`js/transport-map.js`)
 
-The September 2026 NeurIPS news item contains a demo of *Minimax Private Estimation of Smooth Optimal-Transport Maps* in dimension 1. It plots the true map T = F_Y⁻¹ ∘ F_X between two fixed densities on [0, 1] (shown with their samples) and the paper's private estimator: m − 1 quantiles of each sample are estimated with the recursive ε-DP mechanism of Kaplan, Schnapp and Stemmer, and the estimate is the staircase that maps them onto each other. The animation reveals the recursion level by level (2, 4, 8, … steps), sends a few particles from the source through the estimate into the target, then reruns on fresh samples 6 times, leaving earlier estimates as faint staircases. Sliders set ε and n; the error is shown next to the non-private estimator's on the same data.
+The September 2026 NeurIPS news item contains a demo of *Minimax Private Estimation of Smooth Optimal-Transport Maps* in dimension 1. It plots the true map T = F_Y⁻¹ ∘ F_X between two fixed densities on [0, 1] (shown with their samples) and the paper's private estimator: m − 1 quantiles of each sample are estimated with the recursive ε-DP mechanism of Kaplan, Schnapp and Stemmer, and the estimate is the staircase that maps them onto each other. The animation reveals the recursion level by level (2, 4, 8, … steps), sends a few particles from the source through the estimate into the target, then reruns on fresh samples 6 times, leaving earlier estimates as faint staircases. Sliders set ε, n and the number K of modes of the densities (K bumps on a floor, placed differently in the source and the target, with a fixed max/min ratio); the error is shown next to the non-private estimator's on the same data.
 
 - Markup: the `<div class="ot-demo">` in that news item. Styles: the `.ot-*` rules in `css/styles.css`.
-- Tuning: the constants at the top of the script (`SOURCE`, `TARGET`, timings, `RUNS`). The number of steps follows the paper, m ≈ min(√n, nε/10) rounded to a power of 2 (`levelsFor`).
+- Tuning: the constants at the top of the script (`FLOOR`, `density`, timings, `RUNS`). The number of steps follows the paper, m ≈ min(√n, nε/10) rounded to a power of 2 (`levelsFor`).
 - As for the change-detection demo, move the `<script>` tag along with the item if it goes to `news_archive.html`.
 
 ### HellaSwag demo (`js/dlm-hellaswag.js`)
 
-The September 2026 BeNTo workshop news item contains a demo of how *Measuring Progress in Diffusion Language Model Pretraining* scores a masked D3PM on HellaSwag. A HellaSwag-style question (invented, not from the dataset) has four endings. In each of K = 4 draws, every word of every ending is masked with probability t (the context stays visible), masked words are coloured by the probability the model gives to the right word, and each ending's score (cross-entropy of its masked words, averaged over the draws, divided by its length when "norm" is ticked) updates. The lowest score is the model's answer. A slider sets the training progress, and a small chart shows an illustrative accuracy curve with the 25% chance level and the paper's 27.5% speedrun target.
+The September 2026 BeNTo workshop news item contains a two-tab demo of *Measuring Progress in Diffusion Language Model Pretraining*.
 
-- The model is a toy: the probability of a masked word mixes a uniform guess over GPT-2's vocabulary with a trained guess from the logits in `ENDINGS`, weighted by the training progress. The D3PM noise-level weight of the loss is left out. Only the chart's 25% and 27.5% levels are real.
+1. **Scoring one question.** A HellaSwag-style question (invented, not from the dataset) has four endings. In each of K = 4 draws, every word of every ending is masked with probability t (the context stays visible), masked words are coloured by the probability the model gives to the right word, and each ending's score (cross-entropy of its masked words, averaged over the draws, divided by its length when "norm" is ticked) updates. The lowest score is the model's answer. The model is a toy (a mix of a uniform guess over GPT-2's vocabulary and hand-set logits in `ENDINGS`); the D3PM noise-level weight of the loss is left out.
+2. **Racing recipes to a target.** Real results of the speedrun: mean HellaSwag accuracy of ten trainings per recipe along training time, for the seven recipes (`RECIPES`, copied from `figures/trajectory-best.csv` of [speedrun-dlm](https://github.com/agonon/speedrun-dlm)). Visitors move the finish line (slider, mouse drag or tap on the chart); a recipe finishes at the first measurement at or above the target that the next measurement confirms, which reproduces the leaderboard at 27.5%. The ranking shows each recipe's time and its change of rank compared with 27.5%, and the stability line counts the comparable pairs that swap order (the paper's first check, with its comparability rule).
+
 - Markup: the `<div class="dlm-demo">` in that news item. Styles: the `.dlm-*` rules in `css/styles.css`.
-- Tuning: the constants at the top of the script (`CONTEXT`, `ENDINGS`, `RIGHT`, `K`, timings).
+- Colours of the recipes: the seven first slots of a colour-blind-checked categorical palette (`COLORS`), in record order; the ranking list doubles as the legend.
+- To update the race after new runs, regenerate `RECIPES` from the repository's `trajectory-best.csv` (minutes, accuracy in %).
 - Move the `<script>` tag along with the item if it goes to `news_archive.html`.
+
+### Sliced Wasserstein demo (`js/sw-gradients.js`, news archive)
+
+The June 2026 TMLR item at the top of `news_archive.html` contains a demo of *Learning with Differentially Private Sliced Wasserstein Gradients*. An encoder g(x) = Ax + b is trained on a private 2D dataset so that the encoded points match a public N(0, I) prior in sliced Wasserstein distance (the encoder of the paper's private SW autoencoders). Each of the 150 steps draws a few random directions, matches the sorted projections with the prior's quantiles, clips data and activations ("inner clipping"), and adds Gaussian noise of scale Δ/μ to the gradient, with Δ = 12·M·L₁/n from Theorem 4.1 and μ from Gaussian-DP composition so that the whole training is (ε, 10⁻⁵)-DP; the optimizer is Adam (as in the paper's experiments) with a linearly decaying learning rate. Sliders set ε and n; a chart compares with the same run without noise.
+
+- Markup: the `<div class="sw-demo">` in that item; the archive loads the script at the end of the page. Styles: the `.sw-*` rules in `css/styles.css`.
+- Tuning: the constants at the top of the script (`STEPS`, `LEARNING_RATE`, `BETAS`, clipping radii `M` and `R`, `DELTA_DP`).
 
 ### News
 
@@ -159,7 +170,7 @@ The Teaching section lists the current academic year's courses and links to `tea
 - One stylesheet for the whole site, course pages included, so a change affects every page. `index.html` and the archive pages also have a small inline `<style>` for `body`.
 - Palette: navy `rgb(27, 46, 129)` for headings, rules and bullets, and purple `rgb(83, 69, 218)` for links. Georgia serif throughout; the venue badges use a system sans-serif.
 - Responsive rules: below 768px the presentation block stacks vertically (photo, text, demo), the navigation links wrap after their section title, and a row of news photos scrolls sideways; below 480px the venue badge moves above its publication.
-- **Gotcha:** the responsive rules only apply on phones to pages with `<meta name="viewport" content="width=device-width, initial-scale=1">` in their `<head>`. Without it, phones lay the page out 980px wide and zoom out. `index.html` has it; the archive and course pages don't yet.
+- **Gotcha:** the responsive rules only apply on phones to pages with `<meta name="viewport" content="width=device-width, initial-scale=1">` in their `<head>`. Without it, phones lay the page out 980px wide and zoom out. `index.html`, `news_archive.html` and the 2026–2027 M2RI and MAPI3 course pages have it; `teaching_archive.html`, the MAPI3 projects page and older course pages don't yet.
 - **Gotcha:** `.section li` and `.section ul` are more specific than single-class rules such as `.publication-item` or `.year-publication-list`, so they win. For example, the publication list's left padding is the 20px from `.section ul`. Use a more specific selector to override them.
 
 ## Files and media

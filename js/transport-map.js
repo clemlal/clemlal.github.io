@@ -3,7 +3,12 @@
 // in dimension 1.
 //
 // On [0, 1], the optimal transport map from the source density f_X to the
-// target density f_Y is T = F_Y^{-1} ∘ F_X (dashed curve): it sends each
+// target density f_Y is T = F_Y^{-1} ∘ F_X (dashed curve). The densities have
+// K modes (set by a slider) on a floor, at different places in the
+// source and the target, so that more bumps give a map with more steep and
+// flat stretches; their max/min ratio stays below 14 for every K. The paper's
+// 1D result (Theorem 3.2) only needs such bounds, so the error does not depend
+// on K. The map sends each
 // quantile of f_X to the same quantile of f_Y. The paper's 1D estimator
 // (Section 3, Equation (3)) privately estimates the quantiles of orders k/m,
 // k = 1, ..., m - 1, of the X-sample (q_X) and of the Y-sample (q_Y), and
@@ -28,9 +33,7 @@
 // single final estimate, without particles.
 
 (function () {
-  const gauss = (x, mean, sd) => Math.exp(-0.5 * ((x - mean) / sd) ** 2);
-  const SOURCE = x => 0.35 + gauss(x, 0.35, 0.12);
-  const TARGET = x => 0.35 + 0.8 * gauss(x, 0.2, 0.07) + gauss(x, 0.72, 0.1);
+  const FLOOR = 0.12;              // keeps the densities bounded below
   const GRID = 1000;              // resolution of the CDF tables
   const MAX_LEVELS = 6;           // m ≤ 64
   const LEVEL_MS = 700;           // delay between two levels of the animation
@@ -54,13 +57,30 @@
   if (!root) return;
 
   const svg = root.querySelector('svg');
-  const sliders = { eps: root.querySelector('input[name="eps"]'), n: root.querySelector('input[name="n"]') };
-  const outputs = { eps: root.querySelector('output[data-for="eps"]'), n: root.querySelector('output[data-for="n"]') };
+  const sliders = {}, outputs = {};
+  for (const name of ['eps', 'n', 'modes']) {
+    sliders[name] = root.querySelector(`input[name="${name}"]`);
+    outputs[name] = root.querySelector(`output[data-for="${name}"]`);
+  }
   const status = root.querySelector('.ot-status');
   const errorText = root.querySelector('.ot-error');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---- Distributions ----
+
+  // K bumps of width 0.18/K on the floor, the j-th one at (j - offset)/K. The
+  // weights decrease from left to right, or increase if `rising`, so that the
+  // map also moves mass across [0, 1] and does not get closer to the identity
+  // as K grows.
+  function density(K, offset, rising) {
+    const sd = 0.18 / K;
+    const weight = j => (K === 1 ? 1 : rising ? 0.5 + (j - 1) / (K - 1) : 1.5 - (j - 1) / (K - 1));
+    return x => {
+      let s = FLOOR;
+      for (let j = 1; j <= K; j++) s += weight(j) * Math.exp(-0.5 * ((x - (j - offset) / K) / sd) ** 2);
+      return s;
+    };
+  }
 
   function cdfTable(f) {
     const F = new Float64Array(GRID + 1);
@@ -86,7 +106,8 @@
     return table.F[i] + (x * GRID - i) * (table.F[i + 1] - table.F[i]);
   }
 
-  const source = cdfTable(SOURCE), target = cdfTable(TARGET);
+  // Set by setDistributions().
+  let SOURCE, TARGET, source, target, scale;
   const trueMap = x => quantile(target, cdf(source, x));
   const sample = (table, n) => Float64Array.from({ length: n }, () => quantile(table, Math.random())).sort();
 
@@ -172,13 +193,12 @@
 
   const pointList = points => points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
   const unit = Array.from({ length: 201 }, (_, i) => i / 200);
-  const scale = STRIP / Math.max(...unit.map(u => Math.max(SOURCE(u) / source.norm, TARGET(u) / target.norm)));
 
   // Each strip maps a position u in [0, 1] and a depth r in [0, 1] (from the
   // baseline to the density curve) to SVG coordinates.
   const strips = [
-    { density: SOURCE, norm: source.norm, at: (u, r) => [X(u), BOTTOM + r * scale * SOURCE(u) / source.norm] },
-    { density: TARGET, norm: target.norm, at: (u, r) => [LEFT - r * scale * TARGET(u) / target.norm, Y(u)] },
+    { at: (u, r) => [X(u), BOTTOM + r * scale * SOURCE(u) / source.norm] },
+    { at: (u, r) => [LEFT - r * scale * TARGET(u) / target.norm, Y(u)] },
   ];
 
   // Region of a strip between positions a and b, under the density curve.
@@ -190,9 +210,9 @@
   svgElement('rect', { x: PANEL.left, y: PANEL.top, width: PANEL.size, height: PANEL.size, class: 'ot-panel' });
   const bandLayers = strips.map(() => svgElement('g', {}));
   const dotPaths = strips.map(() => svgElement('path', { class: 'ot-dots' }));
-  strips.forEach(strip => svgElement('polygon', { points: stripRegion(strip, 0, 1), class: 'ot-density' }));
+  const outlines = strips.map(() => svgElement('polygon', { class: 'ot-density' }));
   const ticks = svgElement('g', {});
-  svgElement('polyline', { points: pointList(unit.map(x => [X(x), Y(trueMap(x))])), class: 'ot-true' });
+  const trueCurve = svgElement('polyline', { class: 'ot-true' });
   const ghostLayer = svgElement('g', {});
   const staircase = svgElement('path', { class: 'ot-estimate' });
   const particleLayer = svgElement('g', {});
@@ -205,6 +225,16 @@
   }
   label(X(0.5), BOTTOM + STRIP + 18, 'source density f', 'X', false);
   label(LEFT - STRIP - 12, Y(0.5), 'target density f', 'Y', true);
+
+  function setDistributions(K) {
+    SOURCE = density(K, 0.65, false);
+    TARGET = density(K, 0.35, true);
+    source = cdfTable(SOURCE);
+    target = cdfTable(TARGET);
+    scale = STRIP / Math.max(...unit.map(u => Math.max(SOURCE(u) / source.norm, TARGET(u) / target.norm)));
+    outlines.forEach((outline, s) => outline.setAttribute('points', stripRegion(strips[s], 0, 1)));
+    trueCurve.setAttribute('points', pointList(unit.map(x => [X(x), Y(trueMap(x))])));
+  }
 
   // Samples as dots scattered under their density curve, drawn as tiny
   // segments with round caps.
@@ -261,6 +291,7 @@
   const settings = () => ({
     eps: Math.pow(10, Number(sliders.eps.value)),
     n: Math.round(Math.pow(10, Number(sliders.n.value)) / 10) * 10,
+    modes: Number(sliders.modes.value),
   });
 
   function formatError(e) {
@@ -273,6 +304,7 @@
     const { eps, n } = settings();
     outputs.eps.textContent = `ε = ${eps >= 1 ? eps.toFixed(1) : eps >= 0.1 ? eps.toFixed(2) : eps.toFixed(3)}`;
     outputs.n.textContent = `n = ${n}`;
+    outputs.modes.textContent = `K = ${settings().modes}`;
   }
 
   function newRun() {
@@ -291,6 +323,7 @@
 
   // Starts over after a change of the settings: forgets the earlier estimates.
   function restart() {
+    setDistributions(settings().modes);
     ghostLayer.textContent = '';
     particleLayer.textContent = '';
     particles = [];
@@ -371,10 +404,10 @@
     requestAnimationFrame(frame);
   }
 
-  sliders.eps.addEventListener('input', renderSettings);
-  sliders.n.addEventListener('input', renderSettings);
-  sliders.eps.addEventListener('change', restart);
-  sliders.n.addEventListener('change', restart);
+  for (const slider of Object.values(sliders)) {
+    slider.addEventListener('input', renderSettings);
+    slider.addEventListener('change', restart);
+  }
   root.querySelector('.ot-resample').addEventListener('click', restart);
 
   new IntersectionObserver(entries => {

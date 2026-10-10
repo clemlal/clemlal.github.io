@@ -88,6 +88,9 @@
               <label class="ot-control">Sample size <output data-for="n"></output>
                 <input type="range" name="n" min="2" max="4" step="0.05" value="3">
               </label>
+              <label class="ot-control">Number of modes <output data-for="modes"></output>
+                <input type="range" name="modes" min="1" max="6" step="1" value="2">
+              </label>
               <button type="button" class="ot-resample">↻ New sample</button>
               <div class="ot-status"></div>
               <div class="ot-error"></div>
@@ -98,30 +101,50 @@
               </div>
             </div>
             <div class="ot-caption">
-              The optimal map sends each quantile of the source to the same quantile of the target. Our estimator privately estimates m − 1 quantiles of each sample (median first, then quartiles, …) and matches them, giving the orange staircase. Its error behaves like max(1/n, 1/(nε)²): privacy is free once ε ≳ 1/√n.
+              The optimal map sends each quantile of the source to the same quantile of the target. Our estimator privately estimates m − 1 quantiles of each sample (median first, then quartiles, …) and matches them, giving the orange staircase. Its error behaves like max(1/n, 1/(nε)²): privacy is free once ε ≳ 1/√n. More modes change the map but not this rate: in dimension 1, only the bounds on the densities matter.
             </div>
           </div>
         </li>
           <li><strong>September 2026</strong> Our article <a href="https://openreview.net/pdf?id=WLNBGbEQnV" target="_blank" rel="noopener noreferrer">Measuring Progress in Diffusion Language Model Pretraining</a> just got accepted to the NeurIPS 2026 workshop <a href="https://bento-neurips.github.io/" target="_blank" rel="noopener noreferrer">BeNTo: Beyond Next-Token Prediction — Diffusion &amp; Flow Models for Next-Generation Decoding</a>. The accompanying benchmark, <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">speedrun-dlm</a>, is open source. Huge thanks to my coauthors <a href="https://agonon.github.io/" target="_blank" rel="noopener noreferrer">Antoine Gonon</a>, <a href="https://adrianlmueller.github.io/" target="_blank" rel="noopener noreferrer">Adrian Müller</a>, <a href="https://leonzheng2.github.io/" target="_blank" rel="noopener noreferrer">Léon Zheng</a>, <a href="https://shenzebang.github.io/" target="_blank" rel="noopener noreferrer">Zebang Shen</a>, <a href="https://las.inf.ethz.ch/people/yaping-hsieh" target="_blank" rel="noopener noreferrer">Ya-Ping Hsieh</a>, <a href="https://abardou.github.io/" target="_blank" rel="noopener noreferrer">Anthony Bardou</a> and <a href="https://www.nicolasboumal.net/" target="_blank" rel="noopener noreferrer">Nicolas Boumal</a>!
           <!-- Interactive demo, see js/dlm-hellaswag.js -->
           <div class="dlm-demo">
-            <div class="dlm-title">Try it: how a masked diffusion language model (D3PM) answers a HellaSwag question.</div>
-            <div class="dlm-main">
+            <div class="dlm-title">Try it: how we benchmark diffusion language models on HellaSwag.</div>
+            <div class="dlm-tabs" role="tablist">
+              <button type="button" role="tab" id="dlm-tab-question" aria-controls="dlm-question" aria-selected="true">① Scoring one question</button>
+              <button type="button" role="tab" id="dlm-tab-speedrun" aria-controls="dlm-speedrun" aria-selected="false">② Racing recipes to a target</button>
+            </div>
+            <div class="dlm-panel" id="dlm-question" role="tabpanel" aria-labelledby="dlm-tab-question">
               <div class="dlm-context"></div>
               <div class="dlm-rows"></div>
               <div class="dlm-status" aria-live="polite"></div>
               <div class="dlm-legend">Colour of a masked word: probability the model gives to the right word, 0 <i></i> 1.</div>
+              <div class="dlm-controls">
+                <label class="dlm-check"><input type="checkbox" checked> Divide scores by the ending's length (norm)</label>
+                <button type="button" class="dlm-button dlm-replay">↻ New masks</button>
+              </div>
+              <div class="dlm-caption">
+                A diffusion model has no cheap likelihood, so each ending is masked at a random noise level and the model tries to recover it with the context in view. Its loss (for a masked D3PM, the cross-entropy of the masked words), averaged over a few draws and divided by the ending's length, scores the ending; the lowest score is the model's answer. The model here is a toy: real HellaSwag questions are much harder.
+                <button type="button" class="dlm-link dlm-next">Next: how this accuracy ranks training recipes →</button>
+              </div>
             </div>
-            <div class="dlm-side">
-              <label class="dlm-control">Training progress <output></output>
-                <input type="range" min="0" max="100" step="1" value="60">
-              </label>
-              <label class="dlm-check"><input type="checkbox" checked> Divide scores by the ending's length (norm)</label>
-              <div class="dlm-chart-title">Accuracy on the whole benchmark (illustrative)</div>
-              <svg class="dlm-chart" viewBox="0 0 260 128" width="260" height="128" role="img" aria-label="Illustrative HellaSwag accuracy along training, with the 25% chance level and the 27.5% speedrun target"></svg>
-            </div>
-            <div class="dlm-caption">
-              A diffusion model has no cheap likelihood, so each ending is masked at a random noise level and the model tries to recover it with the context in view. Its loss (for a masked D3PM, the cross-entropy of the masked words), averaged over a few draws and divided by the ending's length, scores the ending; the lowest score is the model's answer. The model here is a toy. Real HellaSwag questions are much harder: at the scale of our speedrun, models stay just above chance, and the speedrun measures how long training takes to reach 27.5% accuracy.
+            <div class="dlm-panel" id="dlm-speedrun" role="tabpanel" aria-labelledby="dlm-tab-speedrun" hidden>
+              <div class="dlm-race">
+                <div class="dlm-race-chart">
+                  <label class="dlm-control">Finish line: HellaSwag accuracy <output></output>
+                    <input type="range" min="26" max="28.5" step="0.05" value="27.5">
+                  </label>
+                  <svg viewBox="0 0 520 300" width="520" height="300" role="img" aria-label="Mean HellaSwag accuracy of seven diffusion training recipes along training time, with a movable finish line"></svg>
+                  <div class="dlm-tooltip" hidden></div>
+                </div>
+                <div class="dlm-race-side">
+                  <div class="dlm-race-heading">Ranking by time to the finish line</div>
+                  <ol class="dlm-ranking"></ol>
+                  <div class="dlm-stability"></div>
+                </div>
+              </div>
+              <div class="dlm-caption">
+                Real results from our <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">speedrun</a>: mean HellaSwag accuracy of ten trainings per recipe, along training time on 8 GPUs. A recipe finishes when its accuracy reaches the target and the next measurement confirms it; the fastest wins. Move the finish line to run the first check of our paper: a good target should not reshuffle the ranking when it moves a little. Pairs whose order is still unknown (neither has finished, or one run stopped too early) are left out.
+              </div>
             </div>
           </div>
         </li>

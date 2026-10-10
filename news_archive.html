@@ -2,15 +2,21 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Clément Lalanne</title>
   <link rel="stylesheet" href="css/styles.css">
   <style>
     body {
-    width: 100%;
     background-color: rgb(255, 255, 255);
     font-family: Georgia, serif;
     border-left: 1px solid grey;
     padding: 0 100px 0;
+  }
+  @media (max-width: 768px) {
+    body {
+      padding: 0;
+      border-left: none;
+    }
   }
   </style>
 </head>
@@ -22,6 +28,32 @@
       <div class="section">
         <ul>
           <!-- Move older news items here -->
+          <li><strong>June 2026</strong> Our article <a href="https://openreview.net/forum?id=pqo5VNImZE" target="_blank" rel="noopener noreferrer">Learning with Differentially Private Sliced Wasserstein Gradients</a> just got accepted for publication in the journal <a href="https://www.jmlr.org/tmlr/index.html" target="_blank" rel="noopener noreferrer">Transactions on Machine Learning Research</a>. Huge thanks to my coauthors David Rodríguez-Vítores and <a href="https://perso.math.univ-toulouse.fr/loubes/" target="_blank" rel="noopener noreferrer">Jean-Michel Loubes</a>, and to the reviewers for their suggestions.
+            <!-- Interactive demo, see js/sw-gradients.js -->
+            <div class="sw-demo">
+              <div class="sw-title">Try it: training an encoder on private data with differentially private sliced Wasserstein gradients.</div>
+              <div class="sw-figure">
+                <svg class="sw-scatter" viewBox="0 0 300 300" width="300" height="300" role="img" aria-label="Encoded private data and prior samples in the plane, with the current slicing direction"></svg>
+                <div class="sw-strip-label">Along the dashed direction: encoded data (top) matched in sorted order with the prior (bottom)</div>
+                <svg class="sw-strip" viewBox="0 0 300 70" width="300" height="70" role="img" aria-label="Projections on the current direction, matched in sorted order"></svg>
+              </div>
+              <div class="sw-side">
+                <label class="sw-control">Privacy budget <output data-for="eps"></output>
+                  <input type="range" name="eps" min="-0.5" max="1.5" step="0.05" value="0">
+                </label>
+                <label class="sw-control">Private data size <output data-for="n"></output>
+                  <input type="range" name="n" min="3" max="4.3" step="0.05" value="4">
+                </label>
+                <button type="button" class="sw-restart">↻ Train again</button>
+                <div class="sw-readout"></div>
+                <svg class="sw-chart" viewBox="0 0 260 118" width="260" height="118" role="img" aria-label="Sliced Wasserstein distance to the prior along training, with and without privacy"></svg>
+                <div class="sw-legend"><span><i class="sw-key-private"></i>private training</span><span><i class="sw-key-reference"></i>same run without privacy</span></div>
+              </div>
+              <div class="sw-caption">
+                Dark dots: the private data after encoding; orange dots: the public prior N(0, I). At each step, the gradient of the sliced Wasserstein distance is computed along a few random directions, where optimal transport simply matches sorted values. The data and the encoded points are clipped, and Gaussian noise calibrated to the gradient's sensitivity is added before each Adam update, so that the whole training is (ε, 10<sup>−5</sup>)-differentially private. Our main result bounds this sensitivity by O(1/n): with more data, privacy costs less noise, and the private encoder gets close to the non-private one.
+              </div>
+            </div>
+          </li>
           <li><strong>June 2026</strong> It was great to talk about change detection in LLMs at <a href="https://www.tse-fr.eu/fr" target="_blank" rel="noopener noreferrer">TSE</a>! Thanks to the organizers <a href="https://www.tse-fr.eu/fr/people/adrien-blanchet" target="_blank" rel="noopener noreferrer">Adrien Blanchet</a> and <a href="https://julienchhor.github.io" target="_blank" rel="noopener noreferrer">Julien Chhor</a>. Slides available in <a href="randomDocuments/Token-EfficientChangeDetectioninLLMAPIs.pdf" target="_blank" rel="noopener noreferrer">.pdf</a> and <a href="randomDocuments/Token-EfficientChangeDetectioninLLMAPIs.key" target="_blank" rel="noopener noreferrer">.key</a> formats.</li>
           <li><strong>June 2026</strong> New preprint : <a href="https://hal.science/hal-05638043v1/document" target="_blank" rel="noopener noreferrer">Minimax Private Estimation of Smooth Optimal-Transport Maps </a> (Clément Lalanne, David Rodríguez-Vítores, Franck Iutzeler, Jean-Michel Loubes). </li>
           <li><strong>May 2026</strong> Our article <a href="https://arxiv.org/abs/2602.11083" target="_blank" rel="noopener noreferrer">Token-Efficient Change Detection in LLM APIs</a> (Timothée Chauvin, Clément Lalanne, Erwan Le Merrer, Jean-Michel Loubes, François Taïani, Gilles Tredan) just got accepted to <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML</a> ! See you in Seoul :)</li>
@@ -68,5 +100,6 @@
       </div>
     </main>
   </div>
+  <script src="js/sw-gradients.js"></script>
 </body>
 </html>

@@ -671,11 +671,6 @@
   color: rgb(27, 46, 129);
 }
 
-.dlm-main {
-  flex: 1 1 420px;
-  min-width: 0;
-}
-
 .dlm-context {
   margin-bottom: 6px;
 }
@@ -781,8 +776,103 @@
   vertical-align: middle;
 }
 
-.dlm-side {
-  flex: 0 1 260px;
+/* Tabs: "Scoring one question" and "Racing recipes to a target". */
+.dlm-tabs {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid rgb(206, 210, 217);
+}
+
+.dlm-tabs [role="tab"] {
+  margin-bottom: -1px;
+  padding: 5px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: none;
+  color: rgb(27, 46, 129);
+  font-family: Georgia, serif;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.dlm-tabs [role="tab"][aria-selected="true"] {
+  border-color: rgb(206, 210, 217);
+  border-bottom-color: rgb(248, 249, 250);
+  background-color: rgb(248, 249, 250);
+  font-weight: bold;
+}
+
+.dlm-panel {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.dlm-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin-top: 10px;
+}
+
+.dlm-check input {
+  accent-color: rgb(27, 46, 129);
+}
+
+.dlm-button {
+  padding: 3px 10px;
+  border: 1px solid rgb(27, 46, 129);
+  border-radius: 4px;
+  background-color: #fff;
+  color: rgb(27, 46, 129);
+  font-family: Georgia, serif;
+  font-size: 0.95em;
+  cursor: pointer;
+}
+
+.dlm-button:hover {
+  background-color: rgb(235, 238, 248);
+}
+
+.dlm-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: rgb(83, 69, 218);
+  font-family: Georgia, serif;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.dlm-link:hover {
+  text-decoration: underline;
+}
+
+/* Speedrun chart and ranking. */
+.dlm-race {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  margin-top: 10px;
+}
+
+.dlm-race-chart {
+  position: relative;
+  flex: 1 1 340px;
+  max-width: 560px;
+}
+
+.dlm-race-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 6px;
+  cursor: ns-resize;
+  touch-action: pan-x pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .dlm-control {
@@ -790,6 +880,7 @@
 }
 
 .dlm-control output {
+  font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
 
@@ -800,80 +891,142 @@
   accent-color: rgb(27, 46, 129);
 }
 
-.dlm-check {
-  display: block;
-  margin-top: 10px;
-}
-
-.dlm-check input {
-  accent-color: rgb(27, 46, 129);
-}
-
-.dlm-chart-title {
-  margin-top: 12px;
-  font-size: 0.9em;
-  color: #555;
-}
-
-.dlm-chart {
-  display: block;
-  width: 100%;
-  max-width: 260px;
-  height: auto;
+.dlm-grid {
+  stroke: rgb(229, 231, 235);
 }
 
 .dlm-axis {
-  stroke: #999;
-}
-
-.dlm-chance {
-  stroke: #999;
-  stroke-dasharray: 2 3;
-}
-
-.dlm-target {
-  stroke: rgb(214, 96, 52);
-  stroke-dasharray: 5 3;
-}
-
-.dlm-curve {
-  fill: none;
-  stroke: rgb(27, 46, 129);
-  stroke-width: 2;
-}
-
-.dlm-marker {
-  fill: rgb(27, 46, 129);
-  stroke: #fff;
-  stroke-width: 1.5;
-}
-
-.dlm-tick,
-.dlm-note,
-.dlm-axis-label {
-  font-family: Georgia, serif;
-  font-size: 10px;
-  fill: #666;
+  stroke: rgb(195, 194, 183);
 }
 
 .dlm-tick {
-  text-anchor: end;
-}
-
-.dlm-note {
-  text-anchor: end;
-}
-
-.dlm-note-target {
-  fill: rgb(214, 96, 52);
-}
-
-.dlm-axis-label {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  fill: #777;
   text-anchor: middle;
 }
 
+.dlm-tick-y,
+.dlm-tick-end {
+  text-anchor: end;
+}
+
+.dlm-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: opacity 0.2s;
+}
+
+.dlm-line-example {
+  stroke-width: 3;
+}
+
+.dlm-finish {
+  stroke: #333;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.dlm-finish-label {
+  font-family: Georgia, serif;
+  font-size: 12px;
+  font-weight: bold;
+  fill: #333;
+  stroke: rgb(248, 249, 250);
+  stroke-width: 4px;
+  paint-order: stroke;
+}
+
+.dlm-marker {
+  stroke: #fff;
+  stroke-width: 2;
+  transition: opacity 0.2s;
+}
+
+.dlm-dim {
+  opacity: 0.18;
+}
+
+.dlm-tooltip {
+  position: absolute;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: rgba(30, 30, 30, 0.9);
+  color: #fff;
+  font-size: 0.85em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.dlm-race-side {
+  flex: 1 1 240px;
+  max-width: 340px;
+}
+
+.dlm-race-heading {
+  font-weight: bold;
+  color: rgb(27, 46, 129);
+}
+
+.dlm-ranking {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* .section li is more specific than .dlm-ranking li: restate the list style here. */
+.section .dlm-ranking li {
+  display: grid;
+  grid-template-columns: 1.4em 12px 1fr auto 2.2em;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 3px 6px;
+  border-radius: 4px;
+  list-style: none;
+  color: #333;
+  font-size: 0.95em;
+}
+
+.section .dlm-ranking li.dlm-highlight {
+  background-color: rgb(233, 236, 239);
+}
+
+.dlm-ranking i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dlm-rank {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: #777;
+}
+
+.dlm-example .dlm-name {
+  font-weight: bold;
+}
+
+.dlm-time {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dlm-move {
+  font-size: 0.85em;
+  color: #555;
+}
+
+.dlm-stability {
+  margin-top: 10px;
+  color: #555;
+}
+
 .dlm-caption {
-  flex: 1 1 100%;
+  margin-top: 10px;
   font-size: 0.9em;
   color: #555;
 }
@@ -888,6 +1041,200 @@
   .dlm-bar {
     display: none;
   }
+}
+
+/* Sliced Wasserstein demo in the news archive (js/sw-gradients.js). Private
+   data in navy, public prior in orange. */
+.sw-demo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px 28px;
+  margin: 12px 0 4px;
+  padding: 14px;
+  border: 1px solid rgb(230, 232, 235);
+  border-radius: 8px;
+  background-color: rgb(248, 249, 250);
+  color: #333;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.sw-title {
+  flex: 1 1 100%;
+  font-weight: bold;
+  color: rgb(27, 46, 129);
+}
+
+.sw-figure {
+  flex: 0 1 320px;
+  min-width: 0;
+}
+
+.sw-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sw-frame {
+  fill: #fff;
+  stroke: rgb(206, 210, 217);
+}
+
+.sw-axis {
+  stroke: rgb(206, 210, 217);
+}
+
+.sw-grid {
+  stroke: rgb(229, 231, 235);
+}
+
+.sw-dots {
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.sw-data {
+  stroke: rgba(27, 46, 129, 0.6);
+}
+
+.sw-prior {
+  stroke: rgba(214, 96, 52, 0.35);
+}
+
+.sw-direction {
+  stroke: #333;
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+
+.sw-strip-label {
+  margin: 8px 0 2px;
+  font-size: 0.85em;
+  color: #777;
+}
+
+.sw-tick {
+  stroke-width: 2;
+}
+
+.sw-tick-data {
+  stroke: rgb(27, 46, 129);
+}
+
+.sw-tick-prior {
+  stroke: rgb(214, 96, 52);
+}
+
+.sw-match {
+  stroke: rgba(51, 51, 51, 0.35);
+  stroke-width: 1;
+}
+
+.sw-side {
+  flex: 1 1 250px;
+  max-width: 340px;
+}
+
+.sw-control {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.sw-control output {
+  font-variant-numeric: tabular-nums;
+}
+
+.sw-control input {
+  display: block;
+  width: 100%;
+  margin: 4px 0 0;
+  accent-color: rgb(27, 46, 129);
+}
+
+.sw-restart {
+  padding: 3px 10px;
+  border: 1px solid rgb(27, 46, 129);
+  border-radius: 4px;
+  background-color: #fff;
+  color: rgb(27, 46, 129);
+  font-family: Georgia, serif;
+  font-size: 0.95em;
+  cursor: pointer;
+}
+
+.sw-restart:hover {
+  background-color: rgb(235, 238, 248);
+}
+
+.sw-readout {
+  margin-top: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sw-chart {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin-top: 10px;
+}
+
+.sw-label {
+  font-family: Georgia, serif;
+  font-size: 10px;
+  fill: #777;
+  text-anchor: middle;
+}
+
+.sw-label-y {
+  text-anchor: end;
+}
+
+.sw-curve {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.sw-curve-private {
+  stroke: rgb(27, 46, 129);
+}
+
+.sw-curve-reference {
+  stroke: rgb(160, 160, 160);
+}
+
+.sw-legend {
+  font-size: 0.85em;
+  color: #555;
+}
+
+.sw-legend span {
+  display: inline-block;
+  margin-right: 14px;
+}
+
+.sw-legend i {
+  display: inline-block;
+  width: 18px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.sw-key-private {
+  border-top: 2px solid rgb(27, 46, 129);
+}
+
+.sw-key-reference {
+  border-top: 2px solid rgb(160, 160, 160);
+}
+
+.sw-caption {
+  flex: 1 1 100%;
+  font-size: 0.9em;
+  color: #555;
 }
 
 /* Announcement at the top of a course page (cancelled class, postponed exam...). */
