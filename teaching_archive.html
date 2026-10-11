@@ -1,56 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Clément Lalanne</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teaching Archive – Clément Lalanne</title>
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    body {
-    width: 100%;
-    background-color: rgb(255, 255, 255);
-    font-family: Georgia, serif;
-    border-left: 1px solid grey;
-    padding: 0 100px 0;
-  }
+    .course {
+      margin: 0 0 28px;
+    }
+    .course h3 {
+      color: rgb(27, 46, 129);
+      font-size: 1.2em;
+      margin: 0;
+    }
+    .section .course-meta {
+      color: #555;
+      margin: 2px 0 6px;
+    }
+    .year {
+      display: inline-block;
+      min-width: 6.5em;
+      font-weight: bold;
+    }
+    .current {
+      font-size: 0.8em;
+      color: #555;
+      border: 1px solid #bbb;
+      border-radius: 3px;
+      padding: 0 5px;
+      margin-left: 6px;
+    }
   </style>
 </head>
 <body>
+  <!-- Top horizontal navigation -->
+  <div class="top-nav">
+    <div class="nav-container">
+      <div class="nav-section">
+        <h3>Menu</h3>
+        <ul>
+          <li><a href="index.html">🏠 Home</a></li>
+          <li><a href="index.html#news">📰 News</a></li>
+          <li><a href="index.html#publications">📖 Publications</a></li>
+          <li><a href="index.html#teaching">🏫 Teaching</a></li>
+          <li><a href="index.html#curriculum">🎓 Curriculum</a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <h3>Links</h3>
+        <ul>
+          <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+          <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <div class="container">
     <main class="main">
       <h1>Teaching Archive</h1>
+
       <div class="section">
-        <ul>
-          <!-- Move older news items here -->
-           <li><strong>Asymptotic Statistics (M2 RI Toulouse University / ISAE Supaero) : </strong> <a href="teaching/2025_2026_M2RI_Asymptotic_Statistics/index.html" target="_blank" rel="noopener noreferrer">Course 2025-2026</a>.</li>
-          <li><strong>Mathematical Methods for Supervised Learning (M1 SID Toulouse University) : </strong> <a href="teaching/2025_2026_SID_Supervised_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2025-2026</a>.</li>
-          <li><strong>Mathematics of Machine Learning (M2 MAPI3 Toulouse University) : </strong> <a href="teaching/2025_2026_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2025-2026</a>, <a href="teaching/2025_2026_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects 2025-2026</a>.</li>
-           <li><strong>Mathematical Methods for Supervised Learning (M1 SID University of Toulouse) : </strong> <a href="teaching/2024_2025_SID_Supervised_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>.</li>
-          <li><strong>Mathematics of Machine Learning (M2 MAPI3 University of Toulouse) : </strong> <a href="teaching/2024_2025_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course 2024-2025</a>, <a href="teaching/2024_2025_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects 2024-2025</a>.</li>
-        <li><strong>2022-2023 Competitive Programming (L3 ENS Lyon) : </strong> On site, room E001. Materials on the Discord server. If you need an invide, reach out to me directly.<br>
-            Some other useful information may be found on the other lecturers' pages: <a href="https://perso.ens-lyon.fr/eric.thierry/" target="_blank" rel="noopener noreferrer">Eric Thierry</a>, <a href="https://tung-qle.github.io/" target="_blank" rel="noopener noreferrer">Le Quoc Tung</a>, Julien Duron and <a href="https://perso.ens-lyon.fr/redouane.elghazi/" target="_blank" rel="noopener noreferrer">Redouane Elghazi</a>. </li>
-    
-            <li><strong>2022-2023 Optimization (M1 ENS Lyon) : </strong> On site, rooms B1 and B2. Materials on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>.<br>
-            Some other useful information may be found on the other lecturers' pages: <a href="https://perso.ens-lyon.fr/elisa.riccietti/" target="_blank" rel="noopener noreferrer">Elisa Riccietti</a>, <a href="https://perso.ens-lyon.fr/stephan.thomasse/" target="_blank" rel="noopener noreferrer">Stéphan Thomassé</a> and <a href="https://tung-qle.github.io/" target="_blank" rel="noopener noreferrer">Le Quoc Tung</a>. </li>
-    
-            <li><strong>2021-2022 Data Bases and Data Mining (M1 ENS Lyon) : </strong> On site, room B1. Materials on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>.<br>
-            Some other useful information may be found on the other lecturers' pages: <a href="https://perso.univ-lyon1.fr/mohand-said.hacid/" target="_blank" rel="noopener noreferrer">Mohand-Saïd Hacid</a> and <a href="https://perso.liris.cnrs.fr/celine.robardet/" target="_blank" rel="noopener noreferrer">Céline Robardet</a>. </li>
-    
-            <li><strong>2021-2022 Machine Learning (M1 ENS Lyon) : </strong> On site in amphi B. Materials on <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/ML4M1.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a>'s page and on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>. <br>
-            Some other useful information may be found on the other lecturers' pages:<a href="https://ydecastro.github.io/" target="_blank" rel="noopener noreferrer">Yohann De Castro</a> and <a href="https://perso.ens-lyon.fr/elisa.riccietti/" target="_blank" rel="noopener noreferrer">Elisa Riccietti</a>. </li>
-    
-            <li><strong>2021-2022 System Programming (IUT 2A Lyon 1) : </strong> On site, refer to your schedule for the room. Materials on <a href="https://anthonybusson.fr/index.php/teaching" target="_blank" rel="noopener noreferrer">Anthony Busson</a>'s page. </li>
-    
-            <li><strong>2020-2021 Competitive Programming (L3 ENS Lyon) : </strong> Mixed, on Discord and in amphi B. Materials on the Discord server. If you need an invide, reach out to me directly.<br>
-            Some other useful information may be found on the other lecturers' pages: <a href="https://perso.ens-lyon.fr/eric.thierry/" target="_blank" rel="noopener noreferrer">Eric Thierry</a>, <a href="https://tung-qle.github.io/" target="_blank" rel="noopener noreferrer">Le Quoc Tung</a>, Christophe Lucas and Lucas Perotin. </li>
-    
-            <li><strong>2020-2021 Data Bases and Data Mining (M1 ENS Lyon) : </strong> Remote on ENS BBB. Materials on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>. <br>
-            Some other useful information may be found on the other lecturers' pages: <a href="http://emmanuel.coquery.pages.univ-lyon1.fr/" target="_blank" rel="noopener noreferrer">Emmanuel Coquery</a> and <a href="https://perso.liris.cnrs.fr/mplantev/doku/doku.php" target="_blank" rel="noopener noreferrer">Marc Plantevit</a>. </li>
-    
-            <li><strong>2020-2021 Machine Learning (M1 ENS Lyon) : </strong> Remote on ENS BBB. Materials on <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/ML4M1.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a>'s page and on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>. <br>
-            Some other useful information may be found on the other lecturers' pages: <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/ML4M1.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a> and <a href="https://ydecastro.github.io/" target="_blank" rel="noopener noreferrer">Yohann De Castro</a>. </li>
-    
-        </ul>
+        <h2>University of Toulouse</h2>
+
+        <div class="course">
+          <h3>Asymptotic Statistics</h3>
+          <p class="course-meta">M2 RI, University of Toulouse / ISAE-SUPAERO</p>
+          <ul>
+            <li><span class="year">2026-2027</span> <a href="teaching/2026_2027_M2RI_Asymptotic_Statistics/index.html" target="_blank" rel="noopener noreferrer">Course</a><span class="current">current</span></li>
+            <li><span class="year">2025-2026</span> <a href="teaching/2025_2026_M2RI_Asymptotic_Statistics/index.html" target="_blank" rel="noopener noreferrer">Course</a></li>
+          </ul>
+        </div>
+
+        <div class="course">
+          <h3>Mathematics of Machine Learning</h3>
+          <p class="course-meta">M2 MAPI3, University of Toulouse</p>
+          <ul>
+            <li><span class="year">2026-2027</span> <a href="teaching/2026_2027_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course</a> · <a href="teaching/2026_2027_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects</a><span class="current">current</span></li>
+            <li><span class="year">2025-2026</span> <a href="teaching/2025_2026_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course</a> · <a href="teaching/2025_2026_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects</a></li>
+            <li><span class="year">2024-2025</span> <a href="teaching/2024_2025_MAPI3_Machine_Learning/index.html" target="_blank" rel="noopener noreferrer">Course</a> · <a href="teaching/2024_2025_MAPI3_Machine_Learning_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects</a></li>
+          </ul>
+        </div>
+
+        <div class="course">
+          <h3>Mathematical Methods for Supervised Learning</h3>
+          <p class="course-meta">M1 SID, University of Toulouse</p>
+          <ul>
+            <li><span class="year">2025-2026</span> <a href="teaching/2025_2026_SID_Supervised_Learning/index.html" target="_blank" rel="noopener noreferrer">Course</a></li>
+            <li><span class="year">2024-2025</span> <a href="teaching/2024_2025_SID_Supervised_Learning/index.html" target="_blank" rel="noopener noreferrer">Course</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>ENS Lyon and Lyon 1</h2>
+
+        <div class="course">
+          <h3>Competitive Programming</h3>
+          <p class="course-meta">L3 ENS Lyon. Materials on the Discord server. If you need an invite, reach out to me directly.</p>
+          <ul>
+            <li><span class="year">2022-2023</span> On site, room E001. Other lecturers: <a href="https://perso.ens-lyon.fr/eric.thierry/" target="_blank" rel="noopener noreferrer">Eric Thierry</a>, <a href="https://tung-qle.github.io/" target="_blank" rel="noopener noreferrer">Le Quoc Tung</a>, Julien Duron and <a href="https://perso.ens-lyon.fr/redouane.elghazi/" target="_blank" rel="noopener noreferrer">Redouane Elghazi</a>.</li>
+            <li><span class="year">2020-2021</span> Mixed, on Discord and in amphi B. Other lecturers: <a href="https://perso.ens-lyon.fr/eric.thierry/" target="_blank" rel="noopener noreferrer">Eric Thierry</a>, <a href="https://tung-qle.github.io/" target="_blank" rel="noopener noreferrer">Le Quoc Tung</a>, Christophe Lucas and Lucas Perotin.</li>
+          </ul>
+        </div>
+
+        <div class="course">
+          <h3>Optimization</h3>
+          <p class="course-meta">M1 ENS Lyon. Materials on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>.</p>
+          <ul>
+            <li><span class="year">2022-2023</span> On site, rooms B1 and B2. Other lecturers: <a href="https://perso.ens-lyon.fr/elisa.riccietti/" target="_blank" rel="noopener noreferrer">Elisa Riccietti</a>, <a href="https://perso.ens-lyon.fr/stephan.thomasse/" target="_blank" rel="noopener noreferrer">Stéphan Thomassé</a> and <a href="https://tung-qle.github.io/" target="_blank" rel="noopener noreferrer">Le Quoc Tung</a>.</li>
+          </ul>
+        </div>
+
+        <div class="course">
+          <h3>Data Bases and Data Mining</h3>
+          <p class="course-meta">M1 ENS Lyon. Materials on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>.</p>
+          <ul>
+            <li><span class="year">2021-2022</span> On site, room B1. Other lecturers: <a href="https://perso.univ-lyon1.fr/mohand-said.hacid/" target="_blank" rel="noopener noreferrer">Mohand-Saïd Hacid</a> and <a href="https://perso.liris.cnrs.fr/celine.robardet/" target="_blank" rel="noopener noreferrer">Céline Robardet</a>.</li>
+            <li><span class="year">2020-2021</span> Remote on ENS BBB. Other lecturers: <a href="http://emmanuel.coquery.pages.univ-lyon1.fr/" target="_blank" rel="noopener noreferrer">Emmanuel Coquery</a> and <a href="https://perso.liris.cnrs.fr/mplantev/doku/doku.php" target="_blank" rel="noopener noreferrer">Marc Plantevit</a>.</li>
+          </ul>
+        </div>
+
+        <div class="course">
+          <h3>Machine Learning</h3>
+          <p class="course-meta">M1 ENS Lyon. Materials on <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/ML4M1.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a>'s page and on the <a href="https://etudes.ens-lyon.fr/" target="_blank" rel="noopener noreferrer">portail des études</a>.</p>
+          <ul>
+            <li><span class="year">2021-2022</span> On site in amphi B. Other lecturers: <a href="https://ydecastro.github.io/" target="_blank" rel="noopener noreferrer">Yohann De Castro</a> and <a href="https://perso.ens-lyon.fr/elisa.riccietti/" target="_blank" rel="noopener noreferrer">Elisa Riccietti</a>.</li>
+            <li><span class="year">2020-2021</span> Remote on ENS BBB. Other lecturers: <a href="https://perso.ens-lyon.fr/aurelien.garivier/www.math.univ-toulouse.fr/_agarivie/ML4M1.html" target="_blank" rel="noopener noreferrer">Aurélien Garivier</a> and <a href="https://ydecastro.github.io/" target="_blank" rel="noopener noreferrer">Yohann De Castro</a>.</li>
+          </ul>
+        </div>
+
+        <div class="course">
+          <h3>System Programming</h3>
+          <p class="course-meta">IUT 2A Lyon 1. Materials on <a href="https://anthonybusson.fr/index.php/teaching" target="_blank" rel="noopener noreferrer">Anthony Busson</a>'s page.</p>
+          <ul>
+            <li><span class="year">2021-2022</span> On site, refer to your schedule for the room.</li>
+          </ul>
+        </div>
       </div>
     </main>
   </div>

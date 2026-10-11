@@ -9,7 +9,7 @@ The site is plain static HTML, CSS and vanilla JavaScript: no framework, no buil
 ```
 index.html                 Home page: presentation, news, publications, teaching, curriculum
 news_archive.html          Older news items, moved out of index.html
-teaching_archive.html      Past courses, moved out of index.html
+teaching_archive.html      Every course taught, grouped by course with one line per academic year
 css/styles.css             The only stylesheet, shared by every page (course pages included)
 js/venue-badges.js         Venue list and rules for the coloured badges next to publications
 js/decision-boundary.js    Interactive neural-network demo in the presentation block
@@ -25,7 +25,7 @@ teaching/<year>_<course>/  One folder per course and academic year: index.html +
 
 ## Home page (`index.html`)
 
-Sections are `<div class="section" id="…">` blocks. The top navigation links to them by id (`#news`, `#publications`, `#teaching`, `#curriculum`).
+Sections are `<div class="section" id="…">` blocks. The top navigation links to them by id (`#news`, `#publications`, `#teaching`, `#curriculum`). The same navigation block is copied at the top of `news_archive.html`, `teaching_archive.html` and every course page (with `../../` paths): change them all together.
 
 ### Decision-boundary demo (`js/decision-boundary.js`)
 
@@ -151,12 +151,19 @@ console.log(ctx.venueBadge(['COLT 2025 - 38th Annual Conference on Learning Theo
 
 ### Teaching and curriculum
 
-The Teaching section lists the current academic year's courses and links to `teaching/<folder>/index.html`. Its last item links to `teaching_archive.html`. The Curriculum section is static HTML, with nested `<ul>` lists for details.
+The Teaching section lists the current academic year's courses and links to `teaching/<folder>/index.html`. Its last item links to `teaching_archive.html`. The Curriculum section is static HTML; details go in a `<ul>` nested inside their parent `<li>`.
+
+`teaching_archive.html` lists every course, current year included, as a `<div class="course">` block: an `<h3>` with the course name, a `course-meta` line (programme, institution, where the materials are), then one `<li>` per academic year, newest first:
+
+```html
+<li><span class="year">2026-2027</span> <a href="teaching/…/index.html" target="_blank" rel="noopener noreferrer">Course</a> · <a href="teaching/…_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects</a><span class="current">current</span></li>
+```
 
 ## Course pages (`teaching/`)
 
 - Folder name: `<start year>_<end year>_<programme>_<Course_Name>`, e.g. `2026_2027_MAPI3_Machine_Learning`. The folder holds `index.html` and every file the page links to (PDFs, notebooks), linked by bare file name.
 - Pages reach shared files with `../../` (`../../css/styles.css`, `../../index.html`).
+- Content goes in `<main class="main course-page">`. The `.course-page` rules in `css/styles.css` share the home page sections' look (navy headings and bullets, purple links); keep the class when you create a page.
 - Usual sections: Overview, Evaluation, Lectures, TDs / TPs, References and External Resources.
 - **Announcements** (cancelled class, postponed test): a `<div class="notice">` right after the title block, starting with a `<span class="notice-title">` heading; add `lang="fr"` when it is in French. Delete it once it is outdated.
 - **Releasing material during the semester.** Upcoming lectures and TDs are already listed, with their link inside an HTML comment:
@@ -170,15 +177,16 @@ The Teaching section lists the current academic year's courses and links to `tea
 1. Copy last year's course folder to the new name (e.g. `2026_2027_…` → `2027_2028_…`).
 2. In the copy, update `<title>`, `<h1>`, lecturers and evaluation dates. Comment out the links of lectures and TDs not yet given, and replace files that change.
 3. In `index.html` (Teaching section), point the links at the new folders.
-4. Move last year's `<li>` lines to the top of `teaching_archive.html`.
+4. In `teaching_archive.html`, add a line for the new year at the top of the course's list and move the `<span class="current">current</span>` tag onto it.
 5. Keep the old folders: students and other sites link to them.
 
 ## Styling (`css/styles.css`)
 
-- One stylesheet for the whole site, course pages included, so a change affects every page. `index.html` and the archive pages also have a small inline `<style>` for `body`.
+- One stylesheet for the whole site, course pages included, so a change affects every page. The `body` rule (no margin, white background, Georgia) is in the stylesheet; `teaching_archive.html` adds a small inline `<style>` for its course blocks.
 - Palette: navy `rgb(27, 46, 129)` for headings, rules and bullets, and purple `rgb(83, 69, 218)` for links. Georgia serif throughout; the venue badges use a system sans-serif.
 - Responsive rules: below 768px the presentation block stacks vertically (photo, text, demo), the navigation links wrap after their section title, and a row of news photos scrolls sideways; below 480px the venue badge moves above its publication.
-- **Gotcha:** the responsive rules only apply on phones to pages with `<meta name="viewport" content="width=device-width, initial-scale=1">` in their `<head>`. Without it, phones lay the page out 980px wide and zoom out. `index.html`, `news_archive.html` and the 2026–2027 M2RI and MAPI3 course pages have it; `teaching_archive.html`, the MAPI3 projects page and older course pages don't yet.
+- **Gotcha:** the responsive rules only apply on phones to pages with `<meta name="viewport" content="width=device-width, initial-scale=1">` in their `<head>`. Without it, phones lay the page out 980px wide and zoom out. Every page has it; keep it when you create a page.
+- **Gotcha:** a CSS comment ends at the first `*/`, so never write a path like `teaching/*/…` inside one: the rest of the comment becomes invalid CSS and the browser drops the rule after it.
 - **Gotcha:** `.section li` and `.section ul` are more specific than single-class rules such as `.publication-item` or `.year-publication-list`, so they win. For example, the publication list's left padding is the 20px from `.section ul`. Use a more specific selector to override them.
 
 ## Files and media
