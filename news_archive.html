@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>News Archive – Clément Lalanne</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script src="js/themes.js"></script>
 </head>
 <body>
   <!-- Top horizontal navigation -->
@@ -58,7 +59,7 @@
                 <div class="sw-legend"><span><i class="sw-key-private"></i>private training</span><span><i class="sw-key-reference"></i>same run without privacy</span></div>
               </div>
               <div class="sw-caption">
-                Dark dots: the private data after encoding; orange dots: the public prior N(0, I). At each step, the gradient of the sliced Wasserstein distance is computed along a few random directions, where optimal transport simply matches sorted values. The data and the encoded points are clipped, and Gaussian noise calibrated to the gradient's sensitivity is added before each Adam update, so that the whole training is (ε, 10<sup>−5</sup>)-differentially private. Our main result bounds this sensitivity by O(1/n): with more data, privacy costs less noise, and the private encoder gets close to the non-private one.
+                Dark dots: the private data after encoding; light dots: the public prior N(0, I). At each step, the gradient of the sliced Wasserstein distance is computed along a few random directions, where optimal transport simply matches sorted values. The data and the encoded points are clipped, and Gaussian noise calibrated to the gradient's sensitivity is added before each Adam update, so that the whole training is (ε, 10<sup>−5</sup>)-differentially private. Our main result bounds this sensitivity by O(1/n): with more data, privacy costs less noise, and the private encoder gets close to the non-private one.
               </div>
             </div>
           </li>

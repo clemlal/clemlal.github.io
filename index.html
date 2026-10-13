@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Clément Lalanne</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script src="js/themes.js"></script>
 </head>
 <body>
   <!-- Top horizontal navigation -->
@@ -56,7 +57,7 @@
           </div>
           <figcaption>
             <span class="gd-status"></span><br>
-            Click in the box to add points: a small neural network learns to separate ● from ✕ by gradient descent.
+            Click in the box to add points: a small neural network learns to separate <span class="gd-symbol" data-label="1">●</span> from <span class="gd-symbol" data-label="0">✕</span> by gradient descent.
           </figcaption>
         </figure>
       </div>
@@ -89,7 +90,7 @@
               </div>
             </div>
             <div class="ot-caption">
-              The optimal map sends each quantile of the source to the same quantile of the target. Our estimator privately estimates m − 1 quantiles of each sample (median first, then quartiles, …) and matches them, giving the orange staircase. Its error behaves like max(1/n, 1/(nε)²): privacy is free once ε ≳ 1/√n. More modes change the map but not this rate: in dimension 1, only the bounds on the densities matter.
+              The optimal map sends each quantile of the source to the same quantile of the target. Our estimator privately estimates m − 1 quantiles of each sample (median first, then quartiles, …) and matches them, giving the staircase. Its error behaves like max(1/n, 1/(nε)²): privacy is free once ε ≳ 1/√n. More modes change the map but not this rate: in dimension 1, only the bounds on the densities matter.
             </div>
           </div>
         </li>
@@ -140,7 +141,7 @@
           <div class="center"> <img src="photos/ICML2026_1.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_2.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_3.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_4.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_5.png" alt="ICML 2026" style="height: 100px;"> </div>
           <!-- Interactive demo, see js/change-detection.js -->
           <div class="cd-demo">
-            <div class="cd-title">Try it: a toy LLM completes “The sky is …” with one of three words. Can a small change of the model be detected from a few of its answers?</div>
+            <div class="cd-title">Try it: a toy LLM completes “<span class="cd-prompt">The sky is</span> …” with one of three words. Can a small change of the model be detected from a few of its answers?</div>
             <div class="cd-simplex">
               <svg viewBox="0 0 300 264" width="300" height="264" role="img" aria-label="Triangle of the possible next-word probabilities; drag the point to choose them"></svg>
               <label class="cd-temp">Temperature <output></output>

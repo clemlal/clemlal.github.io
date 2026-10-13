@@ -73,7 +73,6 @@
     const SCORE_MS = 1000;
     const ANSWER_MS = 3500;          // pause on the answer at the end of a round
     const DRAW_MS = MASK_MS + PREDICT_MS + SCORE_MS;
-    const LOW = [214, 96, 52], HIGH = [27, 46, 129];  // colours for probability 0 and 1
 
     const rowsBox = panel.querySelector('.dlm-rows');
     const status = panel.querySelector('.dlm-status');
@@ -127,8 +126,11 @@
       return { s, answer: s.indexOf(Math.min(...s)) };
     }
 
+    // From the theme's highlight (probability 0) to its accent (probability 1),
+    // read at each call so that a theme switch (js/themes.js) shows at the next frame.
     function colour(logP) {
       const p = Math.exp(logP);
+      const LOW = window.siteTheme.rgb.highlight, HIGH = window.siteTheme.rgb.accent;
       return `rgb(${LOW.map((c, i) => Math.round(c + p * (HIGH[i] - c))).join(', ')})`;
     }
 

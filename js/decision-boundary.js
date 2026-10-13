@@ -12,7 +12,9 @@
 // removes the points and resets the weights. Nothing runs while the box is off
 // screen, and visitors who ask for reduced motion see the trained result only.
 //
-// Points live in [-1, 1]², with y pointing up. Label 1 is a circle, 0 a cross.
+// Points live in [-1, 1]², with y pointing up. Label 1 is a circle, 0 a cross,
+// in the classic theme; seasonal themes (js/themes.js) change the two symbols,
+// their names on the buttons and their colours.
 
 (function () {
   const LAYERS = [2, 16, 16, 1];
@@ -20,7 +22,8 @@
   const STEPS_PER_FRAME = 3;
   const ITERATIONS_PER_RUN = 2000;
   const GRID = 50;
-  const COLORS = { 1: [27, 46, 129], 0: [214, 96, 52] };  // circles: site navy, crosses: orange
+  const GLYPH_SIZE = 17;  // font size of the symbols other than ● and ✕
+  let CLASSES, COLORS;  // symbols and colours of labels 1 and 0, from the theme
 
   const root = document.querySelector('.gd-demo');
   if (!root) return;
@@ -31,6 +34,22 @@
   const status = root.querySelector('.gd-status');
   const classButtons = root.querySelectorAll('button[data-label]');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Takes the classes from the theme (js/themes.js), and writes their names in
+  // the buttons, the caption and the canvas's description.
+  function applyTheme() {
+    const theme = window.siteTheme;
+    CLASSES = { 1: theme.classes[0], 0: theme.classes[1] };
+    COLORS = { 1: theme.rgb.accent, 0: theme.rgb.highlight };
+    classButtons.forEach(button => {
+      const { symbol, label: name, plural } = CLASSES[button.dataset.label];
+      button.textContent = `${symbol} ${name}`;
+      button.title = `Clicks in the box add ${plural}`;
+    });
+    root.querySelectorAll('.gd-symbol').forEach(span => { span.textContent = CLASSES[span.dataset.label].symbol; });
+    canvas.setAttribute('aria-label', `A small neural network learning, by gradient descent, a decision boundary between ${CLASSES[1].plural} and ${CLASSES[0].plural}`);
+  }
+  applyTheme();
 
   // The probabilities are computed on the lattice, written to a tiny canvas
   // with one pixel per lattice point, then stretched (with smoothing) to the box.
@@ -223,8 +242,22 @@
   function drawPoint(p) {
     const x = (p.x + 1) / 2 * size, y = (1 - p.y) / 2 * size, r = 4.5;
     const color = `rgb(${COLORS[p.label].join(', ')})`;
+    const symbol = CLASSES[p.label].symbol;
     ctx.beginPath();
-    if (p.label === 1) {
+    if (symbol !== '●' && symbol !== '✕') {
+      // Emoji or letter, on a white glow that keeps it readable over the shading.
+      const emoji = /\p{Extended_Pictographic}/u.test(symbol);
+      ctx.font = emoji
+        ? `${GLYPH_SIZE}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`
+        : `bold ${GLYPH_SIZE}px Georgia, serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = color;
+      ctx.fillText(symbol, x, y);
+      ctx.shadowBlur = 0;
+    } else if (symbol === '●') {
       ctx.arc(x, y, r, 0, 2 * Math.PI);
       ctx.fillStyle = color;
       ctx.fill();
@@ -305,6 +338,12 @@
     net = randomNetwork();
     iteration = 0;
     if (!running) draw();
+  });
+
+  // The theme switch of the navigation bar (js/themes.js).
+  window.addEventListener('sitethemechange', () => {
+    applyTheme();
+    if (!running && size) draw();
   });
 
   new ResizeObserver(() => {

@@ -1,7 +1,8 @@
 // Interactive demo in the July 2026 news item of index.html, illustrating
 // "Token-Efficient Change Detection in LLM APIs" (ICML 2026).
 //
-// A toy LLM completes "The sky is" with one of three words. Its next-word
+// A toy LLM completes a prompt ("The sky is" in the classic theme; the seasonal
+// themes of js/themes.js change it and the words) with one of three words. Its next-word
 // probabilities p at temperature 1 are a point of the triangle (the probability
 // simplex), which visitors drag. At temperature T the model samples from
 // softmax(logits / T), with logits log p, i.e. from p_T ∝ p^(1/T). The changed
@@ -20,7 +21,7 @@
 // motion get the results of all the tests at once, without animation.
 
 (function () {
-  const WORDS = ['blue', 'clear', 'grey'];
+  let WORDS;   // from the theme, see applyTheme
   const DELTA = [0.1, -0.1, 0];  // logit shift of the changed model
   const TOKENS = 20;             // tokens sampled from each model in a test
   const TESTS = 20;
@@ -30,10 +31,10 @@
   const VERDICT_MS = 1300;       // pause on each verdict
   const SNAP = 0.025;            // probabilities closer than this snap to a tie
   const MIN_PROB = 0.005;
-  const COLORS = ['rgb(27, 46, 129)', 'rgb(214, 96, 52)'];  // original, changed (as in css/styles.css)
+  let COLORS;  // of the original and changed models: the theme's accent and highlight
 
-  // Triangle in SVG coordinates (viewBox 0 0 300 264): blue at the top, clear
-  // at the bottom left, grey at the bottom right.
+  // Triangle in SVG coordinates (viewBox 0 0 300 264): the first word at the
+  // top, the second at the bottom left, the third at the bottom right.
   const VERTICES = [[150, 28], [30, 236], [270, 236]];
   const CENTRE = [150, 500 / 3];
   const PAIRS = [[0, 1], [0, 2], [1, 2]];
@@ -79,15 +80,12 @@
     y2: (VERTICES[i][1] + VERTICES[j][1]) / 2,
     class: 'cd-border-line',
   }));
-  WORDS.forEach((word, i) => {
-    const [x, y] = VERTICES[i];
-    svgElement('text', { x, y: i === 0 ? y - 10 : y + 22, class: 'cd-word' }).textContent = `“${word}”`;
-  });
-  const paths = COLORS.map(color => svgElement('polyline', { stroke: color, class: 'cd-path' }));
-  const handle = svgElement('circle', { r: 9, stroke: COLORS[0], class: 'cd-handle' });
+  const wordLabels = VERTICES.map(([x, y], i) => svgElement('text', { x, y: i === 0 ? y - 10 : y + 22, class: 'cd-word' }));
+  const paths = [0, 1].map(() => svgElement('polyline', { class: 'cd-path' }));
+  const handle = svgElement('circle', { r: 9, class: 'cd-handle' });
   const dots = [];
-  dots[1] = svgElement('circle', { r: 5.5, fill: COLORS[1], class: 'cd-dot' });
-  dots[0] = svgElement('circle', { r: 5.5, fill: COLORS[0], class: 'cd-dot' });  // on top when they meet
+  dots[1] = svgElement('circle', { r: 5.5, class: 'cd-dot' });
+  dots[0] = svgElement('circle', { r: 5.5, class: 'cd-dot' });  // on top when they meet
 
   // One column per word in each histogram: the bar, the count above it and a
   // dashed tick at the expected count.
@@ -96,7 +94,7 @@
     const labels = document.createElement('div');
     bars.className = 'cd-bars';
     labels.className = 'cd-labels';
-    const columns = WORDS.map(word => {
+    const columns = [0, 1, 2].map(() => {
       const column = document.createElement('div');
       const parts = {};
       column.className = 'cd-col';
@@ -106,7 +104,7 @@
         column.appendChild(parts[part]);
       }
       bars.appendChild(column);
-      labels.appendChild(document.createElement('span')).textContent = word;
+      parts.label = labels.appendChild(document.createElement('span'));
       return parts;
     });
     panel.append(bars, labels);
@@ -114,6 +112,20 @@
   });
 
   const historyDots = Array.from({ length: TESTS }, () => dotsBox.appendChild(document.createElement('span')));
+
+  // Prompt, words and colours of the theme (js/themes.js).
+  function applyTheme() {
+    const theme = window.siteTheme;
+    WORDS = theme.words;
+    COLORS = [theme.css('accent'), theme.css('highlight')];
+    root.querySelector('.cd-prompt').textContent = theme.prompt;
+    wordLabels.forEach((label, i) => { label.textContent = `“${WORDS[i]}”`; });
+    histograms.forEach(columns => columns.forEach((column, i) => { column.label.textContent = WORDS[i]; }));
+    paths.forEach((path, model) => path.setAttribute('stroke', COLORS[model]));
+    handle.setAttribute('stroke', COLORS[0]);
+    dots.forEach((dot, model) => dot.setAttribute('fill', COLORS[model]));
+  }
+  applyTheme();
 
   // ---- Model ----
 
@@ -323,6 +335,12 @@
     T = Math.pow(10, Number(slider.value));
     renderModel(false);
     restart();
+  });
+
+  // The theme switch of the navigation bar: same model, new words and colours.
+  window.addEventListener('sitethemechange', () => {
+    applyTheme();
+    renderModel(true);
   });
 
   new IntersectionObserver(entries => {
