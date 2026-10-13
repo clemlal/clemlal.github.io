@@ -303,6 +303,21 @@ const phdThesis = {
   badge: venueBadge([], 'THESE'),
 };
 
+// Inserting the publications pushes down everything below them. A visitor who
+// is already further down, typically after following a link to #teaching while
+// the list was loading, would end up in the middle of the publications. So when
+// the whole list is above the screen, scroll by the same amount, keeping the
+// Teaching section (and what is below it) in place. Browsers that do this
+// themselves (scroll anchoring, as in Chrome and Firefox) leave no shift to correct.
+function keepViewInPlace(update) {
+  const below = document.getElementById('teaching');
+  const listAboveScreen = document.querySelector('.publications-container').getBoundingClientRect().bottom <= 0;
+  const before = below.getBoundingClientRect().top;
+  update();
+  const shift = below.getBoundingClientRect().top - before;
+  if (listAboveScreen && shift) window.scrollBy(0, shift);
+}
+
 async function fetchPublications() {
   const publicationList = document.getElementById('publication-list');
   const loadingMessage = document.querySelector('.loading');
@@ -347,21 +362,25 @@ async function fetchPublications() {
     }));
 
     // HAL results are sorted newest first: the diffusion paper and its benchmark lead 2026, the thesis closes 2023.
-    publicationList.innerHTML = renderPublicationList([diffusionLmProgress, speedrunDlm, ...halPublications, phdThesis]);
-    if (loadingMessage) loadingMessage.style.display = 'none';
+    keepViewInPlace(() => {
+      publicationList.innerHTML = renderPublicationList([diffusionLmProgress, speedrunDlm, ...halPublications, phdThesis]);
+      if (loadingMessage) loadingMessage.style.display = 'none';
+    });
 
   } catch (error) {
     console.error('Error fetching publications:', error);
 
-    if (loadingMessage) loadingMessage.style.display = 'none';
-    errorMessage.textContent = 'Unable to load publications automatically at the moment.';
-    publicationList.before(errorMessage);
-
-    publicationList.innerHTML = renderPublicationList([diffusionLmProgress, speedrunDlm, phdThesis]);
+    keepViewInPlace(() => {
+      if (loadingMessage) loadingMessage.style.display = 'none';
+      errorMessage.textContent = 'Unable to load publications automatically at the moment.';
+      publicationList.before(errorMessage);
+      publicationList.innerHTML = renderPublicationList([diffusionLmProgress, speedrunDlm, phdThesis]);
+    });
   }
 }
 
-window.addEventListener('load', fetchPublications);
+// Started right away: waiting for the page's load event would also wait for every photo.
+fetchPublications();
 </script>
 
 </body>

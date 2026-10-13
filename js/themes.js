@@ -133,7 +133,7 @@
     },
     {
       id: 'halloween', name: 'Halloween', icon: '🎃',
-      dates: ['10-01', '11-01'],
+      dates: ['10-10', '11-01'],
       colors: { accent: '#3f1d5c', link: '#7e3fb8', highlight: '#e2620b' },
       classes: [['👻', 'Ghost'], ['🎃', 'Pumpkin']],
       prompt: 'The pumpkin is', words: ['spooky', 'orange', 'carved'],
