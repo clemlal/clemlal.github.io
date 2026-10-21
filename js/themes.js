@@ -1,24 +1,29 @@
-// Seasonal themes of the whole site. Everything that changes with the time of
-// the year is in this file.
+// Themes of the whole site: the light and dark themes, and the seasonal themes
+// that change with the time of the year. Everything about them is in this file.
 //
 // Every page loads this script in its <head>. It picks the theme of the day:
 // the first entry of THEMES whose dates contain today (in the visitor's time
 // zone), so short events come first and the four seasons, which cover the
 // whole year, come last. Then it
-//   - sets the colour variables of css/styles.css (--accent, --link, ...) on <html>,
+//   - sets the colour variables of css/styles.css (--accent, --bg, --text, ...) on <html>,
 //   - sets the browser-tab icon to the theme's emoji,
 //   - exposes the theme as window.siteTheme, from which the demos take their
 //     colours and symbols: the two classes of js/decision-boundary.js, the
 //     prompt and the three words of js/change-detection.js,
-//   - adds a switch to the navigation bar, between the theme of the day and the
-//     classic theme (the site's original colours). The visitor's choice is kept
-//     until the theme of the day changes; the demos redraw on the "sitethemechange"
-//     event that a switch fires.
+//   - adds a switch to the navigation bar: the theme of the day, Light and Dark.
+//     The visitor's choice is kept until the theme of the day changes; the demos
+//     redraw on the "sitethemechange" event that a switch fires.
 //
-// Preview a theme by adding ?theme=<id> (e.g. ?theme=halloween) to the URL of
-// any page, or a day with ?date=YYYY-MM-DD (e.g. ?date=2026-12-24).
+// Light and Dark are the site's own themes; their colours, and the reasons for
+// them, are in css/styles.css. Light is also the fallback and the look without
+// JavaScript. The seasonal themes put their own three colours on a white page
+// with greys (PAPER). Themes only change colours: the font and the weight of
+// the headings are the same everywhere (--font and --heading-weight).
 //
-// A theme has:
+// Preview a theme by adding ?theme=<id> (e.g. ?theme=halloween, ?theme=dark) to
+// the URL of any page, or a day with ?date=YYYY-MM-DD (e.g. ?date=2026-12-24).
+//
+// A seasonal theme has:
 //   id, name, icon   id for ?theme=, readable name, emoji of the browser tab
 //   dates            ['MM-DD', 'MM-DD'], first and last day (the range may go
 //                    over New Year), or { easter: [a, b] } / { lunarNewYear: [a, b] }
@@ -26,10 +31,10 @@
 //                    Lunar New Year (a and b may be negative)
 //   colors           accent: headings, rules, bullets, buttons, first class of the demos
 //                    link: links
-//                    highlight: second class of the demos (the orange of the classic theme)
-//                    The light tints (backgrounds, hovers) are computed from them.
-//                    accent and link are text colours on white: keep a contrast of
-//                    at least 7:1 and 4.5:1. highlight needs at least 3:1.
+//                    highlight: second class of the demos
+//                    The tints (panels, hovers) are computed from them. On the white
+//                    page, keep a contrast of at least 7:1 for accent (it colours list
+//                    text), 4.5:1 for link and 3:1 for highlight.
 //   classes          [symbol, label, plural] of the two classes of the decision-boundary
 //                    demo, drawn in accent and highlight. The label is the button's text
 //                    (the two labels together 14 characters at most); the plural, used
@@ -38,25 +43,37 @@
 //                    with one of the three words. The first word is written above the
 //                    triangle; the other two, at its bottom corners, must stay short
 //                    (6 characters at most).
-// A theme can leave out any field but id and dates: it then keeps the classic one.
+// A theme can leave out any field but id and dates: it then keeps the light
+// theme's one (circles and crosses, "The sky is").
+//
+// A seasonal theme may also set dataA (first class of the demos and text
+// selection, accent by default).
+//
+// The colours of Light and Dark are not here: they are the variables of
+// css/styles.css (:root, and :root[data-theme="dark"]), which also set the rest
+// of the page (bg, text, textSoft, muted, faint, border, surface, accentSoft,
+// linkStrong, rule). This file gives them their demo symbols, sets the colours
+// of the seasonal themes over them, and reads the colours in use back from the
+// stylesheet for the scripts (window.siteTheme.rgb).
 
 (function () {
-  const CLASSIC = {
-    id: 'classic',
-    name: 'Classic',
-    icon: '',
-    colors: {
-      accent: '#1b2e81',
-      link: '#5345da',
-      highlight: '#d66034',
-      // Set here to keep the original look exactly; computed for the other themes.
-      linkStrong: '#3c30a5',
-      accentSoft: '#ebeef8',
-      surface: '#f8f9fa',
-    },
+  // Light and Dark: colours in css/styles.css, symbols here.
+  const LIGHT = {
+    id: 'light', name: 'Light', icon: '',
     classes: [['●', 'Circle'], ['✕', 'Cross', 'crosses']],
     prompt: 'The sky is',
     words: ['blue', 'clear', 'grey'],
+  };
+
+  const DARK = { ...LIGHT, id: 'dark', name: 'Dark' };
+
+  // Ids of ?theme= and of the stored choice for the site's own themes. "classic"
+  // is the theme that Light replaced.
+  const OWN = { light: LIGHT, dark: DARK, classic: LIGHT };
+
+  // The page around a seasonal theme's colours: white, with greys.
+  const PAPER = {
+    colors: { bg: '#ffffff', text: '#000000', textSoft: '#333333', muted: '#555555', faint: '#aaaaaa', border: '#e6e8eb' },
   };
 
   const THEMES = [
@@ -272,25 +289,32 @@
   }
 
   function themeOf(day) {
-    return THEMES.find(theme => contains(theme.dates, day)) || CLASSIC;
+    return THEMES.find(theme => contains(theme.dates, day)) || LIGHT;
   }
 
   // ---- Colours ----
 
   const toRGB = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
   const mix = (a, b, t) => a.map((v, i) => Math.round(v + t * (b[i] - v)));
-  const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
+  const BLACK = [0, 0, 0];
 
+  // The complete theme: a seasonal one on PAPER, with the light theme's symbols
+  // where it has none. Light and Dark have no colours here (see the stylesheet).
+  function complete(theme) {
+    if (theme === LIGHT || theme === DARK) return theme;
+    return { ...LIGHT, ...PAPER, ...theme, colors: { ...PAPER.colors, ...theme.colors } };
+  }
+
+  // [r, g, b] of every colour of a seasonal theme, the tints computed from its own.
   function palette(colors) {
-    const accent = toRGB(colors.accent), link = toRGB(colors.link), highlight = toRGB(colors.highlight);
-    return {
-      accent,
-      link,
-      highlight,
-      linkStrong: colors.linkStrong ? toRGB(colors.linkStrong) : mix(link, BLACK, 0.25),
-      accentSoft: colors.accentSoft ? toRGB(colors.accentSoft) : mix(accent, WHITE, 0.91),
-      surface: colors.surface ? toRGB(colors.surface) : mix(accent, WHITE, 0.965),
-    };
+    const rgb = {};
+    for (const [name, hex] of Object.entries(colors)) rgb[name] = toRGB(hex);
+    rgb.linkStrong = rgb.linkStrong || mix(rgb.link, BLACK, 0.25);
+    rgb.accentSoft = rgb.accentSoft || mix(rgb.accent, rgb.bg, 0.91);
+    rgb.surface = rgb.surface || mix(rgb.accent, rgb.bg, 0.965);
+    rgb.rule = rgb.rule || rgb.accent;
+    rgb.dataA = rgb.dataA || rgb.accent;
+    return rgb;
   }
 
   // ---- Theme of the day ----
@@ -299,7 +323,7 @@
   function themeOfTheDay() {
     const params = new URLSearchParams(window.location.search);
     const asked = params.get('theme');
-    if (asked) return asked === CLASSIC.id ? CLASSIC : THEMES.find(theme => theme.id === asked) || CLASSIC;
+    if (asked) return OWN[asked] || THEMES.find(theme => theme.id === asked) || LIGHT;
     const date = /^\d{4}-\d{2}-\d{2}$/.test(params.get('date') || '') ? params.get('date') : null;
     const now = new Date();
     return themeOf(date ? atDay(Number(date.slice(0, 4)), date.slice(5)) : new Date(now.getFullYear(), now.getMonth(), now.getDate()));
@@ -307,36 +331,43 @@
 
   // ---- Applying a theme ----
 
+  // The colour variables of css/styles.css, by their names here (dataA is --data-a).
+  const COLOURS = ['accent', 'link', 'highlight', 'dataA', 'bg', 'text', 'textSoft', 'muted', 'faint', 'border', 'surface', 'accentSoft', 'linkStrong', 'rule'];
   const variable = name => `--${name.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`)}`;
+  const parse = value => (value.trim()[0] === '#' ? toRGB(value.trim()) : value.match(/\d+/g).slice(0, 3).map(Number));
   let iconLink = null;
 
   function apply(theme) {
-    const { accent, link, highlight } = CLASSIC.colors;
-    const colors = palette({ accent, link, highlight, ...theme.colors });
+    const full = complete(theme);
+    const root = document.documentElement;
+    // data-theme="dark" selects the dark colours of the stylesheet; a seasonal
+    // theme sets its own over the light ones.
+    root.dataset.theme = full.id;
+    for (const name of COLOURS) root.style.removeProperty(variable(name));
+    if (full.colors) {
+      for (const [name, rgb] of Object.entries(palette(full.colors))) root.style.setProperty(variable(name), `rgb(${rgb.join(', ')})`);
+    }
+    // The colours in use, as [r, g, b], for the scripts that draw.
+    const style = getComputedStyle(root);
+    const colors = Object.fromEntries(COLOURS.map(name => [name, parse(style.getPropertyValue(variable(name)))]));
+
     window.siteTheme = {
-      id: theme.id,
-      name: theme.name,
-      icon: theme.icon,
+      id: full.id,
+      name: full.name,
+      icon: full.icon,
       rgb: colors,  // [r, g, b] arrays
       css: name => `rgb(${colors[name].join(', ')})`,
-      classes: (theme.classes || CLASSIC.classes).map(([symbol, label, plural]) => ({ symbol, label, plural: plural || `${label.toLowerCase()}s` })),
-      prompt: theme.prompt || CLASSIC.prompt,
-      words: theme.words || CLASSIC.words,
+      classes: full.classes.map(([symbol, label, plural]) => ({ symbol, label, plural: plural || `${label.toLowerCase()}s` })),
+      prompt: full.prompt,
+      words: full.words,
       themeOf: day => themeOf(day).id,  // for checks: id of the theme of a date
     };
-
-    const root = document.documentElement;
-    root.dataset.theme = theme.id;
-    for (const [name, rgb] of Object.entries(colors)) {
-      root.style.setProperty(variable(name), `rgb(${rgb.join(', ')})`);
-      root.style.setProperty(`${variable(name)}-rgb`, rgb.join(', '));
-    }
 
     // A new <link> each time: browsers do not always notice a changed href.
     if (iconLink) iconLink.remove();
     iconLink = null;
-    if (theme.icon) {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="central">${theme.icon}</text></svg>`;
+    if (full.icon) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="central">${full.icon}</text></svg>`;
       iconLink = document.createElement('link');
       iconLink.rel = 'icon';
       iconLink.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -346,9 +377,9 @@
 
   // ---- The visitor's choice ----
 
-  // A visitor who picks the classic theme with the switch keeps it, on every
-  // page and visit, until the theme of the day changes: the choice is stored
-  // as "classic@<id of the theme of the day>". It is ignored when the URL has ?theme=.
+  // A visitor who picks Light or Dark with the switch keeps it, on every page
+  // and visit, until the theme of the day changes: the choice is stored as
+  // "light@<id of the theme of the day>" or "dark@…". It is ignored when the URL has ?theme=.
   const STORAGE_KEY = 'theme-choice';
   const stored = () => {
     try {
@@ -368,28 +399,31 @@
   try {
     ofTheDay = themeOfTheDay();
   } catch (error) {
-    ofTheDay = CLASSIC;
+    ofTheDay = LIGHT;
   }
   const askedInURL = new URLSearchParams(window.location.search).has('theme');
-  apply(!askedInURL && stored() === `classic@${ofTheDay.id}` ? CLASSIC : ofTheDay);
+  const [chosen, chosenOn] = (stored() || '').split('@');
+  apply(!askedInURL && chosenOn === ofTheDay.id && OWN[chosen] || ofTheDay);
 
   // ---- Switch in the navigation bar ----
 
-  // Two buttons, the theme of the day and the classic theme, added at the end
-  // of the navigation bar of every page (styles: .theme-switch in css/styles.css).
+  // Three buttons, the theme of the day, Light and Dark, as a segmented control
+  // at the end of the navigation bar of every page (styles: .theme-switch in
+  // css/styles.css).
   // A click applies the theme at once and fires the "sitethemechange" event on
   // window, on which the demos redraw with the new colours and symbols.
   function addSwitch() {
     const bar = document.querySelector('.top-nav .nav-container');
-    if (!bar || ofTheDay === CLASSIC) return;
+    if (!bar) return;
     const group = document.createElement('div');
     group.className = 'theme-switch';
     group.setAttribute('role', 'group');
     group.setAttribute('aria-label', 'Theme of the site');
-    group.appendChild(document.createElement('span')).textContent = 'Theme';
+    const seasonal = ofTheDay !== LIGHT && ofTheDay !== DARK;
     const choices = [
-      { theme: ofTheDay, text: `${ofTheDay.icon} ${ofTheDay.name}`, title: `${ofTheDay.name} theme, which changes with the time of the year` },
-      { theme: CLASSIC, text: 'Classic', title: "The site's original colours" },
+      ...(seasonal ? [{ theme: ofTheDay, text: `${ofTheDay.icon} ${ofTheDay.name}`, title: `${ofTheDay.name} theme, which changes with the time of the year` }] : []),
+      { theme: LIGHT, text: 'Light', title: 'Light theme' },
+      { theme: DARK, text: 'Dark', title: 'Dark theme' },
     ];
     const press = () => choices.forEach(choice => choice.button.setAttribute('aria-pressed', String(choice.theme.id === window.siteTheme.id)));
     for (const choice of choices) {
@@ -399,8 +433,11 @@
       choice.button.title = choice.title;
       choice.button.addEventListener('click', () => {
         if (choice.theme.id === window.siteTheme.id) return;
+        const root = document.documentElement;
+        root.classList.add('theme-changing');  // fade (css/styles.css)
+        setTimeout(() => root.classList.remove('theme-changing'), 400);
         apply(choice.theme);
-        store(choice.theme === CLASSIC ? `classic@${ofTheDay.id}` : null);
+        store(choice.theme === ofTheDay ? null : `${choice.theme.id}@${ofTheDay.id}`);
         press();
         window.dispatchEvent(new Event('sitethemechange'));
       });

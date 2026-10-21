@@ -13,7 +13,9 @@ teaching_archive.html      Every course taught, grouped by course with one line 
 css/styles.css             The only stylesheet, shared by every page (course pages included)
 js/themes.js               Seasonal themes: colours and demo symbols of each season and event
 js/lightbox.js             Enlarged view of the news photos, on click
+js/reveal.js               Fade-up of the home page blocks as they come into view
 js/venue-badges.js         Venue list and rules for the coloured badges next to publications
+js/publications.js         Publication list of the home page, fetched from HAL (needs js/venue-badges.js)
 js/decision-boundary.js    Interactive neural-network demo in the presentation block
 js/change-detection.js     Interactive LLM change-detection demo in the July 2026 news item
 js/transport-map.js        Interactive private transport-map demo in the September 2026 NeurIPS news item
@@ -27,11 +29,22 @@ teaching/<year>_<course>/  One folder per course and academic year: index.html +
 
 ## Home page (`index.html`)
 
-Sections are `<div class="section" id="…">` blocks. The top navigation links to them by id (`#news`, `#publications`, `#teaching`, `#curriculum`). The same navigation block is copied at the top of `news_archive.html`, `teaching_archive.html` and every course page (with `../../` paths): change them all together.
+Sections are `<div class="section" id="…">` blocks. The top navigation links to them by id (`#news`, `#publications`, `#teaching`, `#curriculum`).
+
+### Navigation bar
+
+One row, in the spirit of apple.com and tesla.com: Home and the sections, the profiles (Google Scholar, LinkedIn, GitHub) and the theme switch (added by `js/themes.js`) on the right. On screens wider than 768px it stays pinned at the top with a frosted-glass background (`position: sticky` and `backdrop-filter` on `.top-nav`), and the sections stop below it (`scroll-margin-top` on `.section`); on phones it scrolls away and its items wrap. The same `<nav class="top-nav">` block is copied at the top of `index.html`, `news_archive.html`, `teaching_archive.html` and every course page (with `../../` paths): change them all together.
+
+### Look
+
+- Font: the system's (San Francisco on Apple devices), `--font` in `css/styles.css`, at 15px for body text (`font-size: 93.75%` on `html`, so that visitors' own text size settings still apply; every `rem` and `em` follows); large headlines with tight letter-spacing and no lines under them; the name on the home page (`<h1 class="name">`) is a hero headline, standing out by its size, weight and the space around it, in the text colour over a short bar in the signature colour (`--data-a`).
+- Sections (`.section`, and the `<h2>` of course pages) are separated by a hairline and space, and their headings carry a short bar in the signature colour, a smaller echo of the one under the name.
+- The presentation and the demos sit on the page itself, without a panel or border (only the plots inside the demos have frames); announcements keep their box, with 18px rounded corners; buttons are pills (light grey, ink when selected); bullets are soft grey.
+- `js/reveal.js` fades up the presentation and the sections of the home page as they come into view (only those below the screen at load, and never for visitors who ask for reduced motion).
 
 ### Decision-boundary demo (`js/decision-boundary.js`)
 
-The box to the right of the presentation text (below it on narrow screens) is a small interactive demo. Visitors add points of two classes by clicking (circles and crosses in the classic theme; ghosts and pumpkins at Halloween, and so on, see [Seasonal themes](#seasonal-themes-jsthemesjs)), and a 2 → 16 → 16 → 1 tanh network is trained on them by full-batch gradient descent on the logistic loss. The shading shows the predicted probability and the dark curve is the decision boundary. "Reset" restarts from new random weights and keeps the points; "Clear" removes the points.
+The box to the right of the presentation text (below it on narrow screens) is a small interactive demo. Visitors add points of two classes by clicking (circles and crosses in the light and dark themes; ghosts and pumpkins at Halloween, and so on, see [Themes](#themes-jsthemesjs)), and a 2 → 16 → 16 → 1 tanh network is trained on them by full-batch gradient descent on the logistic loss. The shading shows the predicted probability and the dark curve is the decision boundary. "Reset" restarts from new random weights and keeps the points; "Clear" removes the points.
 
 - Markup: the `<figure class="gd-demo">` in the presentation block. Styles: the `.gd-*` rules in `css/styles.css`.
 - Tuning: the constants at the top of the script. `STEP_SIZE` and `STEPS_PER_FRAME` set how fast the boundary forms (about 2 s with the defaults). `ITERATIONS_PER_RUN` is how long training runs before stopping, until a point is added. The starting points come from `twoMoons`.
@@ -39,7 +52,7 @@ The box to the right of the presentation text (below it on narrow screens) is a 
 
 ### Change-detection demo (`js/change-detection.js`)
 
-The July 2026 news item (ICML) contains a demo of *Token-Efficient Change Detection in LLM APIs*. A toy LLM answers a prompt ("The sky is" in the classic theme; each seasonal theme has its own prompt and words) with one of three words. Visitors drag a point in a triangle to set the next-word probabilities at temperature 1 and move a temperature slider. The script samples 20 tokens from the model and from a slightly changed copy (logits shifted by `DELTA`), then runs a two-sample permutation test at level 5%. It shows both histograms, the verdict and the number of detections over 20 tests. The dashed lines in the triangle are the border inputs (tied top words), where the change becomes detectable at low temperature.
+The July 2026 news item (ICML) contains a demo of *Token-Efficient Change Detection in LLM APIs*. A toy LLM answers a prompt ("The sky is" in the light and dark themes; each seasonal theme has its own prompt and words) with one of three words. Visitors drag a point in a triangle to set the next-word probabilities at temperature 1 and move a temperature slider. The script samples 20 tokens from the model and from a slightly changed copy (logits shifted by `DELTA`), then runs a two-sample permutation test at level 5%. It shows both histograms, the verdict and the number of detections over 20 tests. The dashed lines in the triangle are the border inputs (tied top words), where the change becomes detectable at low temperature.
 
 - Markup: the `<div class="cd-demo">` at the end of that news item. Styles: the `.cd-*` rules in `css/styles.css`.
 - Tuning: the constants at the top of the script (`WORDS`, `DELTA`, `TOKENS`, `TESTS`, animation delays). With the defaults, a tie is detected in about 96% of tests at T = 0.05 and a non-tie almost never.
@@ -74,7 +87,7 @@ The June 2026 TMLR item at the top of `news_archive.html` contains a demo of *Le
 
 ### Semi-dual selection demo (`js/semidual-selection.js`, news archive)
 
-The July 2025 ICML item of `news_archive.html` contains a 1D version of the experiment of *On the Private Estimation of Smooth Transport Maps* (Section 6). The true potential and N candidates are random Gaussian attraction/repulsion potentials x²/2 + α e^(−(x−μ₁)²/2σ²) − α e^(−(x−μ₂)²/2σ²) on [−1/2, 1/2] (α = 0.005, σ = 0.1, μ ~ N(0, σ²), as in the paper). From n samples X uniform and Y = T₀(U), each candidate is scored by the clipped grid semi-dual (1/n)Σ clip f(Xᵢ) + (1/n)Σ clip f*(Yᵢ) (C = 0.25, 201-point grid), and the report-noisy-argmin with Laplace noise of scale 4C/(nε) picks one. The candidates are first examined one by one (about 3 s whatever N): each one's map, score and noisy score appear as it is examined, and the smallest score and noisy score so far are followed (navy and orange), so the orange candidate at the end of the scan is the first private draw. Seven more draws of the noise then run on the same data; the left chart shows the maps' displacements T(x) − x, the right one the sorted scores and their noisy versions. Sliders set ε, n and N.
+The July 2025 ICML item of `news_archive.html` contains a 1D version of the experiment of *On the Private Estimation of Smooth Transport Maps* (Section 6). The true potential and N candidates are random Gaussian attraction/repulsion potentials x²/2 + α e^(−(x−μ₁)²/2σ²) − α e^(−(x−μ₂)²/2σ²) on [−1/2, 1/2] (α = 0.005, σ = 0.1, μ ~ N(0, σ²), as in the paper). From n samples X uniform and Y = T₀(U), each candidate is scored by the clipped grid semi-dual (1/n)Σ clip f(Xᵢ) + (1/n)Σ clip f*(Yᵢ) (C = 0.25, 201-point grid), and the report-noisy-argmin with Laplace noise of scale 4C/(nε) picks one. The candidates are first examined one by one (about 3 s whatever N): each one's map, score and noisy score appear as it is examined, and the smallest score and noisy score so far are followed (in the theme's accent and highlight colours), so the highlighted candidate at the end of the scan is the first private draw. Seven more draws of the noise then run on the same data; the left chart shows the maps' displacements T(x) − x, the right one the sorted scores and their noisy versions. Sliders set ε, n and N.
 
 - Markup: the `<div class="sd-demo">` in that item; the archive loads the script at the end of the page. Styles: the `.sd-*` rules in `css/styles.css`.
 - Tuning: the constants at the top of the script (`GRID`, `ALPHA`, `SIGMA`, `C`, `POOL`, `ROUNDS`).
@@ -87,10 +100,10 @@ The July 2025 ICML item of `news_archive.html` contains a 1D version of the expe
 
 ### Publications
 
-The list is built at page load by the script at the bottom of `index.html`. There is no publication HTML to edit.
+The list is built at page load by `js/publications.js`. There is no publication HTML to edit.
 
 1. **HAL.** Publications are fetched from the HAL API for author id `clement-lalanne` (all document types except `LECTURE`, newest first). To add or fix a paper, fix it on HAL and the site follows. `docTypes` maps HAL document codes (`ART`, `COMM`, `THESE`, …) to the text of the "Type:" line.
-2. **Manual entries.** Items missing from HAL are objects at the top of the script (currently `diffusionLmProgress`, `speedrunDlm` and `phdThesis`). To add one:
+2. **Manual entries.** Items missing from HAL are objects at the top of `js/publications.js` (currently `diffusionLmProgress`, `speedrunDlm` and `phdThesis`). To add one:
    ```js
    const myEntry = {
      title: '…',
@@ -127,7 +140,7 @@ A conference paper whose venue mentions a workshop gets a `Workshop` suffix (`Ne
 **Colour.** `colorVenueBadges` numbers the distinct labels by first appearance, oldest paper first. Label number n gets hue 250° + n × 137.5° (the golden angle), which keeps the venues shown on the page far apart on the colour wheel.
 - Adding newer papers never changes existing colours. Adding an *older* paper at a new venue shifts the colours of the venues that first appear after it.
 - Colours are `oklch(52% 0.088 <hue>)`. With these values every hue is inside the sRGB gamut and white text has at least 5.2:1 contrast. If you change the lightness or chroma, re-check both.
-- Browsers without `oklch()` support fall back to the navy set on `.venue-badge` in `css/styles.css`.
+- Browsers without `oklch()` support fall back to the theme's accent colour, set on `.venue-badge` in `css/styles.css`.
 
 **Adding a venue.** Add one line to the right section:
 
@@ -161,37 +174,41 @@ The Teaching section lists the current academic year's courses and links to `tea
 <li><span class="year">2026-2027</span> <a href="teaching/…/index.html" target="_blank" rel="noopener noreferrer">Course</a> · <a href="teaching/…_Projects/index.html" target="_blank" rel="noopener noreferrer">Projects</a><span class="current">current</span></li>
 ```
 
-## Seasonal themes (`js/themes.js`)
+## Themes (`js/themes.js`)
 
-The site's colours and the symbols of the demos change with the time of the year. Everything that changes is in `js/themes.js`, which every page loads in its `<head>`, right after the stylesheet.
+The site has two themes of its own, Light and Dark, and seasonal themes whose colours and demo symbols change with the time of the year. Everything about them is in `js/themes.js`, which every page loads in its `<head>`, right after the stylesheet.
 
-**How a theme is chosen.** `THEMES` is a list, and the first entry whose dates contain today (in the visitor's time zone) wins. Events come first: April Fools' Day, Pi Day, St Patrick's Day, Fête de la Musique, Bastille Day, Data Privacy Day, Chandeleur, International Women's Day, Earth Day, Labour Day, my birthday (November 27), Back to School (first week of September), Valentine's Day, Easter, Lunar New Year, Carnival, New Year, Halloween, Christmas. The four seasons come last and cover the whole year, so there is always a theme. The `classic` theme (the original navy, purple and orange) is the fallback and the look without JavaScript. When two events overlap, the one higher in the list wins: Lunar New Year takes over Carnival in 2026 and 2027.
+**Light and Dark.** A monochrome interface (ink on white, or off-white on a warm near-black `#0b0907`) with neutral greys in Light and sand-tinted greys in Dark, and a small set of colours chosen to work together, at moderate chroma (about 0.7 of full saturation in OKLCH, so they read clearly without shouting): a soft violet-indigo as the signature colour (links, first class of the demos, sliders, text selection), and amber as the warm counter-accent (second class of the demos). Indigo and amber are nearly opposite hues, so the two classes of every demo stay apart, also for colour-blind visitors. They set the whole page's colours: background, text, greys, borders, panels. Their colours are defined once, in `css/styles.css`: Light in `:root` (also the look without JavaScript), Dark in `:root[data-theme="dark"]` (`js/themes.js` sets `data-theme` on `<html>`). `js/themes.js` only gives them their demo symbols, and reads the colours in use back from the stylesheet for the scripts that draw (`window.siteTheme.rgb`).
+
+**Font.** The same in every theme: `--font` (the system's: San Francisco on Apple devices) and `--heading-weight` (600), in the first `:root` block of `css/styles.css`. Themes only change colours; to change the font, edit these two lines.
+
+**Seasonal themes.** `THEMES` is a list, and the first entry whose dates contain today (in the visitor's time zone) is the theme of the day. Events come first: April Fools' Day, Pi Day, St Patrick's Day, Fête de la Musique, Bastille Day, Data Privacy Day, Chandeleur, International Women's Day, Earth Day, Labour Day, my birthday (November 27), Back to School (first week of September), Valentine's Day, Easter, Lunar New Year, Carnival, New Year, Halloween, Christmas. The four seasons come last and cover the whole year, so there is always a theme of the day. When two events overlap, the one higher in the list wins: Lunar New Year takes over Carnival in 2026 and 2027. A seasonal theme only sets three colours; the rest of the page is `PAPER` (white, with greys).
 
 **What a theme changes.**
-- The colour variables of `css/styles.css` (`--accent`, `--link`, `--highlight` and the tints computed from them), set on `<html>` before the page is drawn.
-- The browser-tab icon (the theme's emoji).
-- The demos, through `window.siteTheme`: the two classes of the decision-boundary demo (symbol, button label, plural), the prompt and the three words of the change-detection demo, and the colours drawn by scripts.
+- The colour variables of `css/styles.css` (`--accent`, `--link`, `--highlight`, `--data-a`, `--bg`, `--text`…), set on `<html>` before the page is drawn, and the colour scheme of form controls and scrollbars.
+- The browser-tab icon (the theme's emoji; none for Light and Dark).
+- The demos, through `window.siteTheme`: the two classes of the decision-boundary demo (symbol, button label, plural), the prompt and the three words of the change-detection demo, and the colours drawn by scripts. Light and Dark use circles and crosses and "The sky is".
 
-**Switch.** `js/themes.js` also adds two buttons at the right end of the navigation bar (below the links on phones): the theme of the day (e.g. "🎃 Halloween") and "Classic". A click applies the theme at once, without reloading. Choosing Classic is remembered in the browser's `localStorage`, on every page and visit, until the theme of the day changes (it is stored as `classic@<id>`); then the new theme shows again. The switch is not shown when the theme of the day is the classic one (only possible with `?theme=classic`). Styles: `.theme-switch` in `css/styles.css`.
+**Switch.** `js/themes.js` adds a segmented control at the right end of the navigation bar (below the links on phones): the theme of the day (e.g. "🎃 Halloween"), "Light" and "Dark". A click applies the theme at once, without reloading, with a short fade (the `theme-changing` class on `<html>`; none for visitors who ask for reduced motion). Choosing Light or Dark is remembered in the browser's `localStorage`, on every page and visit, until the theme of the day changes (it is stored as `light@<id>` or `dark@<id>`); then the new theme of the day shows again. An old `classic@<id>` choice counts as Light. Styles: `.theme-switch` in `css/styles.css`.
 
-**Preview.** Add `?theme=<id>` to the URL of any page (`index.html?theme=halloween`), or `?date=YYYY-MM-DD` to see the theme of a given day.
+**Preview.** Add `?theme=<id>` to the URL of any page (`index.html?theme=halloween`, `?theme=dark`), or `?date=YYYY-MM-DD` to see the theme of a given day. `?theme=classic` gives Light.
 
-**Adding or changing a theme.** Edit or add one entry of `THEMES`; the comment at the top of the file lists the fields. Dates are `['MM-DD', 'MM-DD']` (a range may go over New Year), or `{ easter: [a, b] }` / `{ lunarNewYear: [a, b] }` for days relative to Easter Sunday (computed) or to the Lunar New Year (from the `LUNAR_NEW_YEAR` table, which ends in 2035: extend it before then). Constraints:
-- Contrast on white: at least 7:1 for `accent` (it colours list text), 4.5:1 for `link`, 3:1 for `highlight`. Give `highlight` a hue far from `accent`, and avoid red and green as the two classes, which colour-blind visitors cannot tell apart.
+**Adding or changing a seasonal theme.** Edit or add one entry of `THEMES`; the comment at the top of the file lists the fields. Dates are `['MM-DD', 'MM-DD']` (a range may go over New Year), or `{ easter: [a, b] }` / `{ lunarNewYear: [a, b] }` for days relative to Easter Sunday (computed) or to the Lunar New Year (from the `LUNAR_NEW_YEAR` table, which ends in 2035: extend it before then). Constraints:
+- Contrast on the white page: at least 7:1 for `accent` (it colours list text), 4.5:1 for `link`, 3:1 for `highlight`. Give `link` a hue far from `accent`, so that links stand out from the text, and `highlight` too; avoid red and green as the two classes, which colour-blind visitors cannot tell apart.
 - Class labels: the two together 14 characters at most (they fit in the demo's buttons).
 - Words: the second and third (bottom corners of the triangle) 6 characters at most.
 
 **Rules for the rest of the site.**
-- In `css/styles.css`, use the variables, never the literal colours: `var(--accent)`, `var(--link)`, `var(--highlight)`, `var(--accent-soft)`, `var(--surface)`, and `rgba(var(--accent-rgb), 0.5)` for transparency. Only the announcement box (`.notice`) stays orange whatever the theme.
-- Scripts take colours from `window.siteTheme` (`siteTheme.rgb.accent` is `[r, g, b]`, `siteTheme.css('accent')` is `rgb(…)`). The switch replaces `window.siteTheme` and fires a `sitethemechange` event on `window`: a script that draws with the theme's colours or symbols reads `window.siteTheme` again and redraws on that event (see `applyTheme` in `js/decision-boundary.js` and `js/change-detection.js`). Colours set through the CSS variables follow by themselves.
-- Captions should not name colours ("the orange staircase"): they change with the theme.
+- In `css/styles.css`, use the variables, never literal colours: `var(--bg)` (page, and text on accent buttons), `var(--text)`, `var(--text-soft)`, `var(--muted)` (captions), `var(--faint)` (thin lines), `var(--border)`, `var(--surface)` (panels), `var(--accent)`, `var(--accent-soft)` (hovers), `var(--link)`, `var(--data-a)` and `var(--highlight)` (first and second class of the demos: data marks, never the interface), `var(--rule)` (lines under headings), and `color-mix(in srgb, var(--accent) 50%, transparent)` for transparency. A new colour variable goes in both colour blocks of `css/styles.css` (`:root` and `:root[data-theme="dark"]`), in `PAPER` in `js/themes.js` (the value for seasonal themes) and in its `COLOURS` list. Fonts are always `var(--font)`, headings `font-weight: var(--heading-weight)`. Only the announcement box (`.notice`, a light warning box on every theme), the photo viewer and the publication badges keep their own colours.
+- Scripts take colours from `window.siteTheme` (`siteTheme.rgb.accent` and `siteTheme.rgb.bg` are `[r, g, b]`, `siteTheme.css('accent')` is `rgb(…)`). The switch replaces `window.siteTheme` and fires a `sitethemechange` event on `window`: a script that draws with the theme's colours or symbols reads `window.siteTheme` again and redraws on that event (see `applyTheme` in `js/decision-boundary.js` and `js/change-detection.js`). Colours set through the CSS variables follow by themselves.
+- Captions should not name colours or shades ("the orange staircase", "dark dots"): they change with the theme, and the page can be black.
 - A new page needs `<script src="js/themes.js"></script>` (or `../../js/themes.js`) after its stylesheet.
 
 ## Course pages (`teaching/`)
 
 - Folder name: `<start year>_<end year>_<programme>_<Course_Name>`, e.g. `2026_2027_MAPI3_Machine_Learning`. The folder holds `index.html` and every file the page links to (PDFs, notebooks), linked by bare file name.
 - Pages reach shared files with `../../` (`../../css/styles.css`, `../../js/themes.js`, `../../index.html`).
-- Content goes in `<main class="main course-page">`. The `.course-page` rules in `css/styles.css` share the home page sections' look (navy headings and bullets, purple links); keep the class when you create a page.
+- Content goes in `<main class="main course-page">`. The `.course-page` rules in `css/styles.css` share the home page sections' look (headings, bullets and links in the theme's colours); keep the class when you create a page.
 - Usual sections: Overview, Evaluation, Lectures, TDs / TPs, References and External Resources.
 - **Announcements** (cancelled class, postponed test): a `<div class="notice">` right after the title block, starting with a `<span class="notice-title">` heading; add `lang="fr"` when it is in French. Delete it once it is outdated.
 - **Releasing material during the semester.** Upcoming lectures and TDs are already listed, with their link inside an HTML comment:
@@ -210,9 +227,9 @@ The site's colours and the symbols of the demos change with the time of the year
 
 ## Styling (`css/styles.css`)
 
-- One stylesheet for the whole site, course pages included, so a change affects every page. The `body` rule (no margin, white background, Georgia) is in the stylesheet; `teaching_archive.html` adds a small inline `<style>` for its course blocks.
-- Palette: colour variables declared in `:root` at the top of the stylesheet (classic values: navy `rgb(27, 46, 129)` for headings, rules and bullets, purple `rgb(83, 69, 218)` for links, orange `rgb(214, 96, 52)` as the demos' second colour), replaced by `js/themes.js` with the colours of the season. Georgia serif throughout; the venue badges use a system sans-serif.
-- Responsive rules: below 768px the presentation block stacks vertically (photo, text, demo), the navigation links wrap after their section title, and a row of news photos scrolls sideways; below 480px the venue badge moves above its publication.
+- One stylesheet for the whole site, course pages included, so a change affects every page. The `body` rule (no margin, the theme's background, text colour and font) is in the stylesheet. No page has inline styles or inline scripts: styles are in `css/styles.css`, behaviour in `js/`.
+- Palette and font: variables at the top of the stylesheet (font; Light and Dark colours); `js/themes.js` sets those of a seasonal theme over them. The parts shared by the interactive demos (panel, title, caption, pill buttons, sliders, legends, readouts) are the `.demo`, `.demo-title`, `.demo-caption`, `.demo-button`, `.demo-control`, `.demo-legend` and `.demo-readout` classes; each demo's own rules (`.cd-`, `.ot-`, `.dlm-`, `.sw-`, `.sd-`, `.gd-`) only add what differs, and its script finds its elements by these prefixed classes. A new demo starts from the shared classes.
+- Responsive rules: below 768px the presentation block stacks vertically (photo, text, demo), the navigation bar is no longer pinned and its items wrap, and a row of news photos scrolls sideways; below 480px the venue badge moves above its publication.
 - **Gotcha:** the responsive rules only apply on phones to pages with `<meta name="viewport" content="width=device-width, initial-scale=1">` in their `<head>`. Without it, phones lay the page out 980px wide and zoom out. Every page has it; keep it when you create a page.
 - **Gotcha:** a CSS comment ends at the first `*/`, so never write a path like `teaching/*/…` inside one: the rest of the comment becomes invalid CSS and the browser drops the rule after it.
 - **Gotcha:** `.section li` and `.section ul` are more specific than single-class rules such as `.publication-item` or `.year-publication-list`, so they win. For example, the publication list's left padding is the 20px from `.section ul`. Use a more specific selector to override them.
@@ -260,5 +277,5 @@ No output means every link resolves.
 - New venues go in `js/venue-badges.js`, respecting the first-match-wins order. Check the result with the Node snippet above.
 - Releasing a lecture means uncommenting its line, after checking that the file exists in the course folder.
 - `css/styles.css` also styles every course page, so check them after changing shared selectors.
-- Colours go through the theme variables (see [Seasonal themes](#seasonal-themes-jsthemesjs)); never hard-code the navy or the orange. After editing `js/themes.js`, preview a few themes with `?theme=`.
+- Colours and fonts go through the theme variables (see [Themes](#themes-jsthemesjs)); never hard-code a colour, and check new styles in the dark theme (`?theme=dark`). After editing `js/themes.js`, preview a few themes with `?theme=`.
 - Preview locally and run the link check before committing. Commit messages here are short and lower-case (e.g. `added lectures`).

@@ -8,34 +8,28 @@
   <script src="js/themes.js"></script>
 </head>
 <body>
-  <!-- Top horizontal navigation -->
-  <div class="top-nav">
+  <!-- Top navigation, the same on every page (../../ paths on course pages) -->
+  <nav class="top-nav">
     <div class="nav-container">
-      <div class="nav-section">
-        <h3>Menu</h3>
-        <ul>
-          <li><a href="index.html">🏠 Home</a></li>
-          <li><a href="index.html#news">📰 News</a></li>
-          <li><a href="index.html#publications">📖 Publications</a></li>
-          <li><a href="index.html#teaching">🏫 Teaching</a></li>
-          <li><a href="index.html#curriculum">🎓 Curriculum</a></li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <h3>Links</h3>
-        <ul>
-          <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
-          <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-          <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-        </ul>
-      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#news">News</a></li>
+        <li><a href="index.html#publications">Publications</a></li>
+        <li><a href="index.html#teaching">Teaching</a></li>
+        <li><a href="index.html#curriculum">Curriculum</a></li>
+      </ul>
+      <ul class="nav-links nav-external">
+        <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+        <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+        <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
     </div>
-  </div>
+  </nav>
 
   <div class="container">
     <main class="main">
       <div id="toptitle">
-        <h1>Clément Lalanne</h1>
+        <h1 class="name">Clément Lalanne</h1>
       </div>
       <div class="presentation">
         <img src="photos/photo2.png" alt="Clément Lalanne" style="width: 250px;">
@@ -50,10 +44,10 @@
             <canvas role="img" aria-label="A small neural network learning, by gradient descent, a decision boundary between circles and crosses"></canvas>
           </div>
           <div class="gd-controls">
-            <button type="button" data-label="1" aria-pressed="true" title="Clicks in the box add circles">● Circle</button>
-            <button type="button" data-label="0" aria-pressed="false" title="Clicks in the box add crosses">✕ Cross</button>
-            <button type="button" data-action="reset" title="Restart gradient descent from new random weights">↻ Reset</button>
-            <button type="button" data-action="clear" title="Remove all the points">Clear</button>
+            <button type="button" class="demo-button" data-label="1" aria-pressed="true" title="Clicks in the box add circles">● Circle</button>
+            <button type="button" class="demo-button" data-label="0" aria-pressed="false" title="Clicks in the box add crosses">✕ Cross</button>
+            <button type="button" class="demo-button" data-action="reset" title="Restart gradient descent from new random weights">↻ Reset</button>
+            <button type="button" class="demo-button" data-action="clear" title="Remove all the points">Clear</button>
           </div>
           <figcaption>
             <span class="gd-status"></span><br>
@@ -67,37 +61,37 @@
         <ul>
           <li><strong>September 2026</strong> Our article <a href="https://hal.science/hal-05638043v1/document" target="_blank" rel="noopener noreferrer">Minimax Private Estimation of Smooth Optimal-Transport Maps</a> just got accepted to the 40th <a href="https://neurips.cc/" target="_blank" rel="noopener noreferrer">Conference on Neural Information Processing Systems</a> (NeurIPS 2026)! Looking forward to presenting our work in Paris. Huge thanks to my coauthors David Rodríguez-Vítores, <a href="https://www.iutzeler.org/" target="_blank" rel="noopener noreferrer">Franck Iutzeler</a> and <a href="https://perso.math.univ-toulouse.fr/loubes/" target="_blank" rel="noopener noreferrer">Jean-Michel Loubes</a>, and to the reviewers for their useful suggestions.
           <!-- Interactive demo, see js/transport-map.js -->
-          <div class="ot-demo">
-            <div class="ot-title">Try it: private estimation of a one-dimensional transport map from n samples of each distribution.</div>
+          <div class="demo ot-demo">
+            <div class="demo-title">Try it: private estimation of a one-dimensional transport map from n samples of each distribution.</div>
             <svg viewBox="0 0 370 366" width="370" height="366" role="img" aria-label="Source and target densities with their samples, the true transport map and its private estimate"></svg>
             <div class="ot-side">
-              <label class="ot-control">Privacy budget <output data-for="eps"></output>
+              <label class="demo-control">Privacy budget <output data-for="eps"></output>
                 <input type="range" name="eps" min="-2" max="1" step="0.05" value="0">
               </label>
-              <label class="ot-control">Sample size <output data-for="n"></output>
+              <label class="demo-control">Sample size <output data-for="n"></output>
                 <input type="range" name="n" min="2" max="4" step="0.05" value="3">
               </label>
-              <label class="ot-control">Number of modes <output data-for="modes"></output>
+              <label class="demo-control">Number of modes <output data-for="modes"></output>
                 <input type="range" name="modes" min="1" max="6" step="1" value="2">
               </label>
-              <button type="button" class="ot-resample">↻ New sample</button>
+              <button type="button" class="demo-button ot-resample">↻ New sample</button>
               <div class="ot-status"></div>
               <div class="ot-error"></div>
-              <div class="ot-legend">
+              <div class="demo-legend ot-legend">
                 <span><i class="ot-key-true"></i>true map T = F<sub>Y</sub><sup>−1</sup> ∘ F<sub>X</sub></span>
                 <span><i class="ot-key-estimate"></i>private estimate</span>
                 <span><i class="ot-key-ghost"></i>earlier samples</span>
               </div>
             </div>
-            <div class="ot-caption">
+            <div class="demo-caption">
               The optimal map sends each quantile of the source to the same quantile of the target. Our estimator privately estimates m − 1 quantiles of each sample (median first, then quartiles, …) and matches them, giving the staircase. Its error behaves like max(1/n, 1/(nε)²): privacy is free once ε ≳ 1/√n. More modes change the map but not this rate: in dimension 1, only the bounds on the densities matter.
             </div>
           </div>
         </li>
           <li><strong>September 2026</strong> Our article <a href="https://openreview.net/pdf?id=WLNBGbEQnV" target="_blank" rel="noopener noreferrer">Measuring Progress in Diffusion Language Model Pretraining</a> just got accepted to the NeurIPS 2026 workshop <a href="https://bento-neurips.github.io/" target="_blank" rel="noopener noreferrer">BeNTo: Beyond Next-Token Prediction — Diffusion &amp; Flow Models for Next-Generation Decoding</a>. The accompanying benchmark, <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">speedrun-dlm</a>, is open source. Huge thanks to my coauthors <a href="https://agonon.github.io/" target="_blank" rel="noopener noreferrer">Antoine Gonon</a>, <a href="https://adrianlmueller.github.io/" target="_blank" rel="noopener noreferrer">Adrian Müller</a>, <a href="https://leonzheng2.github.io/" target="_blank" rel="noopener noreferrer">Léon Zheng</a>, <a href="https://shenzebang.github.io/" target="_blank" rel="noopener noreferrer">Zebang Shen</a>, <a href="https://las.inf.ethz.ch/people/yaping-hsieh" target="_blank" rel="noopener noreferrer">Ya-Ping Hsieh</a>, <a href="https://abardou.github.io/" target="_blank" rel="noopener noreferrer">Anthony Bardou</a> and <a href="https://www.nicolasboumal.net/" target="_blank" rel="noopener noreferrer">Nicolas Boumal</a>!
           <!-- Interactive demo, see js/dlm-hellaswag.js -->
-          <div class="dlm-demo">
-            <div class="dlm-title">Try it: how we benchmark diffusion language models on HellaSwag.</div>
+          <div class="demo dlm-demo">
+            <div class="demo-title">Try it: how we benchmark diffusion language models on HellaSwag.</div>
             <div class="dlm-tabs" role="tablist">
               <button type="button" role="tab" id="dlm-tab-question" aria-controls="dlm-question" aria-selected="true">① Scoring one question</button>
               <button type="button" role="tab" id="dlm-tab-speedrun" aria-controls="dlm-speedrun" aria-selected="false">② Racing recipes to a target</button>
@@ -106,12 +100,12 @@
               <div class="dlm-context"></div>
               <div class="dlm-rows"></div>
               <div class="dlm-status" aria-live="polite"></div>
-              <div class="dlm-legend">Colour of a masked word: probability the model gives to the right word, 0 <i></i> 1.</div>
+              <div class="demo-legend dlm-legend">Colour of a masked word: probability the model gives to the right word, 0 <i></i> 1.</div>
               <div class="dlm-controls">
                 <label class="dlm-check"><input type="checkbox" checked> Divide scores by the ending's length (norm)</label>
-                <button type="button" class="dlm-button dlm-replay">↻ New masks</button>
+                <button type="button" class="demo-button dlm-replay">↻ New masks</button>
               </div>
-              <div class="dlm-caption">
+              <div class="demo-caption dlm-caption">
                 A diffusion model has no cheap likelihood, so each ending is masked at a random noise level and the model tries to recover it with the context in view. Its loss (for a masked D3PM, the cross-entropy of the masked words), averaged over a few draws and divided by the ending's length, scores the ending; the lowest score is the model's answer. The model here is a toy: real HellaSwag questions are much harder.
                 <button type="button" class="dlm-link dlm-next">Next: how this accuracy ranks training recipes →</button>
               </div>
@@ -119,7 +113,7 @@
             <div class="dlm-panel" id="dlm-speedrun" role="tabpanel" aria-labelledby="dlm-tab-speedrun" hidden>
               <div class="dlm-race">
                 <div class="dlm-race-chart">
-                  <label class="dlm-control">Finish line: HellaSwag accuracy <output></output>
+                  <label class="demo-control dlm-control">Finish line: HellaSwag accuracy <output></output>
                     <input type="range" min="26" max="28.5" step="0.05" value="27.5">
                   </label>
                   <svg viewBox="0 0 520 300" width="520" height="300" role="img" aria-label="Mean HellaSwag accuracy of seven diffusion training recipes along training time, with a movable finish line"></svg>
@@ -131,7 +125,7 @@
                   <div class="dlm-stability"></div>
                 </div>
               </div>
-              <div class="dlm-caption">
+              <div class="demo-caption dlm-caption">
                 Real results from our <a href="https://github.com/agonon/speedrun-dlm" target="_blank" rel="noopener noreferrer">speedrun</a>: mean HellaSwag accuracy of ten trainings per recipe, along training time on 8 GPUs. A recipe finishes when its accuracy reaches the target and the next measurement confirms it; the fastest wins. Move the finish line to run the first check of our paper: a good target should not reshuffle the ranking when it moves a little. Pairs whose order is still unknown (neither has finished, or one run stopped too early) are left out.
               </div>
             </div>
@@ -140,11 +134,11 @@
           <li><strong>July 2026</strong> Had a wonderful time at <a href="https://icml.cc/" target="_blank" rel="noopener noreferrer">ICML 2026</a> in Seoul, South Korea, where I presented our article <a href="https://arxiv.org/abs/2602.11083" target="_blank" rel="noopener noreferrer">Token-Efficient Change Detection in LLM APIs</a> together with <a href="https://timotheechauvin.substack.com" target="_blank" rel="noopener noreferrer">Timothée Chauvin</a>, <a href="https://erwanlemerrer.github.io" target="_blank" rel="noopener noreferrer">Erwan Le Merrer</a> and Jean-Michel Loubes (joint work also with François Taïani and Gilles Tredan). It was a stimulating and inspiring week, full of great talks and rich discussions, and it was a real pleasure to reconnect with the community and meet so many brilliant people. <br>
           <div class="center"> <img src="photos/ICML2026_1.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_2.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_3.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_4.png" alt="ICML 2026" style="height: 100px;"> <img src="photos/ICML2026_5.png" alt="ICML 2026" style="height: 100px;"> </div>
           <!-- Interactive demo, see js/change-detection.js -->
-          <div class="cd-demo">
-            <div class="cd-title">Try it: a toy LLM completes “<span class="cd-prompt">The sky is</span> …” with one of three words. Can a small change of the model be detected from a few of its answers?</div>
+          <div class="demo cd-demo">
+            <div class="demo-title">Try it: a toy LLM completes “<span class="cd-prompt">The sky is</span> …” with one of three words. Can a small change of the model be detected from a few of its answers?</div>
             <div class="cd-simplex">
               <svg viewBox="0 0 300 264" width="300" height="264" role="img" aria-label="Triangle of the possible next-word probabilities; drag the point to choose them"></svg>
-              <label class="cd-temp">Temperature <output></output>
+              <label class="demo-control cd-temp">Temperature <output></output>
                 <input type="range" min="-2" max="0.3" step="0.01" value="0">
               </label>
               <div class="cd-border"></div>
@@ -158,7 +152,7 @@
               <div class="cd-stats"></div>
               <div class="cd-history"><span class="cd-history-text"></span><div class="cd-dots"></div></div>
             </div>
-            <div class="cd-caption">
+            <div class="demo-caption">
               Drag the point to choose the model's next-word probabilities (at temperature 1), then lower the temperature. The curves show how each model's probabilities move with the temperature.
               Each test samples 20 tokens from each model and compares the two histograms (permutation test, level 5%; dashed lines are the expected counts).
               On a dashed line of the triangle, the two most likely words are tied: on these <em>border inputs</em>, a small change of the model is detected at low temperature. Elsewhere, both models end up always giving the same word and the change goes unnoticed.
@@ -223,167 +217,12 @@
     </main>
   </div>
   <script src="js/lightbox.js"></script>
+  <script src="js/reveal.js"></script>
   <script src="js/decision-boundary.js"></script>
   <script src="js/change-detection.js"></script>
   <script src="js/transport-map.js"></script>
   <script src="js/dlm-hellaswag.js"></script>
   <script src="js/venue-badges.js"></script>
-  <script>
-function renderPublication(pub) {
-  return `
-    <li class="publication-item">
-      ${venueBadgeHTML(pub.badge)}
-      <div class="publication-details">
-        <strong>${pub.title}</strong><br>
-        ${pub.authors}<br>
-        Type: ${pub.type}, Date: ${pub.date}<br>
-        ${pub.venue ? `Venue: ${pub.venue}<br>` : ''}
-        <a href="${pub.link}" target="_blank" rel="noopener noreferrer">${pub.linkText}</a>
-      </div>
-    </li>
-  `;
-}
-
-function renderPublicationList(publications) {
-  colorVenueBadges(publications);
-
-  const grouped = {};
-  publications.forEach(pub => {
-    const year = pub.date.slice(0, 4) || 'Unknown';
-    if (!grouped[year]) grouped[year] = [];
-    grouped[year].push(renderPublication(pub));
-  });
-
-  const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
-
-  let publicationsHTML = '';
-
-  years.forEach(year => {
-    publicationsHTML += `
-      <div class="publication-year-block">
-        <h3 class="publication-year">${year}</h3>
-        <ul class="year-publication-list">
-          ${grouped[year].join('')}
-        </ul>
-      </div>
-    `;
-  });
-
-  return publicationsHTML;
-}
-
-// Publications missing from HAL.
-const diffusionLmProgress = {
-  title: 'Measuring Progress in Diffusion Language Model Pretraining',
-  authors: 'Antoine Gonon, Adrian Müller, Léon Zheng, Clément Lalanne, Zebang Shen, Ya-Ping Hsieh, Anthony Bardou, Nicolas Boumal',
-  type: 'Conference Paper',
-  date: '2026',
-  venue: '40th Conference on Neural Information Processing Systems (NeurIPS 2026). Workshop: BeNTo: Beyond Next-Token Prediction — Diffusion & Flow Models for Next-Generation Decoding',
-  link: 'https://openreview.net/pdf?id=WLNBGbEQnV',
-  linkText: 'View Publication',
-  badge: venueBadge(['40th Conference on Neural Information Processing Systems (NeurIPS 2026). Workshop: BeNTo: Beyond Next-Token Prediction — Diffusion & Flow Models for Next-Generation Decoding'], 'COMM'),
-};
-
-const speedrunDlm = {
-  title: 'speedrun-dlm: A speedrun benchmark for diffusion language models',
-  authors: 'Antoine Gonon, Adrian Müller, Léon Zheng, Zebang Shen, Clément Lalanne, Ya-Ping Hsieh, Anthony Bardou, Nicolas Boumal',
-  type: 'Software / Benchmark',
-  date: '2026',
-  venue: 'GitHub (MIT license)',
-  link: 'https://github.com/agonon/speedrun-dlm',
-  linkText: 'View Repository',
-  badge: venueBadge([], 'SOFTWARE'),
-};
-
-const phdThesis = {
-  title: 'On the tradeoffs of statistical learning with privacy',
-  authors: 'Clément Lalanne',
-  type: 'PhD Thesis',
-  date: '2023-10-04',
-  link: 'https://hal.science/tel-04431813',
-  linkText: 'View Thesis',
-  badge: venueBadge([], 'THESE'),
-};
-
-// Inserting the publications pushes down everything below them. A visitor who
-// is already further down, typically after following a link to #teaching while
-// the list was loading, would end up in the middle of the publications. So when
-// the whole list is above the screen, scroll by the same amount, keeping the
-// Teaching section (and what is below it) in place. Browsers that do this
-// themselves (scroll anchoring, as in Chrome and Firefox) leave no shift to correct.
-function keepViewInPlace(update) {
-  const below = document.getElementById('teaching');
-  const listAboveScreen = document.querySelector('.publications-container').getBoundingClientRect().bottom <= 0;
-  const before = below.getBoundingClientRect().top;
-  update();
-  const shift = below.getBoundingClientRect().top - before;
-  if (listAboveScreen && shift) window.scrollBy(0, shift);
-}
-
-async function fetchPublications() {
-  const publicationList = document.getElementById('publication-list');
-  const loadingMessage = document.querySelector('.loading');
-  const errorMessage = document.createElement('p');
-  errorMessage.className = 'error';
-
-  try {
-    const response = await fetch(
-      'https://api.archives-ouvertes.fr/search/?q=authIdHal_s:clement-lalanne&fl=title_s,authFullName_s,docType_s,publicationDate_s,doi_s,uri_s,journalTitle_s,conferenceTitle_s&fq=-docType_s:LECTURE&sort=publicationDate_s%20desc'
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const docs = data.response?.docs || [];
-
-    const docTypes = {
-      ART: 'Journal Article',
-      COMM: 'Conference Paper',
-      THESE: 'PhD Thesis',
-      HDR: 'HDR',
-      COUV: 'Book Chapter',
-      OUV: 'Book',
-      OTHER: 'Other',
-      LECTURE: 'Lecture',
-      UNDEFINED: 'Preprint'
-    };
-
-    const halPublications = docs.map(doc => ({
-      title: doc.title_s || 'Untitled',
-      authors: Array.isArray(doc.authFullName_s)
-        ? doc.authFullName_s.join(', ')
-        : (doc.authFullName_s || 'Unknown Authors'),
-      type: docTypes[doc.docType_s] || doc.docType_s || 'Unknown Type',
-      date: doc.publicationDate_s || 'Unknown Date',
-      venue: doc.journalTitle_s || doc.conferenceTitle_s || 'Unknown Venue',
-      link: doc.doi_s ? `https://doi.org/${doc.doi_s}` : (doc.uri_s || '#'),
-      linkText: 'View Publication',
-      badge: venueBadge([doc.conferenceTitle_s, doc.journalTitle_s], doc.docType_s),
-    }));
-
-    // HAL results are sorted newest first: the diffusion paper and its benchmark lead 2026, the thesis closes 2023.
-    keepViewInPlace(() => {
-      publicationList.innerHTML = renderPublicationList([diffusionLmProgress, speedrunDlm, ...halPublications, phdThesis]);
-      if (loadingMessage) loadingMessage.style.display = 'none';
-    });
-
-  } catch (error) {
-    console.error('Error fetching publications:', error);
-
-    keepViewInPlace(() => {
-      if (loadingMessage) loadingMessage.style.display = 'none';
-      errorMessage.textContent = 'Unable to load publications automatically at the moment.';
-      publicationList.before(errorMessage);
-      publicationList.innerHTML = renderPublicationList([diffusionLmProgress, speedrunDlm, phdThesis]);
-    });
-  }
-}
-
-// Started right away: waiting for the page's load event would also wait for every photo.
-fetchPublications();
-</script>
-
+  <script src="js/publications.js"></script>
 </body>
 </html>

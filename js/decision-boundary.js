@@ -24,6 +24,7 @@
   const GRID = 50;
   const GLYPH_SIZE = 17;  // font size of the symbols other than ● and ✕
   let CLASSES, COLORS;  // symbols and colours of labels 1 and 0, from the theme
+  let PAPER, INK;       // page background and text colours of the theme, [r, g, b]
 
   const root = document.querySelector('.gd-demo');
   if (!root) return;
@@ -40,7 +41,9 @@
   function applyTheme() {
     const theme = window.siteTheme;
     CLASSES = { 1: theme.classes[0], 0: theme.classes[1] };
-    COLORS = { 1: theme.rgb.accent, 0: theme.rgb.highlight };
+    COLORS = { 1: theme.rgb.dataA, 0: theme.rgb.highlight };
+    PAPER = theme.rgb.bg;
+    INK = theme.rgb.text;
     classButtons.forEach(button => {
       const { symbol, label: name, plural } = CLASSES[button.dataset.label];
       button.textContent = `${symbol} ${name}`;
@@ -176,7 +179,7 @@
         const color = COLORS[z > 0 ? 1 : 0];
         const alpha = 0.3 * Math.tanh(Math.abs(z) / 2);  // = 0.3 |2σ(z) - 1|
         const k = 4 * (gy * n + gx);
-        for (let c = 0; c < 3; c++) data[k + c] = 255 + alpha * (color[c] - 255);
+        for (let c = 0; c < 3; c++) data[k + c] = PAPER[c] + alpha * (color[c] - PAPER[c]);
         data[k + 3] = 255;
       }
     }
@@ -235,7 +238,7 @@
     }
     ctx.lineCap = 'round';
     ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(30, 30, 30, 0.8)';
+    ctx.strokeStyle = `rgba(${INK.join(', ')}, 0.8)`;
     ctx.stroke();
   }
 
@@ -245,14 +248,14 @@
     const symbol = CLASSES[p.label].symbol;
     ctx.beginPath();
     if (symbol !== '●' && symbol !== '✕') {
-      // Emoji or letter, on a white glow that keeps it readable over the shading.
+      // Emoji or letter, on a glow of the page colour that keeps it readable over the shading.
       const emoji = /\p{Extended_Pictographic}/u.test(symbol);
       ctx.font = emoji
         ? `${GLYPH_SIZE}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`
-        : `bold ${GLYPH_SIZE}px Georgia, serif`;
+        : `bold ${GLYPH_SIZE}px ${getComputedStyle(canvas).fontFamily}`;  // the site's font
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+      ctx.shadowColor = `rgba(${PAPER.join(', ')}, 0.95)`;
       ctx.shadowBlur = 4;
       ctx.fillStyle = color;
       ctx.fillText(symbol, x, y);
@@ -262,7 +265,7 @@
       ctx.fillStyle = color;
       ctx.fill();
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = `rgb(${PAPER.join(', ')})`;
       ctx.stroke();
     } else {
       ctx.moveTo(x - r, y - r);
@@ -271,7 +274,7 @@
       ctx.lineTo(x - r, y + r);
       ctx.lineCap = 'round';
       ctx.lineWidth = 5;
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = `rgb(${PAPER.join(', ')})`;
       ctx.stroke();
       ctx.lineWidth = 2.5;
       ctx.strokeStyle = color;

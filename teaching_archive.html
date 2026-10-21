@@ -6,58 +6,25 @@
   <title>Teaching Archive – Clément Lalanne</title>
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/themes.js"></script>
-  <style>
-    .course {
-      margin: 0 0 28px;
-    }
-    .course h3 {
-      color: var(--accent);
-      font-size: 1.2em;
-      margin: 0;
-    }
-    .section .course-meta {
-      color: #555;
-      margin: 2px 0 6px;
-    }
-    .year {
-      display: inline-block;
-      min-width: 6.5em;
-      font-weight: bold;
-    }
-    .current {
-      font-size: 0.8em;
-      color: #555;
-      border: 1px solid #bbb;
-      border-radius: 3px;
-      padding: 0 5px;
-      margin-left: 6px;
-    }
-  </style>
 </head>
 <body>
-  <!-- Top horizontal navigation -->
-  <div class="top-nav">
+  <!-- Top navigation, the same on every page (../../ paths on course pages) -->
+  <nav class="top-nav">
     <div class="nav-container">
-      <div class="nav-section">
-        <h3>Menu</h3>
-        <ul>
-          <li><a href="index.html">🏠 Home</a></li>
-          <li><a href="index.html#news">📰 News</a></li>
-          <li><a href="index.html#publications">📖 Publications</a></li>
-          <li><a href="index.html#teaching">🏫 Teaching</a></li>
-          <li><a href="index.html#curriculum">🎓 Curriculum</a></li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <h3>Links</h3>
-        <ul>
-          <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
-          <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-          <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-        </ul>
-      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#news">News</a></li>
+        <li><a href="index.html#publications">Publications</a></li>
+        <li><a href="index.html#teaching">Teaching</a></li>
+        <li><a href="index.html#curriculum">Curriculum</a></li>
+      </ul>
+      <ul class="nav-links nav-external">
+        <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+        <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+        <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
     </div>
-  </div>
+  </nav>
 
   <div class="container">
     <main class="main">

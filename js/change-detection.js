@@ -31,7 +31,7 @@
   const VERDICT_MS = 1300;       // pause on each verdict
   const SNAP = 0.025;            // probabilities closer than this snap to a tie
   const MIN_PROB = 0.005;
-  let COLORS;  // of the original and changed models: the theme's accent and highlight
+  let COLORS;  // of the original and changed models: the theme's dataA and highlight
 
   // Triangle in SVG coordinates (viewBox 0 0 300 264): the first word at the
   // top, the second at the bottom left, the third at the bottom right.
@@ -117,7 +117,7 @@
   function applyTheme() {
     const theme = window.siteTheme;
     WORDS = theme.words;
-    COLORS = [theme.css('accent'), theme.css('highlight')];
+    COLORS = [theme.css('dataA'), theme.css('highlight')];
     root.querySelector('.cd-prompt').textContent = theme.prompt;
     wordLabels.forEach((label, i) => { label.textContent = `“${WORDS[i]}”`; });
     histograms.forEach(columns => columns.forEach((column, i) => { column.label.textContent = WORDS[i]; }));

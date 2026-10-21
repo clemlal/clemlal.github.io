@@ -126,11 +126,11 @@
       return { s, answer: s.indexOf(Math.min(...s)) };
     }
 
-    // From the theme's highlight (probability 0) to its accent (probability 1),
+    // From the theme's highlight (probability 0) to its dataA (probability 1),
     // read at each call so that a theme switch (js/themes.js) shows at the next frame.
     function colour(logP) {
       const p = Math.exp(logP);
-      const LOW = window.siteTheme.rgb.highlight, HIGH = window.siteTheme.rgb.accent;
+      const LOW = window.siteTheme.rgb.highlight, HIGH = window.siteTheme.rgb.dataA;
       return `rgb(${LOW.map((c, i) => Math.round(c + p * (HIGH[i] - c))).join(', ')})`;
     }
 
