@@ -12,6 +12,7 @@ news_archive.html          Older news items, moved out of index.html
 teaching_archive.html      Every course taught, grouped by course with one line per academic year
 css/styles.css             The only stylesheet, shared by every page (course pages included)
 js/themes.js               Seasonal themes: colours and demo symbols of each season and event
+js/lightbox.js             Enlarged view of the news photos, on click
 js/venue-badges.js         Venue list and rules for the coloured badges next to publications
 js/decision-boundary.js    Interactive neural-network demo in the presentation block
 js/change-detection.js     Interactive LLM change-detection demo in the July 2026 news item
@@ -81,7 +82,7 @@ The July 2025 ICML item of `news_archive.html` contains a 1D version of the expe
 ### News
 
 - One `<li>` per item, newest first: `<li><strong>Month YYYY</strong> text…</li>`.
-- Photos go in a `<div class="center">` inside the item, as `<img src="photos/…" alt="…" style="height: 100px;">` (see the ICML 2026 item).
+- Photos go in a `<div class="center">` inside the item, as `<img src="photos/…" alt="…" style="height: 100px;">` (see the ICML 2026 item). `js/lightbox.js` makes every such photo open enlarged on click, with ‹ › to go through the photos of the same item; the `alt` text is the caption, so name the event in it (`alt="ICML 2026"`).
 - Keep the home page short (about 5–6 items). Move older items to the top of the list in `news_archive.html`, keeping newest-first order. The last `<li>` on the home page links to the archive and stays last.
 
 ### Publications
