@@ -1631,6 +1631,542 @@ body {
   }
 }
 
+/* ---- Blog ---- */
+
+/* Posts listed on the home page (#blog, see js/blog.js). */
+.section .post-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section .post-item {
+  margin: 0 0 22px;
+  list-style: none;
+  color: var(--text);
+}
+
+.section .post-item-title {
+  color: var(--accent);
+  font-size: 1.15em;
+  font-weight: 600;
+}
+
+.section .post-item-title:hover {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.post-item-meta {
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+.post-item-dek {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+}
+
+.post-item-draft,
+.is-draft .post-header::before {
+  padding: 1px 9px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--highlight) 20%, transparent);
+  color: var(--text-soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* A post (blog/<name>/index.html): one reading column, centred. */
+.main.post {
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+/* Opened from drafts/ (js/post.js): a label above the title. */
+.is-draft .post-header::before {
+  content: "Draft, not published";
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+.post-header {
+  margin: 36px 0 30px;
+}
+
+.post-kicker {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+.main .post-title {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: clamp(2rem, 4.5vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.post-dek {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 1.2em;
+  line-height: 1.45;
+}
+
+.post-body {
+  font-size: 1.07em;
+  line-height: 1.7;
+}
+
+.post-body h2 {
+  margin: 2.2em 0 0.7em;
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: var(--heading-weight);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.post-body h2::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background-color: var(--data-a);
+}
+
+.post-body h3 {
+  margin: 1.8em 0 0.4em;
+  color: var(--accent);
+  font-size: 1.12rem;
+  font-weight: var(--heading-weight);
+  letter-spacing: -0.01em;
+}
+
+.post-body ul,
+.post-body ol {
+  padding-left: 1.4em;
+}
+
+.post-body li {
+  margin: 0.4em 0;
+}
+
+.post-body li::marker {
+  color: var(--faint);
+}
+
+.post-body a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.post-body a:hover {
+  text-decoration: underline;
+}
+
+/* Wide formulas scroll sideways on narrow screens rather than overflowing. */
+.post-body mjx-container[display="true"] {
+  min-width: 0 !important;  /* MathJax gives numbered equations an inline min-width */
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+}
+
+/* Theorems, lemmas, conjectures: <div class="statement">, or
+   <div class="statement conjecture"> for open statements. */
+.statement {
+  margin: 1.5em 0;
+  padding: 14px 18px;
+  border-left: 3px solid var(--data-a);
+  border-radius: 0 12px 12px 0;
+  background-color: color-mix(in srgb, var(--data-a) 6%, transparent);
+}
+
+.statement.conjecture {
+  border-left-color: var(--highlight);
+  background-color: color-mix(in srgb, var(--highlight) 8%, transparent);
+}
+
+.statement > :first-child,
+.proof > :first-child {
+  margin-top: 0;
+}
+
+.statement > :last-child,
+.proof > :last-child {
+  margin-bottom: 0;
+}
+
+.statement-title {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Proofs: <div class="proof">, opened by "Proof." and closed by a square. */
+.proof {
+  margin: 1em 0 1.5em;
+}
+
+.proof > :first-child::before {
+  content: "Proof. ";
+  font-style: italic;
+  font-weight: 500;
+}
+
+.proof > :last-child::after {
+  content: "∎";
+  float: right;
+  color: var(--muted);
+}
+
+.post-references {
+  font-size: 0.92em;
+}
+
+/* A folded proof: <details class="fold"><summary>Show the proof</summary>
+   <div class="proof">…</div></details>, opened on demand. */
+.fold > summary {
+  color: var(--link);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fold[open] > summary {
+  margin-bottom: 1em;
+}
+
+/* Theorems and references linked from the text land below the pinned bar. */
+.post-body [id] {
+  scroll-margin-top: 64px;
+}
+
+/* A box of code or text to copy, such as the BibTeX entry of a post or a
+   script: <div class="codebox"> holding a bar (label and a Copy button,
+   js/post.js) and the text in <pre><code>. */
+.codebox {
+  margin: 1em 0 1.5em;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: var(--surface);
+}
+
+.codebox-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 0 18px;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.codebox pre {
+  margin: 0;
+  padding: 6px 18px 16px;
+  overflow-x: auto;
+  color: var(--text-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  line-height: 1.6;
+}
+
+/* Figures of the post on toasts around a round table (js/round-table.js). */
+.rt-demo > svg {
+  width: 300px;
+  max-width: 100%;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.rt-side {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.rt-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 10px;
+}
+
+.rt-table {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.rt-axis {
+  stroke: var(--faint);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 5;
+}
+
+.rt-pair,
+.rt-neighbour,
+.rt-ghost,
+.rt-long,
+.rt-almost,
+.rt-spoke {
+  stroke-linecap: round;
+}
+
+/* Small static drawings side by side (shapes): <figure class="rt-demo
+   rt-panels"> holding one <div> per drawing, with its <svg> and a caption. */
+.rt-panels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px 14px;
+  margin: 1.2em 0;
+}
+
+.rt-panels > div > svg {  /* not the formulas of the captions, also SVG */
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rt-panels .demo-caption {
+  margin: 2px 0 0;
+  font-size: 0.82em;
+  line-height: 1.35;
+  text-align: center;
+}
+
+/* Two panels only (split), centred, with a caption below both. */
+.rt-panels-2 {
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  justify-content: center;
+}
+
+/* Three panels (the kinds of instants of the appendix), centred. */
+.rt-panels-3 {
+  grid-template-columns: repeat(3, minmax(0, 200px));
+  justify-content: center;
+}
+
+.rt-panels-caption {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .rt-panels {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Arcs around stretches of corners (polygon figure). */
+.rt-block {
+  fill: none;
+  stroke: var(--faint);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+/* The polygon with its centre (split, wheel): the two parts of a mirror round
+   and the toast with the centre. */
+.rt-part-a,
+.rt-part-b,
+.rt-centre {
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.rt-part-a {
+  stroke: var(--highlight);
+}
+
+.rt-part-b {
+  stroke: var(--data-a);
+}
+
+.rt-centre {
+  stroke: var(--text);
+}
+
+.rt-link {
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
+}
+
+.rt-label.rt-label-big {
+  font-size: 26px;
+  font-style: italic;
+}
+
+/* The counter of the bar figure. */
+.rt-bar {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+/* The proof figure (crowd): toasts as thick as their weight, set inline. */
+.rt-long {
+  stroke: var(--data-a);
+}
+
+.rt-almost {
+  stroke: var(--highlight);
+}
+
+.rt-spoke {
+  stroke: var(--text-soft);
+}
+
+.rt-blocked {
+  stroke: var(--muted);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+
+.rt-cut {
+  fill: color-mix(in srgb, var(--data-a) 20%, transparent);
+}
+
+.rt-crowd {
+  stroke-width: 1.2;
+}
+
+.rt-pair {
+  stroke: var(--data-a);
+  stroke-width: 2.5;
+}
+
+.rt-neighbour {
+  stroke: var(--highlight);
+  stroke-width: 3;
+}
+
+.rt-ghost {
+  stroke: var(--faint);
+  stroke-width: 1;
+  opacity: 0.55;
+}
+
+.rt-person {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.rt-out {
+  fill: var(--bg);
+  stroke: var(--muted);
+}
+
+.rt-selected {
+  fill: none;
+  stroke: var(--data-a);
+  stroke-width: 2.5;
+}
+
+.rt-label {
+  fill: var(--muted);
+  font-family: var(--font);
+  font-size: 12px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.rt-clickable {
+  cursor: pointer;
+}
+
+.rt-clickable:hover .rt-person,
+.rt-clickable:focus-visible .rt-person {
+  stroke: var(--data-a);
+  stroke-width: 3;
+}
+
+.rt-clickable:focus {
+  outline: none;
+}
+
+.rt-legend span {
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
+.rt-key {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  margin: 0 5px 3px 0;
+  vertical-align: middle;
+  border-top: 3px solid;
+}
+
+.rt-key-pair {
+  border-color: var(--data-a);
+}
+
+.rt-key-neighbour {
+  border-color: var(--highlight);
+}
+
+.rt-key-ghost {
+  border-top-width: 1px;
+  border-color: var(--faint);
+}
+
+.rt-key-out {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+}
+
+.rt-key-long {
+  border-top-width: 4px;
+  border-color: var(--data-a);
+}
+
+.rt-key-almost {
+  border-color: var(--highlight);
+}
+
+.rt-key-spoke {
+  border-top-width: 1.5px;
+  border-color: var(--text-soft);
+}
+
+.rt-key-cut {
+  width: 14px;
+  height: 10px;
+  border: none;
+  border-radius: 2px;
+  background-color: color-mix(in srgb, var(--data-a) 20%, transparent);
+}
+
+.rt-key-part-a {
+  border-color: var(--highlight);
+}
+
+.rt-key-part-b {
+  border-color: var(--data-a);
+}
+
+.rt-key-centre {
+  border-color: var(--text);
+}
+
+.rt-key-ring {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--data-a);
+  border-radius: 50%;
+}
+
 /* Teaching archive (teaching_archive.html): one block per course, one line per year. */
 .course {
   margin: 0 0 28px;

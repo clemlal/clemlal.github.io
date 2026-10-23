@@ -1,0 +1,6 @@
+# Blog drafts stay on this computer: git never commits them, so they are never
+# published. To publish a post, move its folder from drafts/ to blog/ (see the README).
+drafts/
+
+# macOS
+.DS_Store

@@ -25,6 +25,12 @@ js/semidual-selection.js   Interactive private transport-potential selection dem
 photos/                    Profile picture and event photos used in the news
 randomDocuments/           Talk slides (.pdf and .key) and other documents linked from the page
 teaching/<year>_<course>/  One folder per course and academic year: index.html + all its materials
+blog/<name>/               One folder per published blog post: index.html + its images
+drafts/<name>/             Blog drafts, local only: ignored by git (.gitignore), never published
+js/post.js                 Loaded by every blog post: LaTeX rendering (MathJax) and the "Draft" label
+js/blog.js                 Local preview of the blog drafts on the home page (index.html?drafts)
+js/round-table.js          Figures of the post on toasts around a round table
+vendor/mathjax/            Copy of MathJax 3.2.2 (tex-svg.js, Apache 2.0), so that no file comes from another site
 ```
 
 ## Home page (`index.html`)
@@ -33,7 +39,7 @@ Sections are `<div class="section" id="…">` blocks. The top navigation links t
 
 ### Navigation bar
 
-One row, in the spirit of apple.com and tesla.com: Home and the sections, the profiles (Google Scholar, LinkedIn, GitHub) and the theme switch (added by `js/themes.js`) on the right. On screens wider than 768px it stays pinned at the top with a frosted-glass background (`position: sticky` and `backdrop-filter` on `.top-nav`), and the sections stop below it (`scroll-margin-top` on `.section`); on phones it scrolls away and its items wrap. The same `<nav class="top-nav">` block is copied at the top of `index.html`, `news_archive.html`, `teaching_archive.html` and every course page (with `../../` paths): change them all together.
+One row, in the spirit of apple.com and tesla.com: Home and the sections, the profiles (Google Scholar, LinkedIn, GitHub) and the theme switch (added by `js/themes.js`) on the right. On screens wider than 768px it stays pinned at the top with a frosted-glass background (`position: sticky` and `backdrop-filter` on `.top-nav`), and the sections stop below it (`scroll-margin-top` on `.section`); on phones it scrolls away and its items wrap. The same `<nav class="top-nav">` block is copied at the top of `index.html`, `news_archive.html`, `teaching_archive.html`, every course page and every blog post (with `../../` paths): change them all together.
 
 ### Look
 
@@ -204,6 +210,43 @@ The site has two themes of its own, Light and Dark, and seasonal themes whose co
 - Captions should not name colours or shades ("the orange staircase", "dark dots"): they change with the theme, and the page can be black.
 - A new page needs `<script src="js/themes.js"></script>` (or `../../js/themes.js`) after its stylesheet.
 
+## Blog (`blog/`, `drafts/`)
+
+The blog section of the home page (`#blog`) comes after the publications. Each post is a folder with an `index.html` page, written by hand like the rest of the site, with mathematics in LaTeX.
+
+**Drafts stay private.** The site is a public GitHub repository: anything committed can be read on GitHub, even if no page links to it. Drafts therefore live in `drafts/<name>/`, which `.gitignore` excludes, so git never commits them and they only exist on this computer. A post opened from `drafts/` shows a "Draft, not published" label above its title (added by `js/post.js`, it disappears by itself in `blog/`).
+
+**Preview.** Open the draft itself (`drafts/<name>/index.html`), or `index.html?drafts` to see the home page with its blog section and the drafts listed with a "Draft" label. That list comes from `drafts/drafts.js` (local too):
+
+```js
+window.siteDrafts = [
+  { title: '…', href: 'drafts/<name>/index.html', date: 'October 2026', dek: 'One or two sentences.' },
+];
+```
+
+
+**Writing a post.** Copy an existing post (or draft) and keep its `<head>`: the stylesheet, `js/themes.js` and `js/post.js`, with `../../` paths. The content goes in `<div class="post-body">`, after a `<header class="post-header">` with a `post-kicker` (Blog · date), an `<h1 class="post-title">` and a `post-dek` (subtitle). Then:
+- Mathematics: `$…$` or `\(…\)` inline; `$$…$$`, `\[…\]`, or `\begin{equation}\label{eq:name} … \end{equation}` for numbered equations, referenced with `\eqref{eq:name}` (numbers and links are automatic). `\$` writes a dollar sign. Macros shared by all posts (`\Z`, `\N`, `\R`) are in `js/post.js`. In HTML, write `\lt` (or `&lt;`) rather than `<` directly followed by a letter, which the browser would read as a tag.
+- Theorems: `<div class="statement"><p><span class="statement-title">Theorem 1</span> (name). …</p></div>`, numbered by hand; `<div class="statement conjecture">` for conjectures and open statements (amber).
+- Proofs: `<div class="proof"><p>…</p></div>`, opened by "Proof." and closed by ∎ automatically. Proofs are folded, so that readers open them on demand: `<details class="fold"><summary>Show the proof</summary><div class="proof">…</div></details>`. Long ones go in an appendix at the end of the post.
+- Interactive figures: the `.demo` classes of the news demos (see Styling), with a script of the post in `js/` loaded at the end of the page.
+- References: `<ol class="post-references">` at the end, each `<li id="ref-…">`, cited as `<a href="#ref-…">[1]</a>`.
+- How to cite: a `<div class="codebox">` with a bar (`<span>BibTeX</span>` and a `<button class="demo-button codebox-copy">Copy</button>`, which `js/post.js` makes copy the entry) and the entry in `<pre><code>…</code></pre>`, its lines not indented. The entry gives the URL of the published post (`https://clemlal.github.io/blog/<name>/`) and its month: check both when publishing. The same box presents code, with the file name as its label.
+
+**Publishing a draft.**
+1. Move its folder: `mkdir -p blog && mv drafts/<name> blog/` (the `../../` paths stay valid).
+2. In `index.html`, add it at the top of the blog list:
+   ```html
+   <li class="post-item">
+     <a class="post-item-title" href="blog/<name>/index.html">Title</a>
+     <div class="post-item-meta">October 2026</div>
+     <p class="post-item-dek">One or two sentences.</p>
+   </li>
+   ```
+3. Remove it from `drafts/drafts.js`, check it (links, `?theme=dark`), then commit and push.
+
+**Mathematics engine.** `vendor/mathjax/tex-svg.js` is MathJax 3.2.2 (TeX input, SVG output, fonts included, one file of 2 MB loaded only by blog posts). Formulas are drawn in the colour of the text, so they follow the themes. See `vendor/mathjax/README.md` to update it.
+
 ## Course pages (`teaching/`)
 
 - Folder name: `<start year>_<end year>_<programme>_<Course_Name>`, e.g. `2026_2027_MAPI3_Machine_Learning`. The folder holds `index.html` and every file the page links to (PDFs, notebooks), linked by bare file name.
@@ -259,7 +302,7 @@ Run this from the repository root before pushing. It lists every local `href`/`s
 ```sh
 python3 - <<'EOF'
 import glob, html, os, re, urllib.parse
-for page in ['index.html', 'news_archive.html', 'teaching_archive.html', *glob.glob('teaching/*/index.html')]:
+for page in ['index.html', 'news_archive.html', 'teaching_archive.html', *glob.glob('teaching/*/index.html'), *glob.glob('blog/*/index.html'), *glob.glob('drafts/*/index.html')]:
     for ref in re.findall(r'(?:href|src)="([^"#]+)', open(page, encoding='utf-8').read()):
         path = os.path.join(os.path.dirname(page), urllib.parse.unquote(html.unescape(ref)))
         if not re.match(r'[a-z]+:', ref) and '${' not in ref and not os.path.exists(path):
