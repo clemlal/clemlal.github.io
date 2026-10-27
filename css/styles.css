@@ -12,11 +12,13 @@
    A monochrome interface, ink on white or off-white on a warm near-black, with
    neutral greys in Light (any warm tint on its pale panels looks dingy) and
    sand-tinted greys in Dark; one signature colour, a soft violet-indigo, and
-   one warm counter-accent, amber. Both are kept at moderate chroma (about 0.7
-   of full saturation in OKLCH), so that they read clearly without shouting;
-   indigo and amber are nearly opposite hues, which keeps the two classes of the
-   demos apart, also for colour-blind visitors. Contrast on the page: text at
-   least 7:1, links 4.5:1, highlight 3:1. */
+   one counter-accent: amber in Light, a light warm grey in Dark. Indigo and
+   amber are kept at moderate chroma (about 0.7 of full saturation in OKLCH),
+   so that they read clearly without shouting, and are nearly opposite hues;
+   in Dark, the grey stands apart from the indigo by being colourless and
+   lighter. Either way, the two classes of the demos stay apart, also for
+   colour-blind visitors. Contrast on the page: text at least 7:1, links 4.5:1,
+   highlight 3:1. */
 :root {
   color-scheme: light;     /* form controls and scrollbars */
   --accent: #0e0e0e;       /* headings, bullets, selected buttons */
@@ -41,7 +43,7 @@
   --link: #9991df;
   --link-strong: #aba3e5;
   --data-a: #8f89dd;
-  --highlight: #e3aa62;
+  --highlight: #cdc8c1;
   --bg: #0b0907;
   --text: #f4f0eb;
   --text-soft: #d3cec8;
