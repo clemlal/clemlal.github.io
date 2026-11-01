@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural networks, hands-on - Clément Lalanne</title>
+    <meta name="description" content="Train small neural networks in your browser: datasets, architectures, activation functions, SGD and decision boundaries, with guided experiments and interactive figures on backpropagation, universal approximation and generalization.">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <script src="../../js/themes.js"></script>
+    <script src="../../js/post.js"></script>
+</head>
+<body>
+    <!-- Top navigation, the same on every page (../../ paths on course pages) -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="../../index.html#news">News</a></li>
+                <li><a href="../../index.html#publications">Publications</a></li>
+                <li><a href="../../index.html#blog">Blog</a></li>
+                <li><a href="../../index.html#teaching">Teaching</a></li>
+                <li><a href="../../index.html#curriculum">Curriculum</a></li>
+            </ul>
+            <ul class="nav-links nav-external">
+                <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+                <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="main nn-page">
+            <header class="post-header">
+                <p class="post-kicker">Interactive notes</p>
+                <h1 class="post-title">Neural networks, hands-on</h1>
+            </header>
+
+            <div class="nn-prose">
+                <p>Neural networks build functions by composing simple layers. This page lets you train small ones and look inside them: what each unit computes, how gradient descent trains them, what they can approximate, and what is known about how they generalize. Nothing is precomputed: the forward pass, backpropagation and stochastic gradient descent run in the page itself.</p>
+                <p><strong>Setting.</strong> We observe a sample $S = ((x_1, y_1), \dots, (x_n, y_n))$ of independent draws from an unknown distribution $P$ on $\mathcal{X} \times \mathcal{Y}$. A predictor $f$ is judged by its risk $R(f) = \mathbb{E}_{(x, y) \sim P}[\ell(y, f(x))]$ for a loss $\ell$, which cannot be computed since $P$ is unknown, and is trained on its empirical risk $\widehat{R}_S(f) = \frac{1}{n} \sum_{i \le n} \ell(y_i, f(x_i))$. In the playground, the test risk is the empirical risk on 1000 fresh points, an estimate of $R(f)$.</p>
+                <p><strong>How to use it.</strong> The playground trains a network on the dataset of your choice. Below it, guided experiments follow the four parts of this page. After the playground, each part has its own section, where interactive figures illustrate its key results.</p>
+            </div>
+
+            <!-- ==================== The playground (js/nn-playground.js) ==================== -->
+            <section class="nn-lab" id="playground" aria-label="Neural network playground">
+                <div class="nn-toolbar">
+                    <button type="button" class="demo-button nn-play" data-action="play">▶ Train</button>
+                    <button type="button" class="demo-button" data-action="step" title="One iteration of SGD">Step</button>
+                    <button type="button" class="demo-button" data-action="reset" title="Start again from new random weights, on the same data">↻ New initialization</button>
+                    <button type="button" class="demo-button" data-action="permute" title="Shuffle the units of every hidden layer, with their weights">⇄ Permute hidden units</button>
+                    <span class="nn-counter" data-out="counter"></span>
+                    <span class="nn-speed"><span class="nn-label">Speed</span> <span class="nn-pills" data-group="speed"></span></span>
+                </div>
+
+                <div class="nn-columns">
+                    <div class="nn-settings">
+                        <h3>Data</h3>
+                        <div class="nn-pills" data-group="task"></div>
+                        <div class="nn-pills" data-group="dataset"></div>
+                        <label class="demo-control">Noise <output data-out="noise"></output>
+                            <input type="range" data-input="noise" min="0" max="1" step="0.05">
+                        </label>
+                        <label class="demo-control">Training points $n$ = <output data-out="n"></output>
+                            <input type="range" data-input="n" min="10" max="500" step="10">
+                        </label>
+                        <label class="nn-check"><input type="checkbox" data-input="randomLabels"> Random labels</label>
+                        <label class="nn-check"><input type="checkbox" data-input="showTest"> Show test points</label>
+                        <button type="button" class="demo-button nn-small" data-action="resample">New sample</button>
+
+                        <h3>Network</h3>
+                        <div class="nn-label">Activation $\sigma$</div>
+                        <div class="nn-pills" data-group="activation"></div>
+                        <div class="nn-layers">Hidden layers
+                            <button type="button" class="nn-round" data-action="remove-layer" aria-label="Remove a hidden layer">−</button>
+                            <span data-out="layers"></span>
+                            <button type="button" class="nn-round" data-action="add-layer" aria-label="Add a hidden layer">+</button>
+                        </div>
+
+                        <h3>Training</h3>
+                        <label class="demo-control">Learning rate $\gamma$ = <output data-out="lr"></output>
+                            <input type="range" data-input="lr" min="0" max="11" step="1">
+                        </label>
+                        <label class="demo-control">Batch size $|B|$ = <output data-out="batch"></output>
+                            <input type="range" data-input="batch" min="0" max="8" step="1">
+                        </label>
+                        <label class="demo-control">Weight decay $\lambda$ = <output data-out="lambda"></output>
+                            <input type="range" data-input="lambda" min="0" max="7" step="1">
+                        </label>
+                    </div>
+
+                    <div class="nn-network">
+                        <div class="nn-network-summary">Depth $L$ = <span data-out="depth"></span> · $P$ = <span data-out="params"></span> parameters</div>
+                        <div class="nn-diagram">
+                            <div class="nn-layer-controls"></div>
+                            <canvas role="img" aria-label="The network: one column of units per layer, and the weights between them"></canvas>
+                            <div class="nn-tooltip" hidden><canvas></canvas><div class="nn-tooltip-text"></div></div>
+                        </div>
+                        <p class="nn-caption">Each square shows what a unit computes, as a function of the input: hover over it for details. A dashed square is a dead ReLU unit. Edges are the weights, thicker when larger: <span class="nn-swatch nn-swatch-pos"></span> positive, <span class="nn-swatch nn-swatch-neg"></span> negative. Under the network, the norm of the gradient of $F$ in the weights of each layer.</p>
+                    </div>
+
+                    <div class="nn-output">
+                        <div class="nn-plot">
+                            <canvas role="img" aria-label="The prediction of the network on the input space, with the training points"></canvas>
+                            <div class="nn-tooltip" hidden></div>
+                        </div>
+                        <div class="nn-message" role="status" hidden></div>
+                        <div class="nn-chart-legend"><span><span class="nn-swatch nn-swatch-pos"></span> training risk $\widehat{R}_S(f_\theta)$</span> <span><span class="nn-swatch nn-swatch-neg"></span> test risk</span> <span class="nn-muted">log scale, against iterations</span></div>
+                        <div class="nn-chart"><canvas role="img" aria-label="Training and test risks against iterations"></canvas></div>
+                        <table class="nn-readouts">
+                            <tr><th>Training risk $\widehat{R}_S(f_\theta)$</th><td data-out="train-risk"></td></tr>
+                            <tr><th>Test risk, on 1000 fresh points, estimating $R(f_\theta)$</th><td data-out="test-risk"></td></tr>
+                            <tr><th>Gap $R - \widehat{R}_S$</th><td data-out="gap"></td></tr>
+                            <tr data-when="classification"><th>Training error / test error</th><td><span data-out="train-error"></span> / <span data-out="test-error"></span></td></tr>
+                            <tr data-when="penalty"><th>Penalty $\Omega(\theta) = \lambda \sum_l \|W_l\|_F^2$</th><td data-out="penalty"></td></tr>
+                            <tr data-when="regression-relu"><th>Affine pieces of $f_\theta$ on the plot</th><td data-out="pieces"></td></tr>
+                            <tr><th>$P$, $n$ and $\sqrt{P/n}$</th><td><span data-out="P"></span>, <span data-out="n-readout"></span>, <span data-out="sqrt-P-n"></span></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="nn-experiments">
+                    <div class="nn-exp-list" aria-label="Guided experiments"></div>
+                    <div class="nn-exp-detail" aria-live="polite"></div>
+                </div>
+            </section>
+
+            <!-- ==================== Part I ==================== -->
+            <section class="nn-section" id="architectures">
+                <h2>Part I. Architectures</h2>
+                <div class="nn-prose">
+                    <p>A network of depth $L$ composes $L$ parametrized maps, $f_{(\theta_1, \dots, \theta_L)}(x) = \rho^{(L)}_{\theta_L}(\cdots \rho^{(1)}_{\theta_1}(x))$. In the playground, the first $L - 1$ are non-linear layers $\rho^{(i)}(h) = \sigma(W_i h + b_i)$ and the last one is affine, $\rho^{(L)}(h) = W_L h + b_L$, followed by the softmax in classification. Layer $i$ has $d_i$ units and the parameters $\theta_i = (W_i, b_i)$, so that $P = \sum_{i \le L} d_i (d_{i-1} + 1)$, the count shown above the network.</p>
+                    <p>Two facts organize this part. A composition of affine maps is affine, so without the non-linearity depth is useless (<a href="#I.1" data-experiment="I.1">Experiment I.1</a>, <a href="#I.2" data-experiment="I.2">I.2</a>). And each unit computes a simple function of the layer before it, which the playground draws in its square: half-planes and ramps for the first layer, combinations of them further on (<a href="#I.3" data-experiment="I.3">I.3</a>, <a href="#I.4" data-experiment="I.4">I.4</a>).</p>
+                </div>
+
+                <div class="nn-fig-row">
+                    <div class="nn-prose">
+                        <h3>The activation function</h3>
+                        <p>The non-linearity $\sigma$ is a fixed function, applied coordinatewise. Its shape matters twice. In the forward pass, it shapes the functions the network can represent: ReLU networks are continuous and piecewise affine, with kinks where units switch on or off (<a href="#I.4" data-experiment="I.4">Experiment I.4</a>). In the backward pass, $\sigma'$ multiplies the gradient at every layer (<a href="#backprop">backpropagation</a>), and a small $\sigma'$ repeated over many layers makes the gradient vanish (<a href="#II.5" data-experiment="II.5">Experiment II.5</a>).</p>
+                    </div>
+                    <figure class="nn-fig nn-fig-activation">
+                        <div class="nn-pills" data-pills="activation">
+                            <button type="button" class="demo-button" data-value="relu" aria-pressed="true">ReLU</button>
+                            <button type="button" class="demo-button" data-value="sigmoid" aria-pressed="false">sigmoid</button>
+                            <button type="button" class="demo-button" data-value="tanh" aria-pressed="false">tanh</button>
+                            <button type="button" class="demo-button" data-value="identity" aria-pressed="false">identity</button>
+                        </div>
+                        <canvas role="img" aria-label="The activation function and its derivative"></canvas>
+                        <div class="nn-fig-legend"><span><span class="nn-swatch nn-swatch-pos"></span> $\sigma(u)$</span> <span><span class="nn-swatch nn-swatch-neg nn-dashed"></span> $\sigma'(u)$</span></div>
+                        <div class="nn-fig-text">
+                            <p data-activation="relu">$\sigma(u) = (u)_+ = \max(0, u)$ and $\sigma'(u) = \mathbf{1}\{u > 0\}$, a subgradient being chosen at $0$. Cheap, unbounded, and its derivative is $1$ on active units, so it does not shrink the gradient. A unit that is negative on every data point gets no gradient at all: it is dead.</p>
+                            <p data-activation="sigmoid" hidden>$\sigma(u) = 1/(1 + e^{-u})$ and $\sigma' = \sigma(1 - \sigma) \le 1/4$. Through $L$ layers, the backward pass multiplies by $L$ such factors (times the weights): the gradient of the first layers can be tiny. It saturates for large $|u|$, where $\sigma' \approx 0$.</p>
+                            <p data-activation="tanh" hidden>$\sigma(u) = \tanh u = 2\,\mathrm{sigmoid}(2u) - 1$ and $\sigma' = 1 - \tanh^2 \le 1$, with equality at $0$. Odd and centred, so that layers start near a regime where $\sigma' \approx 1$; it saturates like the sigmoid.</p>
+                            <p data-activation="identity" hidden>$\sigma(u) = u$ and $\sigma' = 1$: every layer is affine, and so is the whole network, whatever its depth, since $W_2 (W_1 x + b_1) + b_2 = (W_2 W_1) x + (W_2 b_1 + b_2)$. In the playground, the boundary is then always a straight line.</p>
+                        </div>
+                    </figure>
+                </div>
+
+                <div class="nn-fig-row">
+                    <div class="nn-prose">
+                        <h3>The softmax and the cross-entropy</h3>
+                        <p>With $d$ classes, the last layer outputs logits $z \in \mathbb{R}^d$, and the softmax turns them into a probability vector, $\mathrm{sm}(z)_j = e^{z_j} / \sum_{k \le d} e^{z_k}$, a point of the simplex $\Delta_{d-1} = \{u \in \mathbb{R}^d : u \ge 0, \ \sum_k u_k = 1\}$. Try the buttons: adding the same constant to every logit changes nothing, since the softmax only sees their differences; doubling them sharpens the distribution towards the largest one.</p>
+                        <p>With a one-hot label $e_c$, the loss is $-\log \mathrm{sm}(z)_c$, and its gradient in $z$ is $\mathrm{sm}(z) - e_c$, the predicted distribution minus the truth, since $\partial\, \mathrm{sm}(z)_j / \partial z_i = \mathrm{sm}(z)_j \, (\delta_{ij} - \mathrm{sm}(z)_i)$. It vanishes only in the limit $\mathrm{sm}(z) \to e_c$: on separable data, training keeps increasing the logits, and the loss tends to $0$ without reaching it. On one-hot labels, the cross-entropy is the negative log-likelihood of the model $\mathbb{P}(y = c \mid x) = \mathrm{sm}(z)_c$: training is maximum likelihood. See <a href="#I.5" data-experiment="I.5">Experiment I.5</a>.</p>
+                    </div>
+                    <figure class="nn-fig nn-fig-softmax">
+                        <div class="nn-softmax-controls">
+                            <label class="demo-control">$z_1$ = <output data-logit></output><input type="range" min="-10" max="10" step="0.1" value="1.5"></label>
+                            <label class="demo-control">$z_2$ = <output data-logit></output><input type="range" min="-10" max="10" step="0.1" value="0.5"></label>
+                            <label class="demo-control">$z_3$ = <output data-logit></output><input type="range" min="-10" max="10" step="0.1" value="-1"></label>
+                        </div>
+                        <div class="nn-fig-line"><span class="nn-label">True class $c$</span>
+                            <span class="nn-pills" data-pills="class">
+                                <button type="button" class="demo-button" data-value="0" aria-pressed="true">1</button>
+                                <button type="button" class="demo-button" data-value="1" aria-pressed="false">2</button>
+                                <button type="button" class="demo-button" data-value="2" aria-pressed="false">3</button>
+                            </span>
+                        </div>
+                        <div class="nn-fig-line">
+                            <button type="button" class="demo-button nn-small" data-action="shift">$z + 1$</button>
+                            <button type="button" class="demo-button nn-small" data-action="double">$2z$</button>
+                            <button type="button" class="demo-button nn-small" data-action="halve">$z/2$</button>
+                            <button type="button" class="demo-button nn-small" data-action="reset">Reset</button>
+                        </div>
+                        <canvas role="img" aria-label="Logits, their softmax, and the gradient of the cross-entropy"></canvas>
+                        <div class="nn-fig-readout">$\sum_k \mathrm{sm}(z)_k$ = <span data-out="sum"></span> · loss $-\log \mathrm{sm}(z)_c$ = <span data-out="loss"></span></div>
+                    </figure>
+                </div>
+
+                <div class="nn-fig-row">
+                    <div class="nn-prose">
+                        <h3>The cross-entropy is a divergence</h3>
+                        <p>For probability vectors $p$ (the label) and $q$ (the prediction), $\ell(p, q) = -\sum_i p_i \log q_i = H(p) + \mathrm{KL}(p \,\|\, q)$, where $H(p) = \ell(p, p)$ is the entropy of $p$. Only the divergence depends on $q$, so $q \mapsto \ell(p, q)$ is minimized exactly at $q = p$, by Jensen's inequality.</p>
+                        <p>But its minimum is $H(p)$, not $0$: for $p = q = (1/2, 1/2)$ the loss is $\log 2 \approx 0.693$, and $\ell(p, q) = 0$ does not characterize $q = p$. On one-hot labels, $H(p) = 0$ and both statements hold. The figure is the case of two classes, with $p$ and $q$ the probabilities of class 1. Drag on the plot to move $q$.</p>
+                    </div>
+                    <figure class="nn-fig nn-fig-xent">
+                        <label class="demo-control">Label $p$ = <output data-out="p"></output><input type="range" data-input="p" min="0" max="1" step="0.01" value="0.7"></label>
+                        <label class="demo-control">Prediction $q$ = <output data-out="q"></output><input type="range" data-input="q" min="0.01" max="0.99" step="0.01" value="0.3"></label>
+                        <div class="nn-fig-line">
+                            <button type="button" class="demo-button nn-small" data-action="onehot">One-hot label, $p = 1$</button>
+                            <button type="button" class="demo-button nn-small" data-action="half">$p = q = 1/2$</button>
+                        </div>
+                        <canvas role="img" aria-label="The cross-entropy as a function of the prediction"></canvas>
+                        <div class="nn-fig-readout">$\ell(p, q)$ = <span data-out="loss"></span> = $H(p)$ <span class="nn-swatch nn-swatch-pos"></span> <span data-out="entropy"></span> + $\mathrm{KL}(p \,\|\, q)$ <span class="nn-swatch nn-swatch-neg"></span> <span data-out="kl"></span></div>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- ==================== Part II ==================== -->
+            <section class="nn-section" id="optimization">
+                <h2>Part II. Optimization and the chain rule</h2>
+                <div class="nn-prose">
+                    <p>Training minimizes the regularized empirical risk $F(\theta) = \frac{1}{n} \sum_{i \le n} \ell(y_i, f_\theta(x_i)) + \Omega(\theta)$ by stochastic gradient descent, $\theta_t = \theta_{t-1} - \gamma_t \nabla_\theta F^{(B)}(\theta_{t-1})$, where $F^{(B)}$ averages the loss over a batch $B$. In the playground, $\Omega(\theta) = \lambda \sum_l \|W_l\|_F^2$, the step $\gamma$ is constant, and the batches are drawn without replacement: one epoch is one pass over the data.</p>
+                </div>
+
+                <h3 id="backprop">Backpropagation, step by step</h3>
+                <div class="nn-prose">
+                    <p>The gradient is computed by the chain rule, ordered so that a single backward traversal gives every partial derivative. Take a node $N = N(\mathrm{input}, \mathrm{params})$ of the network, and write the loss as a function $\ell(N)$ of its output, everything after the node included. Then</p>
+                    $$\frac{\partial \ell}{\partial\, \mathrm{params}} = \frac{\partial \ell}{\partial N} \, \frac{\partial N}{\partial\, \mathrm{params}} \quad (\ast) \qquad \text{and} \qquad \frac{\partial \ell}{\partial\, \mathrm{input}} = \frac{\partial \ell}{\partial N} \, \frac{\partial N}{\partial\, \mathrm{input}} \quad (\ast\ast).$$
+                    <p>Both need $\partial \ell / \partial N$, the derivative of the loss with respect to the output of the node. It travels backwards: (∗∗) turns it into the same derivative for the node before, and (∗) reads off the gradient in the parameters of the node on the way. Below, a network with an input $x \in \mathbb{R}^2$, two hidden units and a scalar output, on one data point with the quadratic loss. Run the forward pass, then the backward pass, and follow which identity each step uses.</p>
+                </div>
+                <figure class="nn-fig nn-fig-backprop">
+                    <div class="nn-bp-top">
+                        <span class="nn-pills" data-pills="activation">
+                            <button type="button" class="demo-button" data-value="relu" aria-pressed="true">σ = ReLU</button>
+                            <button type="button" class="demo-button" data-value="tanh" aria-pressed="false">tanh</button>
+                            <button type="button" class="demo-button" data-value="sigmoid" aria-pressed="false">sigmoid</button>
+                        </span>
+                        <span class="nn-bp-stage" data-out="step"></span>
+                    </div>
+                    <div class="nn-bp-graph">
+                        <div class="nn-bp-node" data-node="0">
+                            <span class="nn-bp-name">input $x$</span>
+                            <span class="nn-bp-value" data-v="x"></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="1 9">
+                            <span class="nn-bp-name">$W_1 \cdot + \, b_1$</span>
+                            <span class="nn-bp-param">$W_1$ <span data-v="W1"></span></span>
+                            <span class="nn-bp-param">$b_1$ <span data-v="b1"></span></span>
+                            <span class="nn-bp-grad" data-from="9">$\partial \ell / \partial W_1$ <span data-v="dW1"></span></span>
+                            <span class="nn-bp-grad" data-from="9">$\partial \ell / \partial b_1$ <span data-v="db1"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="1 8">
+                            <span class="nn-bp-name">$a_1$</span>
+                            <span class="nn-bp-value" data-v="a1"></span>
+                            <span class="nn-bp-grad" data-from="8">$\partial \ell / \partial a_1$ <span data-v="da1"></span></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="2 8">
+                            <span class="nn-bp-name">$\sigma$, coordinatewise</span>
+                            <span class="nn-bp-grad" data-from="8">$\sigma'(a_1)$ <span data-v="s1"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="2 7">
+                            <span class="nn-bp-name">$h_1$</span>
+                            <span class="nn-bp-value" data-v="h1"></span>
+                            <span class="nn-bp-grad" data-from="7">$\partial \ell / \partial h_1$ <span data-v="dh1"></span></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="3 6 7">
+                            <span class="nn-bp-name">$W_2 \cdot + \, b_2$</span>
+                            <span class="nn-bp-param">$W_2$ <span data-v="W2"></span></span>
+                            <span class="nn-bp-param">$b_2$ <span data-v="b2"></span></span>
+                            <span class="nn-bp-grad" data-from="6">$\partial \ell / \partial W_2$ <span data-v="dW2"></span></span>
+                            <span class="nn-bp-grad" data-from="6">$\partial \ell / \partial b_2$ <span data-v="db2"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="3 5">
+                            <span class="nn-bp-name">$a_2 = f_\theta(x)$</span>
+                            <span class="nn-bp-value" data-v="a2"></span>
+                            <span class="nn-bp-grad" data-from="5">$\partial \ell / \partial a_2$ <span data-v="da2"></span></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="4 5">
+                            <span class="nn-bp-name">$(\cdot - y)^2$</span>
+                            <span class="nn-bp-param">$y$ <span data-v="y"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="4">
+                            <span class="nn-bp-name">loss $\ell$</span>
+                            <span class="nn-bp-value" data-v="loss"></span>
+                        </div>
+                    </div>
+
+                    <div class="nn-bp-explain">
+                        <p data-step="0"><strong>Start.</strong> The input is $x = (1, 0.5)$, the target $y = 1$, and the parameters $\theta = (W_1, b_1, W_2, b_2)$ are $P = 9$ numbers. Press <em>Next</em> to run the forward pass.</p>
+                        <p data-step="1" hidden><strong>Forward 1.</strong> $a_1 = W_1 x + b_1$ = <span data-v="a1"></span>.</p>
+                        <p data-step="2" hidden><strong>Forward 2.</strong> $h_1 = \sigma(a_1)$, coordinate by coordinate: <span data-v="h1"></span>.</p>
+                        <p data-step="3" hidden><strong>Forward 3.</strong> $a_2 = W_2 h_1 + b_2 = f_\theta(x)$ = <span data-v="a2"></span>.</p>
+                        <p data-step="4" hidden><strong>Forward 4.</strong> $\ell = (a_2 - y)^2$ = <span data-v="loss"></span>. The forward pass is over. Every activation is kept for the backward pass, which is what limits memory in practice.</p>
+                        <p data-step="5" hidden><strong>Backward 1.</strong> Start from the loss: $\partial \ell / \partial a_2 = 2 (a_2 - y)$ = <span data-v="da2"></span>. This derivative of the loss with respect to the output of a node is the object that travels backwards.</p>
+                        <p data-step="6" hidden><strong>Backward 2, identity (∗).</strong> At the node $W_2 \cdot + \, b_2$, read off the gradient in its parameters: $\partial \ell / \partial W_2 = (\partial \ell / \partial a_2)\, h_1^\top$ = <span data-v="dW2"></span> and $\partial \ell / \partial b_2 = \partial \ell / \partial a_2$ = <span data-v="db2"></span>.</p>
+                        <p data-step="7" hidden><strong>Backward 3, identity (∗∗).</strong> Pass the derivative to the input of the node: $\partial \ell / \partial h_1 = W_2^\top (\partial \ell / \partial a_2)$ = <span data-v="dh1"></span>. The backward pass through an affine layer is a multiplication by the transpose of its matrix.</p>
+                        <p data-step="8" hidden><strong>Backward 4, identity (∗∗) through $\sigma$.</strong> The node $\sigma$ has no parameter, and its Jacobian is diagonal: $\partial \ell / \partial a_1 = \sigma'(a_1) \odot \partial \ell / \partial h_1$, with $\sigma'(a_1)$ = <span data-v="s1"></span>, which gives <span data-v="da1"></span>. <span data-sigma="relu">For ReLU, $\sigma'(u) = \mathbf{1}\{u > 0\}$: an inactive unit would let no gradient through.</span><span data-sigma="tanh" hidden>For tanh, $\sigma' = 1 - \tanh^2$.</span><span data-sigma="sigmoid" hidden>For the sigmoid, $\sigma' = \sigma (1 - \sigma) \le 1/4$: the derivative is divided by at least 4 on its way through.</span></p>
+                        <p data-step="9" hidden><strong>Backward 5, identity (∗).</strong> $\partial \ell / \partial W_1 = (\partial \ell / \partial a_1)\, x^\top$ = <span data-v="dW1"></span> and $\partial \ell / \partial b_1 = \partial \ell / \partial a_1$ = <span data-v="db1"></span>. Done: one forward and one backward pass gave all 9 partial derivatives. There is no parameter before $W_1$, so $\partial \ell / \partial x$ is not needed. Take a gradient step, or check these numbers against finite differences.</p>
+                    </div>
+
+                    <div class="nn-bp-controls">
+                        <button type="button" class="demo-button" data-action="back">◀ Back</button>
+                        <button type="button" class="demo-button nn-play" data-action="next">Next ▶</button>
+                        <button type="button" class="demo-button" data-action="all">All steps</button>
+                        <button type="button" class="demo-button" data-action="restart">↻ Restart</button>
+                        <span class="nn-bp-sep"></span>
+                        <button type="button" class="demo-button" data-action="descend">Gradient step, $\gamma = 0.03$</button>
+                        <button type="button" class="demo-button" data-action="check">Check by finite differences</button>
+                        <span class="nn-bp-losses">loss: <span data-out="losses"></span></span>
+                    </div>
+
+                    <div class="nn-bp-check" hidden>
+                        <table>
+                            <thead><tr><th>parameter</th><th>backpropagation</th><th>finite differences, $\epsilon = 10^{-5}$</th><th>difference</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <p>The finite differences $\big(\ell(\theta + \epsilon e_k) - \ell(\theta - \epsilon e_k)\big) / 2\epsilon$ needed $2P = 18$ forward passes, one pair per parameter, while backpropagation needed one forward and one backward pass. With $P$ in the millions, this is the whole difference.</p>
+                    </div>
+                </figure>
+
+                <h3>What gradient descent does, and does not, do</h3>
+                <div class="nn-prose">
+                    <p>Nothing guarantees that SGD finds a minimizer. $F$ is not convex as soon as $L \ge 2$, it has many critical points, and its minimizers come in orbits of size at least $\prod_l (d_l)!$ because permuting hidden units, with their weights, does not change the function. Under a step size condition, gradient descent converges to a critical point, and nothing more is proved in general. The experiments of this part make each of these facts visible:</p>
+                    <ul>
+                        <li><a href="#II.1" data-experiment="II.1">II.1</a>, the learning rate, including a step so large that the network dies at a critical point;</li>
+                        <li><a href="#II.2" data-experiment="II.2">II.2</a>, gradient descent against SGD, per iteration and per epoch;</li>
+                        <li><a href="#II.3" data-experiment="II.3">II.3</a>, different initializations, different minimizers, different test risks;</li>
+                        <li><a href="#II.4" data-experiment="II.4">II.4</a>, the permutation symmetry;</li>
+                        <li><a href="#II.5" data-experiment="II.5">II.5</a>, vanishing gradients in a deep sigmoid network.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ==================== Part III ==================== -->
+            <section class="nn-section" id="approximation">
+                <h2>Part III. Universal approximation</h2>
+                <div class="nn-prose">
+                    <div class="statement">
+                        <p><span class="statement-title">Theorem.</span> Let $g \in C^0([a, b], \mathbb{R})$ and $\epsilon > 0$. There is a network $f(x) = \sum_{j \le m} \eta_j (w_j x + b_j)_+$ with one hidden layer of finitely many ReLU units such that $\sup_{x \in [a, b]} |g(x) - f(x)| \le \epsilon$.</p>
+                    </div>
+                    <p>The proof has two steps, both visible in the figure. First, $g$ is uniformly continuous on the compact $[a, b]$ (Heine's theorem): there is $\eta > 0$ such that $|x - x'| \le \eta$ implies $|g(x) - g(x')| \le \epsilon$. Take knots $a = x_1 < \dots < x_N = b$ of spacing at most $\eta$, and let $g_\eta$ be the piecewise affine interpolant of $g$ on them. On $[x_k, x_{k+1}]$, $g_\eta(x)$ is a convex combination of $g(x_k)$ and $g(x_{k+1})$, both within $\epsilon$ of $g(x)$, so $\sup |g - g_\eta| \le \epsilon$. Second, $g_\eta$ is <em>exactly</em> a one hidden layer network, with one unit per knot:</p>
+                    $$g_\eta(x) = \sum_{i \ge 0} (S_i - S_{i-1})(x - x_i)_+ \quad \text{on } [a, b],$$
+                    <p>where $S_i$ is the slope of $g_\eta$ on $[x_i, x_{i+1}]$, and the extra knot $x_0 = a - 1$, with $S_{-1} = 0$ and $S_0 = g(a)$, produces the value at $a$. The units are the kinks, and the coefficients are the jumps of the slope.</p>
+                    <p>Move <em>Units added</em> to build the sum one unit at a time. With the units up to the knot $x_k$, the partial sum is exactly $g_\eta$ on $[a, x_{k+1}]$ and continues affinely beyond. This is the telescoping argument of the proof: on $[x_k, x_{k+1}]$ the slopes of the active units add up to $\sum_{i = 0}^{k} (S_i - S_{i-1}) = S_k$, and at $a$ only the unit of $x_0$ is active, with value $S_0 (a - x_0) = g(a)$. The plot on the right gives the uniform error against the number of units $N$. For a $G$-Lipschitz target, the first step works with $\epsilon = G \eta$, so the proof guarantees $G (b - a)/(N - 1)$ (dashed), an upper bound: on smooth targets the interpolant does better, while $\sqrt{|x|}$, continuous but not Lipschitz, is approximated more slowly, though the theorem still applies (its error zigzags, depending on whether a knot falls on the cusp at $0$). Choose <em>Draw</em> to draw your own $g$ with the mouse.</p>
+                </div>
+                <figure class="nn-fig nn-fig-ua">
+                    <div class="nn-ua-controls">
+                        <span class="nn-pills" data-pills="target">
+                            <button type="button" class="demo-button" data-value="sine" aria-pressed="true">$0.8 \sin 5x$</button>
+                            <button type="button" class="demo-button" data-value="bump" aria-pressed="false">Bump</button>
+                            <button type="button" class="demo-button" data-value="sqrt" aria-pressed="false">$\sqrt{|x|}$</button>
+                            <button type="button" class="demo-button" data-value="draw" aria-pressed="false">Draw</button>
+                        </span>
+                        <label class="demo-control">Knots, and units, $N$ = <output data-out="knots"></output><input type="range" data-input="knots" min="2" max="64" step="1" value="8"></label>
+                        <label class="demo-control">Units added: <output data-out="units"></output><input type="range" data-input="units" min="1" max="8" step="1" value="8"></label>
+                        <label class="nn-check"><input type="checkbox" data-input="terms" checked> Show each term $(S_i - S_{i-1})(x - x_i)_+$</label>
+                    </div>
+                    <div class="nn-ua-plots">
+                        <div class="nn-ua-main"><canvas role="img" aria-label="The target, its interpolant and the ReLU units that compute it"></canvas></div>
+                        <div class="nn-ua-errors"><canvas role="img" aria-label="Uniform error against the number of units"></canvas></div>
+                    </div>
+                    <div class="nn-fig-legend">
+                        <span><span class="nn-swatch nn-swatch-faint"></span> target $g$</span>
+                        <span><span class="nn-swatch nn-swatch-ink"></span> network (the partial sum)</span>
+                        <span><span class="nn-swatch nn-swatch-pos"></span><span class="nn-swatch nn-swatch-neg"></span> one term per unit</span>
+                        <span>right: <span class="nn-swatch nn-swatch-ink"></span> $\sup |g - g_\eta|$, <span class="nn-swatch nn-swatch-neg nn-dashed"></span> guarantee $G\eta$</span>
+                    </div>
+                    <div class="nn-fig-readout">sup error on $[a, b]$ = <span data-out="error"></span> · spacing $\eta$ = <span data-out="spacing"></span> · guarantee $G \eta$ = <span data-out="bound"></span></div>
+                </figure>
+                <div class="nn-prose">
+                    <p>In several dimensions, the same holds for any continuous activation that is not a polynomial (Cybenko, 1989; Hornik, 1991; Leshno, Lin, Pinkus and Schocken, 1993). It is an existence statement: it says that a good $f$ is in $\mathcal{F}$, which makes the approximation error small, but neither that SGD finds it nor that finitely many samples identify it. In the playground: <a href="#III.1" data-experiment="III.1">III.1</a> (one unit, one kink), <a href="#III.2" data-experiment="III.2">III.2</a> (SGD misses a network that exists) and <a href="#III.3" data-experiment="III.3">III.3</a> (two spirals).</p>
+                </div>
+            </section>
+
+            <!-- ==================== Part IV ==================== -->
+            <section class="nn-section" id="generalization">
+                <h2>Part IV. Generalization</h2>
+                <div class="nn-prose">
+                    <p>Write $R^\star$ for the smallest risk of any predictor, and $\mathcal{F}$ for the networks of a given architecture. The excess risk of a trained network $\hat f \in \mathcal{F}$ splits into two terms,</p>
+                    $$R(\hat f) - R^\star = \underbrace{R(\hat f) - \inf_{f \in \mathcal{F}} R(f)}_{\text{estimation error}} + \underbrace{\inf_{f \in \mathcal{F}} R(f) - R^\star}_{\text{approximation error}}.$$
+                    <p>Universal approximation makes the approximation error small for wide enough networks, and leaves the estimation error. Networks of a fixed architecture form a parametric class with $P$ parameters, and the classical tools for such classes (covering numbers, Rademacher complexity, concentration) give the following. With bounded inputs and weights and a Lipschitz, bounded loss, with probability at least $1 - \delta$, every $f \in \mathcal{F}$ satisfies</p>
+                    $$R(f) \le \widehat{R}_S(f) + O\Big(\sqrt{P/n}\Big),$$
+                    <p>with a constant exponential in the depth, and up to a term in $\sqrt{\log(1/\delta)/n}$ (Anthony and Bartlett, <em>Neural Network Learning: Theoretical Foundations</em>, 1999). Counting through the VC dimension of ReLU networks, of order $P L \log P$, gives a similar bound (Bartlett, Harvey, Liaw and Mehrabian, 2019). The bound is uniform over $\mathcal{F}$, so it holds for whatever weights SGD returns, minimizer or not. The playground shows both sides of the story. Overfitting is real when $P \gg n$, and the gap does shrink with $n$ (<a href="#IV.1" data-experiment="IV.1">Experiment IV.1</a>). But the bound is vacuous long before the network stops generalizing: in that experiment, the gap is already about $0.01$ at $n = 100$, where $\sqrt{P/n} \approx 3.4$, and it decreases much faster than $\sqrt{P/n}$ in between. A network can even memorize random labels (<a href="#IV.2" data-experiment="IV.2">Experiment IV.2</a>):</p>
+                </div>
+                <div class="nn-table-wrap">
+                    <table class="nn-table">
+                        <thead><tr><th>Setting</th><th>$P$</th><th>$n$</th><th>$\sqrt{P/n}$</th><th>observed gap (test error − training error)</th></tr></thead>
+                        <tbody>
+                            <tr><td>ResNet-18 on CIFAR-10</td><td>$1.1 \times 10^7$</td><td>$5 \times 10^4$</td><td>15</td><td>0.05</td></tr>
+                            <tr><td>Experiment IV.2, true labels</td><td>2274</td><td>40</td><td>7.5</td><td>0.035</td></tr>
+                            <tr><td>Experiment IV.2, random labels</td><td>2274</td><td>40</td><td>7.5</td><td>0.4</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="nn-prose">
+                    <p>A gap between error rates cannot exceed $1$: these bounds are not loose but vacuous. With random labels, the same network on the same points reaches zero training error and a test error at chance level. It shatters those points, so no bound depending only on the class $\mathcal{F}$, through $P$ or the VC dimension, can be below $1$ for it. Since the same class generalizes on the true labels, the explanation has to involve the data and the algorithm: SGD does not explore all of $\mathcal{F}$ (Zhang, Bengio, Hardt, Recht and Vinyals, 2017). Why deep networks generalize is mostly an open question.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../../js/nn-engine.js"></script>
+    <script src="../../js/nn-experiments.js"></script>
+    <script src="../../js/nn-playground.js"></script>
+    <script src="../../js/nn-figures.js"></script>
+</body>
+</html>

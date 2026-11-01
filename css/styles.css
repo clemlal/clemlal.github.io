@@ -2283,3 +2283,781 @@ body {
     min-width: 5.5rem;
   }
 }
+
+/* ---- Neural networks, hands-on ----
+   teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html:
+   the playground (js/nn-playground.js) and the figures (js/nn-figures.js). Made for computer screens: the playground needs about
+   1100 pixels of width. */
+
+.main.nn-page {
+  padding-bottom: 60px;
+}
+
+.nn-page .post-header,
+.nn-prose {
+  max-width: 52rem;
+}
+
+.nn-prose {
+  font-size: 1.04em;
+  line-height: 1.65;
+}
+
+.nn-prose p {
+  margin: 0 0 0.9em;
+}
+
+.nn-prose ul {
+  padding-left: 1.3em;
+}
+
+.nn-prose li {
+  margin: 0.35em 0;
+}
+
+.nn-prose li::marker {
+  color: var(--faint);
+}
+
+.nn-page a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.nn-page a:hover {
+  text-decoration: underline;
+}
+
+.nn-page mjx-container[display="true"] {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.nn-section {
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 64px;
+}
+
+.nn-section h2 {
+  margin: 0 0 18px;
+  color: var(--accent);
+  font-size: 1.6rem;
+  font-weight: var(--heading-weight);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.nn-section h2::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background-color: var(--data-a);
+}
+
+.nn-page h3 {
+  margin: 1.6em 0 0.5em;
+  color: var(--accent);
+  font-size: 1.15rem;
+  font-weight: var(--heading-weight);
+  letter-spacing: -0.01em;
+  scroll-margin-top: 64px;
+}
+
+.nn-fig-row .nn-prose h3 {
+  margin-top: 0;
+}
+
+.nn-label,
+.nn-muted {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.nn-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 4px;
+  margin: 0 2px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.nn-swatch-pos { background-color: var(--data-a); }
+.nn-swatch-neg { background-color: var(--highlight); }
+.nn-swatch-ink { background-color: var(--text); }
+.nn-swatch-faint { background-color: var(--faint); height: 7px; }
+
+.nn-swatch.nn-dashed {
+  background: repeating-linear-gradient(90deg, var(--highlight) 0 5px, transparent 5px 8px);
+}
+
+.nn-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 10px;
+}
+
+.nn-pills .demo-button,
+.demo-button.nn-small {
+  padding: 4px 10px;
+  font-size: 0.85em;
+}
+
+.demo-button.nn-play {
+  background-color: var(--data-a);
+  color: var(--bg);
+}
+
+.demo-button.nn-play:not([aria-pressed="true"]):hover {
+  background-color: var(--link-strong);
+}
+
+.demo-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.nn-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  font-size: 0.92em;
+  cursor: pointer;
+}
+
+.nn-check input {
+  accent-color: var(--data-a);
+}
+
+.nn-check.is-disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The playground: a toolbar, three columns (settings, network, output), and
+   the experiments below. */
+.nn-lab {
+  margin: 32px 0 0;
+  padding: 20px 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background-color: var(--bg);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+  color: var(--text-soft);
+  scroll-margin-top: 60px;
+}
+
+.nn-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.nn-counter {
+  margin-left: 10px;
+  color: var(--muted);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-speed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.nn-speed .nn-pills {
+  margin: 0;
+}
+
+.nn-columns {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 380px;
+  gap: 28px;
+  align-items: start;
+}
+
+.nn-settings {
+  font-size: 0.92em;
+}
+
+.nn-settings h3 {
+  margin: 0 0 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nn-settings h3:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.nn-settings .demo-control {
+  margin: 10px 0;
+}
+
+.nn-settings .nn-small {
+  margin: 6px 0 16px;
+}
+
+.nn-layers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.nn-round,
+.nn-layer-detail button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--accent-soft);
+  color: var(--text-soft);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.nn-round:hover,
+.nn-layer-detail button:hover {
+  background-color: var(--border);
+}
+
+.nn-network-summary {
+  font-size: 0.9em;
+  color: var(--muted);
+  text-align: center;
+}
+
+.nn-diagram {
+  position: relative;
+  padding-top: 52px;
+}
+
+.nn-layer-controls {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  height: 44px;
+}
+
+.nn-layer-head {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 0.78em;
+  line-height: 1.3;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.nn-layer-title {
+  display: block;
+  color: var(--muted);
+}
+
+.nn-layer-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-layer-detail button {
+  width: 18px;
+  height: 18px;
+  font-size: 0.85rem;
+  line-height: 18px;
+}
+
+.nn-diagram canvas,
+.nn-plot canvas,
+.nn-chart canvas,
+.nn-fig canvas {
+  display: block;
+  width: 100%;
+}
+
+.nn-caption {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.82em;
+  line-height: 1.45;
+}
+
+.nn-tooltip {
+  position: absolute;
+  z-index: 5;
+  max-width: 280px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--bg);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  color: var(--text-soft);
+  font-size: 0.8em;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.nn-tooltip canvas {
+  margin-bottom: 6px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.nn-tooltip-scale {
+  color: var(--muted);
+}
+
+.nn-plot {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border);
+  background-color: var(--bg);
+}
+
+.nn-plot canvas {
+  cursor: crosshair;
+}
+
+/* Why the training stopped (end of an experiment, divergence), under the plot. */
+.nn-message {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--highlight);
+  border-radius: 0 10px 10px 0;
+  background-color: color-mix(in srgb, var(--highlight) 10%, transparent);
+  color: var(--text);
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.nn-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 14px 0 4px;
+  font-size: 0.8em;
+}
+
+.nn-readouts {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+  font-size: 0.85em;
+}
+
+.nn-readouts th {
+  padding: 4px 8px 4px 0;
+  color: var(--muted);
+  font-weight: normal;
+  text-align: left;
+}
+
+.nn-readouts td {
+  padding: 4px 0;
+  color: var(--text);
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-readouts tr + tr {
+  border-top: 1px solid var(--border);
+}
+
+/* Guided experiments: the list by part, and the selected experiment. */
+.nn-experiments {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 28px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.nn-exp-part {
+  margin: 14px 0 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nn-exp-part:first-child {
+  margin-top: 0;
+}
+
+.nn-exp-item {
+  display: block;
+  width: 100%;
+  margin: 1px 0;
+  padding: 4px 9px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-soft);
+  font-family: var(--font);
+  font-size: 0.88em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nn-exp-item:hover {
+  background-color: var(--accent-soft);
+}
+
+.nn-exp-item[aria-pressed="true"] {
+  background-color: var(--accent);
+  color: var(--bg);
+}
+
+.nn-exp-id {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-exp-detail {
+  max-width: 50rem;
+  font-size: 1.02em;
+  line-height: 1.6;
+}
+
+.nn-exp-head {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.nn-exp-detail h3 {
+  margin: 2px 0 12px;
+  font-size: 1.3rem;
+}
+
+.nn-exp-question {
+  padding: 12px 16px;
+  border-left: 3px solid var(--data-a);
+  border-radius: 0 12px 12px 0;
+  background-color: color-mix(in srgb, var(--data-a) 7%, transparent);
+  color: var(--text);
+}
+
+.nn-exp-label {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.nn-exp-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.nn-exp-watch {
+  margin: 0 0 12px;
+}
+
+.nn-exp-explanation > summary {
+  color: var(--link);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nn-exp-explanation[open] > summary {
+  margin-bottom: 8px;
+}
+
+.nn-exp-explanation p {
+  margin: 0 0 0.8em;
+}
+
+.nn-exp-explanation .nn-table {
+  margin: 0 0 0.9em;
+  font-size: 0.9em;
+}
+
+/* Figures: text on the left, figure on the right, or the
+   figure on the whole width. */
+.nn-fig-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+  margin: 36px 0;
+}
+
+.nn-fig {
+  margin: 18px 0;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background-color: var(--bg);
+  color: var(--text-soft);
+  font-size: 0.92em;
+}
+
+.nn-fig-row .nn-fig {
+  margin: 0;
+}
+
+.nn-fig-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+
+.nn-fig-text p {
+  margin: 8px 0 0;
+  line-height: 1.55;
+}
+
+.nn-fig-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 10px;
+}
+
+.nn-fig-line .nn-pills {
+  margin: 0;
+}
+
+.nn-fig-readout {
+  margin-top: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-softmax-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.nn-fig-xent canvas,
+.nn-fig-ua .nn-ua-main canvas {
+  touch-action: none;
+}
+
+.nn-fig-xent canvas {
+  cursor: ew-resize;
+}
+
+/* Backpropagation: the computational graph, nodes and operations alternating. */
+.nn-bp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nn-bp-stage {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-bp-graph {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr 0.9fr 1fr 1.25fr 1fr 0.8fr 0.9fr;
+  gap: 8px;
+  align-items: stretch;
+  margin: 14px 0;
+}
+
+.nn-bp-node,
+.nn-bp-op {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  font-size: 0.88em;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.nn-bp-node {
+  background-color: var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.nn-bp-op {
+  position: relative;
+  justify-content: center;
+  color: var(--muted);
+}
+
+/* The arrow of an operation, from the node on its left to the node on its right. */
+.nn-bp-op::before {
+  content: "⟶";
+  color: var(--faint);
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+.nn-bp-node.is-current,
+.nn-bp-op.is-current {
+  box-shadow: 0 0 0 2px var(--data-a);
+  background-color: color-mix(in srgb, var(--data-a) 8%, transparent);
+}
+
+.nn-bp-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.nn-bp-value {
+  color: var(--text);
+}
+
+.nn-bp-param {
+  color: var(--text-soft);
+  white-space: pre-line;
+}
+
+.nn-bp-grad {
+  color: var(--highlight);
+  white-space: pre-line;
+  visibility: hidden;
+}
+
+.nn-bp-grad.is-known {
+  visibility: visible;
+}
+
+/* Values below their names, matrices one row per line. */
+.nn-bp-param [data-v],
+.nn-bp-grad [data-v] {
+  display: block;
+}
+
+.nn-bp-explain {
+  min-height: 3.4em;
+  padding: 10px 14px;
+  border-left: 3px solid var(--data-a);
+  border-radius: 0 12px 12px 0;
+  background-color: color-mix(in srgb, var(--data-a) 6%, transparent);
+  font-size: 1.05em;
+  line-height: 1.6;
+}
+
+.nn-bp-explain p {
+  margin: 0;
+}
+
+.nn-bp-explain [data-v] {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.nn-bp-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.nn-bp-sep {
+  width: 1px;
+  height: 22px;
+  margin: 0 6px;
+  background-color: var(--border);
+}
+
+.nn-bp-losses {
+  margin-left: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-bp-check {
+  margin-top: 14px;
+}
+
+.nn-bp-check table,
+.nn-table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-bp-check th,
+.nn-bp-check td,
+.nn-table th,
+.nn-table td {
+  padding: 5px 14px 5px 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.nn-bp-check th,
+.nn-table th {
+  color: var(--muted);
+  font-weight: normal;
+}
+
+.nn-bp-check p {
+  max-width: 52rem;
+  margin: 10px 0 0;
+}
+
+.nn-table-wrap {
+  margin: 4px 0 20px;
+  overflow-x: auto;
+}
+
+.nn-table {
+  font-size: 0.95em;
+}
+
+/* Universal approximation: the controls above, the construction and the error
+   curve side by side. */
+.nn-ua-controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 8px 24px;
+  align-items: center;
+}
+
+.nn-ua-controls .nn-pills,
+.nn-ua-controls .demo-control {
+  margin: 0;
+}
+
+.nn-ua-plots {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.nn-fig-ua.is-drawing .nn-ua-main canvas {
+  cursor: crosshair;
+}
