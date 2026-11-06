@@ -1,0 +1,2162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asymptotic statistics, self-assessment - Clément Lalanne</title>
+    <meta name="description" content="Questions and exercises with commented solutions on asymptotic statistics: modes of convergence, characteristic functions, Slutsky, the delta method, the method of moments, M and Z estimators and empirical processes.">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <script src="../../js/themes.js"></script>
+    <script src="../../js/post.js"></script>
+    <script>
+        // Formulas out of the tab order, which goes through the boxes and buttons only.
+        window.MathJax.options = { menuOptions: { settings: { inTabOrder: false } } };
+        // Shorthands for the questions below.
+        Object.assign(window.MathJax.tex.macros, {
+            E: '\\mathbb{E}',
+            P: '\\mathbb{P}',
+            Var: '\\operatorname{Var}',
+            Cov: '\\operatorname{Cov}',
+            cvd: '\\xrightarrow{\\;d\\;}',
+            cvp: '\\xrightarrow{\\;\\mathbb{P}\\;}',
+            cvas: '\\xrightarrow{\\text{a.s.}}',
+        });
+    </script>
+</head>
+<body>
+    <!-- Top navigation, the same on every page (../../ paths on course pages) -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="../../index.html#news">News</a></li>
+                <li><a href="../../index.html#publications">Publications</a></li>
+                <li><a href="../../index.html#blog">Blog</a></li>
+                <li><a href="../../index.html#teaching">Teaching</a></li>
+                <li><a href="../../index.html#curriculum">Curriculum</a></li>
+            </ul>
+            <ul class="nav-links nav-external">
+                <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+                <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="main quiz-page">
+            <header class="post-header">
+                <p class="post-kicker"><a href="index.html">Asymptotic Statistics, M2 RI</a></p>
+                <h1 class="post-title">Self-assessment</h1>
+            </header>
+
+            <div class="quiz-prose">
+                <p>Questions on the whole class, from the modes of convergence to M and Z estimators, in the order of the lectures. The sections titled <em>Exercises</em> apply the same techniques to examples that were not treated in class. A question can have several correct answers, possibly all of them: tick every correct one, then check. If some boxes are wrong, you are told how many; try again, or show the solution, which explains every answer.</p>
+                <p>Questions tagged <em>Pen and paper</em> need a computation: do it on paper before ticking. Questions tagged <em>Going further</em> go beyond the class, to related results worth knowing. Your answers are saved in this browser.</p>
+            </div>
+
+            <div class="quiz" data-quiz="m2ri-asymptotic-statistics-2026" data-source="quiz-source"></div>
+        </main>
+    </div>
+
+    <!-- The questions, in the format described at the top of js/quiz.js. -->
+    <script type="text/x-quiz" id="quiz-source">
+# Modes of convergence and the portmanteau theorem
+
+## Which modes need a common probability space?
+Let $(X_n)_{n \in \N}$ and $X$ be random vectors of $\R^d$. For which modes of convergence of $X_n$ to $X$ must all of them be defined on one probability space?
+
+- [ ] Convergence in distribution.
+  Only the laws $\P_{X_n}$ and $\P_X$ appear in the definition. The $X_n$ may live on different spaces, and the limit may even be a law rather than a random vector.
+- [x] Convergence in probability.
+  The definition involves $\P(\|X_n - X\| \ge \epsilon)$, hence the difference $X_n - X$.
+- [x] Almost sure convergence.
+  The event $\{X_n \to X\}$ only makes sense if all of them are functions of the same $\omega$.
+- [x] Convergence in $L^p$.
+  The definition involves $\E[\|X_n - X\|^p]$, hence the difference $X_n - X$.
+
+> Convergence in distribution is the only one of the four that is a statement about laws. The other three compare the values $X_n(\omega)$ and $X(\omega)$, so they need a common $(\Omega, \mathcal{A}, \P)$.
+>
+> See *Random vectors*, Part I.
+
+## A deterministic sequence
+Let $X_n = 1/n$ (a constant) and $X = 0$. Which statements are true?
+
+- [x] $X_n \cvd X$.
+  $F_{X_n}(x) \to F_X(x)$ at every $x \neq 0$, and $0$ is the only discontinuity point of $F_X$.
+- [ ] $F_{X_n}(0) \to F_X(0)$.
+  $F_{X_n}(0) = \P(1/n \le 0) = 0$ for every $n$, whereas $F_X(0) = 1$.
+- [x] $X_n \cvas X$.
+  Constants can be defined on any probability space, and $1/n \to 0$ at every $\omega$.
+- [x] $F_{X_n}(x) \to F_X(x)$ for every $x \neq 0$.
+  For $x < 0$ both are $0$, and for $x > 0$, $F_{X_n}(x) = 1 = F_X(x)$ as soon as $1/n \le x$.
+
+> This is why the definition of convergence in distribution only asks for $F_{X_n}(x) \to F_X(x)$ at the continuity points of $F_X$: otherwise, even a deterministic sequence converging to a point would fail to converge in distribution.
+>
+> See *Random vectors*, Part I.
+
+## The same law, two random variables
+Let $U \sim \mathrm{Unif}([0, 1])$, and set $X_n = U$ for every $n$ and $X = 1 - U$. Which statements are true?
+
+- [ ] $X_n \cvp X$.
+  $|X_n - X| = |2U - 1|$ does not depend on $n$ and is not $0$ almost surely.
+- [x] $X_n \cvd X$.
+  $1 - U \sim \mathrm{Unif}([0,1])$, so $X_n$ and $X$ have the same law for every $n$.
+- [ ] $X_n - X \cvd 0$.
+  $X_n - X = 2U - 1 \sim \mathrm{Unif}([-1, 1])$ for every $n$.
+- [x] $X_n \cvd U$ and $X_n \cvd 1 - U$ hold simultaneously.
+  A limit in distribution is unique as a law, not as a random vector.
+
+> Convergence in distribution controls the law of $X_n$ and the law of $X$ separately, never the joint law of $(X_n, X)$. Hence, it says nothing about $X_n - X$.
+>
+> See *Random vectors*, Parts II and V.
+
+## The maximum of uniforms @calc
+Let $U_1, U_2, \dots$ be i.i.d. uniform on $[0, 1]$ and $M_n = \max_{i \le n} U_i$. Which statements are true?
+
+- [ ] $n(1 - M_n) \cvd \mathcal{N}(0, 1)$, by the central limit theorem.
+  A maximum is not an average, and $n(1 - M_n) \ge 0$ anyway.
+- [x] $M_n \cvp 1$.
+  $\P(M_n \le 1 - \epsilon) = (1 - \epsilon)^n \to 0$ for every $\epsilon \in (0, 1)$.
+- [x] $n(1 - M_n)$ converges in distribution to the exponential law of parameter $1$.
+  For $0 \le t \le n$, $\P(n(1 - M_n) > t) = (1 - t/n)^n$, which tends to $e^{-t}$ for every $t > 0$.
+- [ ] $\sqrt{n}(1 - M_n)$ converges in distribution to a nondegenerate limit.
+  $\sqrt{n}(1 - M_n) = n(1 - M_n)/\sqrt{n}$ is a tight sequence divided by $\sqrt n$, so it tends to $0$ in probability.
+
+? Compute $\P(n(1 - M_n) > t)$ with the independence of the $U_i$.
+
+> For $0 \le t \le n$, independence gives
+> $$\P(n(1 - M_n) > t) = \P(M_n < 1 - t/n) = (1 - t/n)^n \to e^{-t}.$$
+> Hence $\P(n(1 - M_n) \le t) \to 1 - e^{-t}$, the distribution function of the exponential law, which is continuous everywhere, so the convergence in law holds. The right scaling is $n$, not $\sqrt n$, since a maximum is not an average.
+>
+> See *Random vectors*, Part II.
+
+## The portmanteau theorem
+Let $X_n$ and $X$ be random vectors of $\R^d$. Which statements are equivalent to $X_n \cvd X$?
+
+- [x] $\E[f(X_n)] \to \E[f(X)]$ for every bounded Lipschitz $f$.
+  This is item (iii), the easiest to check, since the class of test functions is small.
+- [ ] $\E[f(X_n)] \to \E[f(X)]$ for every continuous $f$.
+  Too strong: with $X_n = n$ with probability $1/n$ and $0$ otherwise, $X_n \cvd 0$ but $\E[X_n] = 1$. The test functions must be bounded.
+- [x] $\limsup_n \P(X_n \in F) \le \P(X \in F)$ for every closed $F$.
+  This is item (vi).
+- [ ] $\P(X_n \in B) \to \P(X \in B)$ for every Borel set $B$.
+  Only for $B$ with $\P(X \in \partial B) = 0$: with $X_n = 1/n$, $X = 0$ and $B = (0, \infty)$, $\P(X_n \in B) = 1$ while $\P(X \in B) = 0$.
+- [x] $\liminf_n \P(X_n \in O) \ge \P(X \in O)$ for every open $O$.
+  This is item (v).
+
+> The portmanteau theorem gives seven equivalent conditions: the distribution functions at continuity points, $\E[f(X_n)]$ for bounded continuous or bounded Lipschitz $f$, the liminf for nonnegative continuous $f$, the two inequalities for open and closed sets, and $\P(X_n \in B)$ for the sets $B$ whose boundary has zero mass.
+>
+> See *Random vectors*, Part II.
+
+## The inequalities can be strict @calc
+Let $X_n \sim \mathcal{N}(0, 1/n)$ and $X = 0$, so that $X_n \cvd X$. Which statements are true?
+
+- [x] With $O = (0, \infty)$, $\liminf_n \P(X_n \in O) = 1/2 > \P(X \in O) = 0$.
+  By symmetry, $\P(X_n > 0) = 1/2$ for every $n$.
+- [ ] $F_{X_n}(0) \to F_X(0)$.
+  $F_{X_n}(0) = 1/2$ for every $n$ and $F_X(0) = 1$, which is allowed since $0$ is a discontinuity point of $F_X$.
+- [x] With $F = \{0\}$, $\limsup_n \P(X_n \in F) = 0 < \P(X \in F) = 1$.
+  Each $X_n$ has a density, so $\P(X_n = 0) = 0$.
+- [x] $\P(X_n \in (0, \infty))$ does not tend to $\P(X \in (0, \infty))$, which does not contradict item (vii).
+  The boundary of $(0, \infty)$ is $\{0\}$, which carries all the mass of $X$.
+
+> A single sequence shows that the inequalities (v) and (vi) can be strict, and that the boundary hypothesis of (vii) cannot be dropped.
+>
+> See *Random vectors*, Part II.
+
+## Dirac masses
+For $x_n, x \in \R^d$, let $X_n \sim \delta_{x_n}$ and $X \sim \delta_x$. Which statements are true?
+
+- [ ] To prove that $X_n \cvd X$ implies $x_n \to x$, one can apply item (ii) of portmanteau to $f = \mathbf{1}_{B(x, \epsilon)}$.
+  An indicator is not continuous. The proof uses a continuous function equal to $1$ on $B(x, \epsilon/2)$ and to $0$ outside $B(x, \epsilon)$.
+- [x] $X_n \cvd X$ if and only if $x_n \to x$.
+  If $x_n \to x$, then $f(x_n) \to f(x)$ for every continuous $f$. The converse needs something that isolates $x$: a continuous test function through item (ii), or the open ball $B(x, \epsilon)$ through item (v).
+- [ ] If $x_n \to x$, then $\P(X_n = x) \to \P(X = x)$.
+  With $x_n = 1/n$ and $x = 0$, $\P(X_n = 0) = 0$ for every $n$: the set $\{x\}$ is its own boundary, of full mass under $\delta_x$.
+- [x] If $X_n \cvd X$, then $X_n \cvp x$.
+  A limit in distribution that is a constant is also a limit in probability.
+
+> $\delta_{x_n} \cvd \delta_x$ is equivalent to $x_n \to x$. The direct implication needs something that isolates $x$; through item (ii), it must be a bounded continuous test function.
+>
+> See *Random vectors*, Part II.
+
+## Convergence on a dense set
+Let $F$ be a distribution function on $\R$, $D \subset \R$ a dense set, and assume that $F_{X_n}(x) \to F(x)$ for every $x \in D$. Which statements are true?
+
+- [ ] One also needs $F$ to be continuous to conclude that $X_n$ converges in distribution.
+  The squeeze argument works at every continuity point of $F$, and the definition of convergence in distribution only asks for those.
+- [x] $X_n \cvd X$ for any $X$ with distribution function $F$.
+  At a continuity point $x$ of $F$, take $u < x < v$ in $D$: then $F_{X_n}(u) \le F_{X_n}(x) \le F_{X_n}(v)$, and let $n \to \infty$, then $u \uparrow x$ and $v \downarrow x$ in $D$.
+- [x] If $F_{X_n}(q) \to F(q)$ for every rational $q$, then $X_n$ converges in distribution.
+  $\mathbb{Q}$ is dense. The condition is sufficient, not necessary: if $F$ has an atom at a rational $q$, the convergence at $q$ can fail ($X_n = 1/n$, $q = 0$), and any dense set of continuity points of $F$ can be used instead.
+- [ ] If $F$ is only assumed nondecreasing, not necessarily a distribution function, $X_n$ still converges in distribution.
+  With $X_n = n$, $F_{X_n}(x) \to 0$ for every $x$, and $F \equiv 0$ is nondecreasing, but mass escapes to infinity and $X_n$ does not converge in distribution.
+
+> It suffices to check the limit on a dense set, provided that the limit is a genuine distribution function.
+>
+> See *Random vectors*, Part II.
+
+## The atoms of a law
+Let $X$ be a real random variable and $A = \{t \in \R : \P(X = t) > 0\}$ the set of its atoms. Which statements are true?
+
+- [x] $A$ is at most countable.
+  $A_m = \{t : \P(X = t) > 1/m\}$ has fewer than $m$ elements, and $A = \bigcup_{m \ge 1} A_m$.
+- [ ] $A$ cannot be dense in $\R$.
+  Enumerate $\mathbb{Q} = \{q_1, q_2, \dots\}$ and let $\P(X = q_k) = 2^{-k}$: then $A = \mathbb{Q}$.
+- [x] $F_X$ is continuous exactly at the points outside $A$.
+  $F_X$ is right continuous, and its jump at $t$ is $F_X(t) - F_X(t^-) = \P(X = t)$.
+- [x] The continuity points of $F_X$ form a dense set.
+  Their complement $A$ is countable, and the complement of a countable set is dense in $\R$.
+
+> The set of discontinuity points of a distribution function is small, so that restricting convergence in distribution to continuity points still constrains $F_{X_n}$ on a dense set.
+>
+> See *Random vectors*, Part I.
+
+## Implications between the modes
+For random vectors on one probability space, which implications hold in general?
+
+- [ ] Convergence in probability implies almost sure convergence.
+  The typewriter sequence $\mathbf{1}_{[j 2^{-k}, (j+1) 2^{-k}]}$ on $[0, 1]$, with $n = 2^k + j$ and $0 \le j < 2^k$, tends to $0$ in probability but takes the values $0$ and $1$ infinitely often at every $\omega$.
+- [x] Almost sure convergence implies convergence in probability.
+  By dominated convergence applied to $\mathbf{1}\{\|X_n - X\| \ge \epsilon\}$.
+- [x] Convergence in $L^p$, $p \ge 1$, implies convergence in probability.
+  By Markov's inequality, $\P(\|X_n - X\| \ge \epsilon) \le \epsilon^{-p} \E[\|X_n - X\|^p]$.
+- [ ] Almost sure convergence implies convergence in $L^1$.
+  $X_n = n \mathbf{1}_{[0, 1/n]}$ on $[0, 1]$ tends to $0$ almost surely, but $\E[X_n] = 1$.
+- [ ] Convergence in distribution implies convergence in probability.
+  Take $X_n = U$ and $X = 1 - U$ with $U$ uniform. The implication does hold when the limit is a constant.
+
+> Almost sure and $L^p$ convergence both imply convergence in probability, which implies convergence in distribution. None of the converse implications holds in general.
+>
+> See *Random vectors*, Part V.
+
+## Subsequences and metrics @further
+Let $X_n$ and $X$ be random vectors on one probability space. Which statements are true?
+
+- [x] If $X_n \cvp X$, then some subsequence $X_{\varphi(n)}$ converges to $X$ almost surely.
+  Choose $\varphi(k)$ with $\P(\|X_{\varphi(k)} - X\| \ge 2^{-k}) \le 2^{-k}$ and apply the Borel–Cantelli lemma.
+- [x] $X_n \cvp X$ if and only if every subsequence of $(X_n)$ has a further subsequence that converges to $X$ almost surely.
+  Direct implication: every subsequence still converges in probability to $X$, so the Borel–Cantelli extraction applies to it. Converse: if $X_n$ did not converge in probability, there would be $\epsilon, \eta > 0$ and a subsequence along which $\P(\|X_n - X\| \ge \epsilon) \ge \eta$, and none of its further subsequences could converge almost surely, since it would then converge in probability.
+- [x] $d(X, Y) = \E[\min(1, \|X - Y\|)]$ is a distance (between random vectors identified when they are almost surely equal) such that $d(X_n, X) \to 0$ if and only if $X_n \cvp X$.
+  $\min(1, \cdot)$ is bounded, so dominated convergence and Markov's inequality give the two directions.
+- [ ] On $\Omega = [0, 1]$ with the Lebesgue measure, there is a distance $\rho$ between random variables such that, for all $X_n$ and $X$, $\rho(X_n, X) \to 0$ if and only if $X_n \cvas X$.
+  No such distance exists. In a metric space, a sequence converges to $x$ as soon as each of its subsequences has a further subsequence converging to $x$. Take the typewriter sequence $X_n = \mathbf{1}_{[j 2^{-k}, (j+1) 2^{-k}]}$, $n = 2^k + j$: it tends to $0$ in probability, so each of its subsequences has a further subsequence tending to $0$ almost surely, that is, in $\rho$. Hence $\rho(X_n, 0) \to 0$, which would mean $X_n \cvas 0$. But at every $\omega$, $X_n(\omega)$ takes the values $0$ and $1$ infinitely often.
+
+> Convergence in probability is metrizable, by $d$, and it is characterized by almost sure convergence along subsequences. Almost sure convergence is not metrizable on $[0, 1]$. On a finite probability space, by contrast, the two modes coincide, and $d$ metrizes both.
+>
+> Not in the course; these facts are in every graduate probability textbook, next to the Borel–Cantelli lemmas.
+
+## Skorokhod's representation @further
+*Skorokhod's representation theorem*, not seen in class, states that if $X_n \cvd X$ in $\R^d$, there are, on some probability space, random vectors $Y_n$ and $Y$ with $Y_n \overset{d}{=} X_n$ for every $n$, $Y \overset{d}{=} X$ and $Y_n \cvas Y$. Which statements are true?
+
+- [ ] It shows that $X_n \cvas X$ after a modification of the $X_n$ on a null set.
+  The $Y_n$ are new random vectors, on a new space, with the same laws as the $X_n$; nothing is said about the $X_n$ themselves, which need not even live on a common space.
+- [x] It applies even when the $X_n$ and $X$ are defined on different probability spaces.
+  Only their laws enter the hypothesis and the conclusion.
+- [x] In dimension one, one can take $Y_n = F_{X_n}^{-1}(U)$ and $Y = F_X^{-1}(U)$ for a single $U \sim \mathrm{Unif}([0, 1])$, with the generalized inverses $F^{-1}(u) = \inf\{x : F(x) \ge u\}$.
+  $F^{-1}(U)$ has the distribution function $F$, and $F_{X_n}^{-1}(u) \to F_X^{-1}(u)$ at every continuity point $u$ of $F_X^{-1}$, that is, for all but countably many $u$.
+- [x] It gives a short proof of the continuous mapping theorem for convergence in distribution.
+  $g(Y_n) \to g(Y)$ almost surely on $\{Y \in C\}$, hence in distribution, and $g(Y_n) \overset{d}{=} g(X_n)$, $g(Y) \overset{d}{=} g(X)$.
+- [ ] It gives information on the joint law of $(X_n, X)$.
+  The pair $(Y_n, Y)$ is built for the purpose and says nothing about $(X_n, X)$: think of $X_n = U$ and $X = 1 - U$.
+
+> Skorokhod's theorem turns a convergence in law into an almost sure one, at the price of changing the probability space. Since a statement about laws only involves the laws, this is often the shortest route.
+>
+> Not in the course; see van der Vaart, *Asymptotic Statistics*, Chapter 2.
+
+# Characteristic functions, tightness and the central limit theorem
+
+## Elementary properties
+Let $X$ be a random vector of $\R^d$ and $\phi_X(t) = \E[e^{i \langle t, X \rangle}]$. Which statements are true?
+
+- [x] $\phi_X$ is defined for every $t$, with no integrability assumption on $X$.
+  $|e^{i \langle t, x \rangle}| = 1$.
+- [ ] $|\phi_X(t)| = 1$ for every $t$.
+  Only $|\phi_X(t)| \le 1$ and $\phi_X(0) = 1$ hold in general; for $X \sim \mathcal{N}(0, 1)$, $\phi_X(t) = e^{-t^2/2}$.
+- [x] $\phi_X$ is uniformly continuous on $\R^d$.
+  Split the expectation between a large ball, where $|e^{ia} - e^{ib}| \le |a - b|$, and its complement, of small mass.
+- [x] For $A \in \R^{d \times d}$ and $b \in \R^d$, $\phi_{AX + b}(t) = e^{i \langle b, t \rangle} \phi_X(A^\top t)$.
+  $\langle t, Ax + b \rangle = \langle A^\top t, x \rangle + \langle b, t \rangle$.
+- [ ] $\phi_X$ is real valued.
+  Only when $X \overset{d}{=} -X$. For the exponential law of parameter $1$, $\phi_X(t) = 1/(1 - it)$.
+
+> See *Random vectors*, Part III.
+
+## Densities and integrability
+Let $X$ be a real random variable. Which statements are true?
+
+- [x] $\phi_X$ is real valued if and only if $X \overset{d}{=} -X$.
+  $\phi_{-X} = \overline{\phi_X}$, and the characteristic function determines the law.
+- [ ] If $X \sim \mathrm{Ber}(p)$ with $p \in (0, 1)$, then $\phi_X$ is integrable on $\R$.
+  $\phi_X(t) = 1 - p + p e^{it}$ is $2\pi$-periodic and does not tend to $0$.
+- [x] If $X$ has a density, then $\phi_X(t) \to 0$ as $|t| \to \infty$.
+  This is the Riemann–Lebesgue lemma.
+- [x] If $\phi_X$ is integrable, then $X$ has a bounded continuous density, given by $p(x) = \frac{1}{2\pi} \int_\R e^{-itx} \phi_X(t) \, dt$.
+  This is the Fourier inversion theorem.
+
+> See *Random vectors*, Part III.
+
+## Gaussian vectors @calc
+Let $\mu \in \R^d$, $\Sigma \in \R^{d \times d}$ symmetric positive semidefinite, and $X \sim \mathcal{N}(\mu, \Sigma)$. Which statements are true?
+
+- [x] $\phi_X(t) = \exp\big(i \langle \mu, t \rangle - \frac12 t^\top \Sigma t\big)$.
+  Write $X = \mu + \Sigma^{1/2} X'$ with $X' \sim \mathcal{N}(0, I_d)$, whose characteristic function is $e^{-\|t\|^2/2}$.
+- [x] For $A \in \R^{m \times d}$, $AX \sim \mathcal{N}(A\mu, A \Sigma A^\top)$, even when $A \Sigma A^\top$ is singular.
+  $\phi_{AX}(t) = \phi_X(A^\top t)$, which is the characteristic function of $\mathcal{N}(A\mu, A \Sigma A^\top)$.
+- [ ] $X$ has a density with respect to the Lebesgue measure on $\R^d$.
+  Only when $\Sigma$ is invertible: otherwise, $X$ lives on the affine subspace $\mu + \mathrm{Im}(\Sigma)$, of Lebesgue measure zero.
+- [x] If $X = (X_1, X_2)$ with $\Cov(X_1, X_2) = 0$, then $X_1$ and $X_2$ are independent.
+  The characteristic function factorizes, since $\Sigma$ is block diagonal. This is special to gaussian vectors.
+
+> A gaussian law is defined through its characteristic function, which makes sense for every symmetric positive semidefinite $\Sigma$, singular or not.
+>
+> See *Random vectors*, Part III.
+
+## The exponential law @calc
+Let $X$ follow the exponential law of parameter $\lambda > 0$, of density $\lambda e^{-\lambda x}$ on $(0, \infty)$. Which statements are true?
+
+- [ ] $\phi_X(t) = \dfrac{\lambda}{\lambda + it}$.
+  The sign is wrong; this is $\phi_{-X}(t)$.
+- [x] $\phi_X(t) = \dfrac{\lambda}{\lambda - it}$.
+  $\int_0^\infty \lambda e^{(it - \lambda)x} \, dx = \lambda/(\lambda - it)$, since $\mathrm{Re}(it - \lambda) < 0$.
+- [x] $\phi_X'(0) = i/\lambda$.
+  $\phi_X'(t) = i\lambda/(\lambda - it)^2$, and indeed $\phi_X'(0) = i \E[X]$.
+- [x] $\phi_X$ is not integrable on $\R$, although $X$ has a density.
+  $|\phi_X(t)| = \lambda/\sqrt{\lambda^2 + t^2} \sim \lambda/|t|$. This is consistent with the inversion theorem: the density jumps at $0$, whereas an integrable $\phi_X$ would give a continuous one.
+
+? Compute $\int_0^\infty \lambda e^{(it - \lambda) x} \, dx$.
+
+> $\phi_X(t) = \lambda/(\lambda - it)$. It tends to $0$ at infinity, as the Riemann–Lebesgue lemma predicts, but too slowly to be integrable.
+>
+> See *Random vectors*, Part III.
+
+## Moments and derivatives
+Let $X$ be a real random variable. Which statements are true?
+
+- [x] If $\E[|X|^r] < \infty$, then $\phi_X$ is $r$ times continuously differentiable and $\phi_X^{(k)}(0) = i^k \E[X^k]$ for $k \le r$.
+  Differentiate under the expectation, with domination by $|X|^k$.
+- [ ] If $\phi_X$ is differentiable at $0$, then $\E[|X|] < \infty$.
+  Moments give derivatives, but the converse fails in odd order: some laws with $\E[|X|] = \infty$ have a characteristic function differentiable at $0$.
+- [x] If $\phi_X$ is twice differentiable at $0$, then $\E[X^2] = -\phi_X''(0) < \infty$.
+  By the symmetric second difference and Fatou's lemma.
+- [ ] If $\E[X^2] = \infty$, then $\phi_X$ is not continuous at $0$.
+  A characteristic function is always uniformly continuous.
+
+> Moments give derivatives. The converse only holds for derivatives of even order at $0$.
+>
+> See *Random vectors*, Part III.
+
+## Which families are tight?
+Which families of real random variables are uniformly tight?
+
+- [x] Any finite family.
+  Take the largest of the finitely many $M$.
+- [ ] $X_n \sim \mathcal{N}(0, n)$, $n \ge 1$.
+  $\P(|X_n| \ge M) = \P(|Z| \ge M/\sqrt{n}) \to 1$ for every fixed $M$, with $Z \sim \mathcal{N}(0, 1)$.
+- [x] Any sequence that converges in distribution.
+  This is item 1 of Prohorov's theorem.
+- [x] $X_n = n$ with probability $1/n$ and $X_n = 0$ otherwise.
+  For $n < M$, $\P(|X_n| \ge M) = 0$, and for $n \ge M$, it is $1/n \le 1/M$. Hence, the supremum is at most $1/M$, although $\E[X_n] = 1$.
+- [x] $X_n \sim \mathcal{N}(\mu_n, \sigma_n^2)$ with $|\mu_n| \le c$ and $\sigma_n \le s$ for every $n$.
+  By Chebyshev's inequality, $\P(|X_n| \ge M) \le s^2/(M - c)^2$ for $M > c$.
+
+> Tightness means that no mass escapes to infinity. It is the analogue of boundedness for a sequence of real numbers.
+>
+> See *Random vectors*, Part IV.
+
+## A limit that is not a characteristic function
+Let $X_n \sim \mathcal{N}(0, n)$. Which statements are true?
+
+- [x] $\phi_{X_n}(t) \to \mathbf{1}\{t = 0\}$ for every $t \in \R$.
+  $\phi_{X_n}(t) = e^{-n t^2/2}$.
+- [ ] By Lévy's continuity theorem, $X_n$ converges in distribution.
+  Lévy's theorem requires the pointwise limit to be continuous at $0$, which fails here.
+- [x] $F_{X_n}(x) \to 1/2$ for every $x \in \R$.
+  $F_{X_n}(x) = \P(Z \le x/\sqrt{n}) \to \P(Z \le 0)$ for $Z \sim \mathcal{N}(0, 1)$. The constant $1/2$ is not a distribution function.
+- [x] $(X_n)$ is not uniformly tight, so it does not converge in distribution.
+  By item 1 of Prohorov's theorem.
+
+> In Lévy's continuity theorem, the continuity of the limit at $0$ is what prevents mass from escaping to infinity: it is used to prove tightness.
+>
+> See *Random vectors*, Part IV.
+
+## The Cramér–Wold device
+Let $X_n$ and $X$ be random vectors of $\R^d$. Which statements are true?
+
+- [ ] $X_n \cvd X$ if and only if each coordinate converges, $X_{n, j} \cvd X_j$ for $j \le d$.
+  The marginals do not determine the joint law: with $X, Y$ independent $\mathcal{N}(0,1)$, $(X, -X)$ and $(X, Y)$ have the same marginals.
+- [x] $X_n \cvd X$ if and only if $\langle t, X_n \rangle \cvd \langle t, X \rangle$ for every $t \in \R^d$.
+  $\phi_{\langle t, X_n \rangle}(1) = \phi_{X_n}(t)$, and Lévy's theorem concludes.
+- [x] The multivariate central limit theorem follows from the scalar one through this device.
+  The $\langle t, X_i \rangle$ are i.i.d. real variables, of variance $t^\top \Sigma t$.
+- [ ] It suffices to check $\langle t, X_n \rangle \cvd \langle t, X \rangle$ for $t$ in the canonical basis.
+  This is the convergence of the coordinates, which is not enough, since the marginals do not determine the joint law.
+
+> See *Random vectors*, Part IV.
+
+## Inside the proof of the central limit theorem @calc
+Let $X_1, \dots, X_n$ be i.i.d. copies of a real $X$ with $\E[X] = 0$ and $\E[X^2] = 1$, of characteristic function $\phi$. Which expressions are equal to $\phi_{\sqrt{n} \bar X_n}(t)$?
+
+- [ ] $\phi(t/n)^n$.
+  This is $\phi_{\bar X_n}(t)$.
+- [x] $\phi(t/\sqrt{n})^n$.
+  $\sqrt n \bar X_n = \sum_i X_i/\sqrt n$, a sum of independent terms.
+- [ ] $n \, \phi(t/\sqrt{n})$.
+  Independence turns sums into products of characteristic functions, not into multiples.
+- [x] $(1 - t^2/(2n) + o(1/n))^n$, which tends to $e^{-t^2/2}$.
+  $\phi(u) = 1 - u^2/2 + o(u^2)$ near $0$, since $\phi'(0) = i\E[X] = 0$ and $\phi''(0) = -\E[X^2] = -1$.
+
+> Centering cancels the first order term, and the unit variance fixes the second one. The limit $e^{-t^2/2}$ is continuous, so Lévy's theorem concludes.
+>
+> See *Random vectors*, Part IV.
+
+## The Cauchy law @calc
+Let $X_1, X_2, \dots$ be i.i.d. standard Cauchy variables, of characteristic function $\phi(t) = e^{-|t|}$. Which statements are true?
+
+- [x] $\bar X_n$ is standard Cauchy for every $n$.
+  $\phi_{\bar X_n}(t) = \phi(t/n)^n = e^{-|t|}$.
+- [ ] $\bar X_n \cvp 0$ by the weak law of large numbers.
+  The weak law of the course needs $\phi$ to be differentiable at $0$, and $e^{-|t|}$ is not; indeed, $\E[|X|] = \infty$.
+- [x] $\bar X_n$ converges in distribution, but not in probability to a constant.
+  Its law does not depend on $n$, and it is not a Dirac mass.
+- [ ] $\bar X_n$ converges almost surely.
+  Its limit would be measurable with respect to the tail $\sigma$-field of the $X_i$, hence constant by Kolmogorov's zero-one law, whereas the law of $\bar X_n$ stays Cauchy.
+
+> Averaging Cauchy variables does not concentrate them at all: the laws of large numbers need an integrability assumption.
+>
+> See *Random vectors*, Part IV.
+
+# Slutsky, continuous mapping and the symbols $o_P$ and $O_P$
+
+## Slutsky's lemma
+Let $X_n \cvd X$ in $\R$ and $Y_n \cvd c$, with $c \in \R$ a constant. Which statements are true?
+
+- [x] $X_n + Y_n \cvd X + c$.
+  Continuous mapping with $(x, y) \mapsto x + y$.
+- [ ] These conclusions still hold if $Y_n \cvd Y$ for a nonconstant $Y$.
+  With $X$ standard gaussian, $X_n = X$ and $Y_n = (-1)^n X$, we have $Y_n \cvd \mathcal{N}(0, 1)$, but $X_n + Y_n$ alternates between $2X$ and $0$, so it has no limit in law at all.
+- [x] $Y_n X_n \cvd cX$.
+  Continuous mapping with $(x, y) \mapsto yx$.
+- [x] $X_n / Y_n \cvd X/c$ if $c \neq 0$, whatever value is given to $x/0$.
+  $(x, y) \mapsto x/y$, extended in any way to $\{y = 0\}$, is continuous on $\{y \neq 0\}$, which carries the limit law.
+
+> Since a constant limit in distribution is a limit in probability, $(X_n, Y_n) \cvd (X, c)$, and the continuous mapping theorem gives the three conclusions.
+>
+> See *Random vectors*, Part V.
+
+## Marginal convergence is not enough @calc
+Let $X, Y$ be independent $\mathcal{N}(0, 1)$, and set $X_n = X$ and $Y_n = -X$ for every $n$. Which statements are true?
+
+- [x] $X_n \cvd X$ and $Y_n \cvd Y$.
+  $-X \sim \mathcal{N}(0, 1)$, the law of $Y$.
+- [ ] $(X_n, Y_n) \cvd (X, Y)$.
+  $(X_n, Y_n) = (X, -X)$ lives on the line $\{y = -x\}$, whereas $(X, Y)$ has a density on $\R^2$.
+- [x] $X_n + Y_n \cvd 0$, whereas $X + Y \sim \mathcal{N}(0, 2)$.
+  $X_n + Y_n = 0$ for every $n$.
+- [ ] $X_n + Y_n \cvd X + Y$ by Slutsky's lemma.
+  Slutsky's lemma requires one of the two limits to be a constant.
+
+> When one limit is a constant $c$, the joint limit is forced to be $\P_X \otimes \delta_c$, whatever the dependence. Otherwise, the marginals say nothing about the joint law.
+>
+> See *Random vectors*, Part V.
+
+## Continuous mapping
+Let $X_n \cvd X$ in $\R$, with $X \sim \mathcal{N}(0, 1)$. Which statements are true?
+
+- [x] $X_n^2$ converges in distribution to the $\chi^2_1$ law.
+  $x \mapsto x^2$ is continuous.
+- [x] $\mathbf{1}\{X_n > 0\} \cvd \mathrm{Ber}(1/2)$.
+  The indicator is discontinuous only at $0$, and $\P(X = 0) = 0$.
+- [ ] $\E[X_n^2] \to 1$.
+  $x \mapsto x^2$ is unbounded. With $\xi_n \sim \mathrm{Ber}(1/n)$ independent of $X$ and $X_n = X + \sqrt{n} \, \xi_n$, we have $X_n \cvd X$ since $\sqrt{n} \, \xi_n \cvp 0$, but $\E[X_n^2] = 1 + n \cdot \frac1n = 2$. The convergence of $\E[X_n^2]$ needs the uniform integrability of $(X_n^2)$, for instance $\sup_n \E[|X_n|^{2 + \eta}] < \infty$.
+- [x] $1/X_n \cvd 1/X$, whatever value is given to $1/0$.
+  $x \mapsto 1/x$ is continuous on $\R \setminus \{0\}$, which has probability $1$ under the law of $X$.
+
+> The continuous mapping theorem only needs $g$ to be continuous on a set that carries the limit law.
+>
+> See *Random vectors*, Part V.
+
+## A discontinuity at the wrong place
+Let $X_n = 1/n$, $X = 0$ and $g = \mathbf{1}_{(0, \infty)}$. Which statements are true?
+
+- [x] $X_n \cvd X$, but $g(X_n) = 1$ does not tend to $g(X) = 0$.
+- [ ] The continuous mapping theorem requires $g$ to be continuous everywhere.
+  Only on a set $C$ with $\P(X \in C) = 1$.
+- [x] This does not contradict the continuous mapping theorem, since $X$ puts all its mass on the discontinuity point of $g$.
+- [x] With $X_n = -1/n$ instead, $g(X_n) \cvd g(X)$.
+  $g(-1/n) = 0 = g(0)$ for every $n$. The theorem does not apply, but the conclusion happens to hold.
+
+> See *Random vectors*, Part V.
+
+## Combining convergences
+Which statements are true for random vectors on one probability space?
+
+- [x] If $X_n \cvd c$ for a constant $c$, then $X_n \cvp c$.
+  Apply item (vi) of portmanteau to the closed set $\{x : \|x - c\| \ge \epsilon\}$.
+- [ ] If $X_n \cvd X$ and $Y_n \cvd X$, then $X_n - Y_n \cvp 0$.
+  With $X_n = U$ and $Y_n = 1 - U$, $U$ uniform, both tend in law to $\mathrm{Unif}([0,1])$, but $X_n - Y_n = 2U - 1$.
+- [ ] If $X_n \cvd X$ and $Y_n \cvd Y$, then $(X_n, Y_n) \cvd (X, Y)$.
+  The marginals do not determine the joint law. The statement holds in probability, by a union bound, or when $Y$ is a constant, by Slutsky's lemma.
+- [x] If $X_n \cvd X$ and $X_n - Y_n \cvp 0$, then $Y_n \cvd X$.
+  This is the theorem on asymptotically equivalent sequences: a perturbation negligible in probability is invisible in distribution.
+
+> See *Random vectors*, Part V.
+
+## Studentisation @calc
+Let $X_1, \dots, X_n$ be i.i.d. $\mathrm{Ber}(p)$ with $p \in (0, 1)$, and $r_\alpha$ the quantile of order $1 - \alpha/2$ of $\mathcal{N}(0, 1)$. Which statements are true?
+
+- [x] $\sqrt{n}(\bar X_n - p) \cvd \mathcal{N}(0, p(1-p))$.
+  This is the central limit theorem, with $\Var(X_1) = p(1-p)$.
+- [ ] The interval $\bar X_n \pm r_\alpha \sqrt{p(1-p)/n}$ can be computed from the sample.
+  Its width involves the unknown $p$.
+- [x] $\sqrt{n}(\bar X_n - p) / \sqrt{\bar X_n (1 - \bar X_n)} \cvd \mathcal{N}(0, 1)$, with any value on the event $\{\bar X_n \in \{0, 1\}\}$, of probability $p^n + (1-p)^n \to 0$.
+  $\bar X_n(1 - \bar X_n) \cvp p(1-p) > 0$ by continuous mapping, then Slutsky's lemma.
+- [x] $I_n = \bar X_n \pm r_\alpha \sqrt{\bar X_n (1 - \bar X_n)/n}$ satisfies $\P(p \in I_n) \to 1 - \alpha$.
+  By item (vii) of portmanteau applied to $[-r_\alpha, r_\alpha]$, whose boundary has no mass under $\mathcal{N}(0,1)$.
+- [ ] For every $n$, $\P(p \in I_n) \ge 1 - \alpha$.
+  The statement is only asymptotic. With $n = 1$, $\bar X_1 \in \{0, 1\}$, so that $I_1 = \{X_1\}$ never contains $p$. More generally, $I_n = \{0\}$ or $\{1\}$ when all the $X_i$ are equal, so that $\P(p \notin I_n) \ge (1 - p)^n + p^n$, which exceeds $\alpha$ for small $n$, or for $p$ close to $0$ or $1$.
+
+> Replacing the unknown variance by a consistent estimate keeps the limit law, by Slutsky's lemma. The resulting interval is computable, but its guarantee is only asymptotic.
+>
+> See *Random vectors*, Part VI.
+
+## The Wilson interval @calc @further
+In the setting of the previous question, the Wilson interval is the set of $p$ such that $|\sqrt{n}(\bar X_n - p)| \le r_\alpha \sqrt{p(1-p)}$. Which statements are true?
+
+- [x] It is obtained by solving a quadratic inequality in $p$.
+  Squaring gives $n(\bar X_n - p)^2 \le r_\alpha^2 \, p(1-p)$.
+- [ ] It is exact: the Wilson interval $W_n$ satisfies $\P(p \in W_n) = 1 - \alpha$ for every $n$.
+  It still relies on the central limit theorem, and its coverage is only asymptotically $1 - \alpha$. For instance, with $n = 1$, $p = 1/2$ and $\alpha = 0.05$, it is $[0, r_\alpha^2/(1 + r_\alpha^2)] \approx [0, 0.79]$ if $X_1 = 0$ and $[1/(1 + r_\alpha^2), 1] \approx [0.21, 1]$ if $X_1 = 1$, so that it contains $p$ with probability $1$.
+- [x] When $\bar X_n = 0$, it is $[0, r_\alpha^2/(n + r_\alpha^2)]$.
+  The inequality becomes $n p^2 \le r_\alpha^2 \, p(1 - p)$, that is, $p(n + r_\alpha^2) \le r_\alpha^2$ for $p \ge 0$.
+- [x] It does not need any estimate of the variance.
+  The variance $p(1-p)$ is kept as a function of the unknown, and the inversion takes care of it.
+
+> Inverting the event with the exact variance $p(1-p)$, rather than plugging in $\bar X_n(1 - \bar X_n)$, gives an interval asymptotically equivalent to the plug-in one, and much better for small $n$ or for $p$ close to $0$ or $1$.
+>
+> See *Random vectors*, Part VI.
+
+## Moments do not always converge
+Let $X_n = n$ with probability $1/n$ and $X_n = 0$ otherwise. Which statements are true?
+
+- [x] $X_n \cvd 0$.
+  $\P(X_n \neq 0) = 1/n \to 0$.
+- [ ] $(X_n)$ is uniformly integrable.
+  $\E[X_n \mathbf{1}\{X_n \ge M\}] = 1$ for every $n \ge M$.
+- [x] $\E[X_n] = 1$ for every $n$, so that $\E[X_n] \not\to 0$.
+- [x] If $X_n \cvd X$ and $\sup_n \E[|X_n|^{1 + \eta}] < \infty$ for some $\eta > 0$, then $\E[X_n] \to \E[X]$.
+  The moment bound implies uniform integrability, which is what the convergence of moments needs. Here, $\E[X_n^{1+\eta}] = n^\eta$ is unbounded.
+
+> Portmanteau only tests bounded functions, and $x \mapsto x$ is not bounded. Uniform integrability is the missing condition.
+>
+> See *Random vectors*, Part V.
+
+## Uniform convergence of distribution functions @further
+Let $X_n \cvd X$ in $\R$. The *Berry–Esseen theorem*, not seen in class, states that if $X_1, X_2, \dots$ are i.i.d. with mean $\mu$, variance $\sigma^2 > 0$ and $\E[|X_1 - \mu|^3] < \infty$, then $\sup_x |\P(\sqrt{n}(\bar X_n - \mu)/\sigma \le x) - \Phi(x)| \le C \, \E[|X_1 - \mu|^3] / (\sigma^3 \sqrt{n})$ for a universal constant $C$, where $\Phi$ is the distribution function of $\mathcal{N}(0, 1)$. Which statements are true?
+
+- [ ] $\sup_x |F_{X_n}(x) - F_X(x)| \to 0$ in general.
+  With $X_n = 1/n$ and $X = 0$, the supremum is $1$ for every $n$, attained at $x = 0$.
+- [x] If $F_X$ is continuous, then $\sup_x |F_{X_n}(x) - F_X(x)| \to 0$.
+  This is Pólya's lemma.
+- [x] If $X_1, X_2, \dots$ are i.i.d. with mean $\mu$ and variance $\sigma^2 \in (0, \infty)$, then $\sup_x |\P(\sqrt{n}(\bar X_n - \mu)/\sigma \le x) - \Phi(x)| \to 0$, even without a third moment.
+  Central limit theorem and Pólya's lemma, since $\Phi$ is continuous; the Berry–Esseen theorem only adds a rate.
+- [x] For i.i.d. $\mathrm{Ber}(p)$ observations, the Berry–Esseen bound is $C \, \frac{p^2 + (1 - p)^2}{\sqrt{n p(1 - p)}}$, so that the normal approximation needs more observations when $p$ is close to $0$ or $1$.
+  $\E[|X_1 - p|^3] = p(1-p)^3 + (1-p)p^3 = p(1-p)\big(p^2 + (1-p)^2\big)$ and $\sigma^3 = (p(1-p))^{3/2}$.
+
+? For the last option, compute $\E[|X_1 - p|^3]$ for a Bernoulli variable.
+
+> Pólya's lemma is in the course; the Berry–Esseen theorem, which quantifies it for the central limit theorem, is not.
+>
+> See *Random vectors*, Part V.
+
+## The two symbols
+Which statements are true?
+
+- [x] $X_n = o_P(1)$ means $X_n \cvp 0$.
+- [x] $X_n = O_P(1)$ means that $(X_n)$ is uniformly tight.
+- [x] If $X_n = O_P(1)$, then some subsequence of $(X_n)$ converges in distribution.
+  This is item 2 of Prohorov's theorem. The whole sequence need not converge: $X_n = (-1)^n$ is $O_P(1)$.
+- [x] If $X_n \cvd X$, then $X_n = O_P(1)$.
+  This is item 1 of Prohorov's theorem.
+
+> $o_P$ is the probabilistic version of "negligible", and $O_P$ that of "bounded", with convergence in probability and tightness in place of convergence to $0$ and boundedness.
+>
+> See *Random vectors*, Part VII.
+
+## Rules of calculation
+For sequences of real random variables, which rules are true?
+
+- [x] $o_P(1) + O_P(1) = O_P(1)$.
+- [ ] $O_P(1) \, O_P(1) = o_P(1)$.
+  Take both sequences equal to $1$.
+- [x] $o_P(1) \, O_P(1) = o_P(1)$.
+  Split on $\{|X_n| \ge M\}$ and its complement, with $M$ given by tightness.
+- [ ] $O_P(1) / O_P(1) = O_P(1)$ when the denominator does not vanish.
+  $1/(1/n) = n$ is not $O_P(1)$.
+- [x] If $a_n \to 0$, then $O_P(a_n) = o_P(1)$.
+
+> These rules are one way: $o_P(1) = O_P(1)$ is true, $O_P(1) = o_P(1)$ is not.
+>
+> See *Random vectors*, Part VII.
+
+## Orders of magnitude of the empirical mean @calc
+Let $X_1, X_2, \dots$ be i.i.d. real with mean $\mu$ and variance $\sigma^2 \in (0, \infty)$. Which statements are true?
+
+- [x] $\bar X_n - \mu = O_P(n^{-1/2})$.
+  $\sqrt{n}(\bar X_n - \mu)$ converges in distribution, hence is tight.
+- [ ] $\bar X_n - \mu = o_P(n^{-1/2})$.
+  $\sqrt{n}(\bar X_n - \mu)$ converges to a nondegenerate gaussian, not to $0$.
+- [x] $\bar X_n - \mu = o_P(n^{-1/4})$.
+  $n^{1/4}(\bar X_n - \mu) = n^{-1/4} \cdot \sqrt{n}(\bar X_n - \mu)$ is $o(1) \, O_P(1)$.
+- [ ] $(\bar X_n - \mu)^2 = o_P(1/n)$.
+  $n(\bar X_n - \mu)^2 = (\sqrt{n}(\bar X_n - \mu))^2$ converges in distribution to $\sigma^2 \chi^2_1$, not to $0$: it is $O_P(1/n)$, not $o_P(1/n)$.
+
+> The central limit theorem gives the exact order $n^{-1/2}$ of the error.
+>
+> See *Random vectors*, Parts IV and VII.
+
+## Transferring a Taylor remainder
+Let $X_n \cvp 0$ in $\R$, and $R(h) = h^2 \sin(1/h)$ for $h \neq 0$, $R(0) = 0$. Which statements are true?
+
+- [x] $R(X_n) = o_P(|X_n|)$.
+  $|R(h)| \le h^2 = o(|h|)$ as $h \to 0$.
+- [x] $R(X_n) = O_P(|X_n|^2)$.
+  $|R(h)| \le |h|^2$.
+- [ ] The transfer theorem needs a bound on $|R(h)|$ for every $h$, not only as $h \to 0$.
+  Only the behaviour near $0$ matters, since $X_n \cvp 0$.
+- [x] If moreover $\sqrt{n} X_n = O_P(1)$, then $\sqrt{n} R(X_n) \cvp 0$.
+  $\sqrt{n} R(X_n) = O_P(1) \cdot \sqrt{n} X_n \cdot X_n$ is $O_P(1) \, O_P(1) \, o_P(1)$.
+
+> This theorem is what allows us to evaluate a deterministic Taylor remainder at a random increment, as in the proof of the delta method.
+>
+> See *Random vectors*, Part VII.
+
+## Negligible with respect to a tight sequence
+Let $X_n = O_P(1)$ and $Y_n = o_P(X_n)$, that is, $Y_n = W_n X_n$ with $W_n \cvp 0$. Which statements are true?
+
+- [x] $Y_n = o_P(1)$.
+- [ ] $Y_n = o_P(1/n)$.
+  With $X_n = 1$ and $W_n = Y_n = 1/n$, $n Y_n = 1$.
+- [x] A proof splits $\P(|Y_n| > \epsilon)$ on $\{|X_n| \ge M\}$ and its complement, with $M$ chosen by tightness.
+  $\P(|Y_n| > \epsilon) \le \P(|X_n| \ge M) + \P(|W_n| > \epsilon/M)$.
+- [x] Without the tightness of $(X_n)$, the conclusion can fail: $X_n = n$ and $Y_n = 1$ satisfy $Y_n = o_P(X_n)$.
+  $Y_n = (1/n) X_n$, but $Y_n$ does not tend to $0$.
+
+> See *Random vectors*, Part VII.
+
+## Asymptotic probabilities
+Let $T_n \cvd \mathcal{N}(0, 1)$ and $r_\alpha$ the quantile of order $1 - \alpha/2$ of $\mathcal{N}(0,1)$. Which statements are true?
+
+- [x] $\P(|T_n| \le r_\alpha) \to 1 - \alpha$.
+  Item (vii) of portmanteau applied to $B = [-r_\alpha, r_\alpha]$, whose boundary $\{\pm r_\alpha\}$ has no mass under $\mathcal{N}(0, 1)$.
+- [x] For $\alpha = 0.05$, $r_\alpha \approx 1.96$.
+- [ ] $\P(T_n \in B) \to \P(Z \in B)$ for every Borel set $B$, with $Z \sim \mathcal{N}(0, 1)$.
+  If each $T_n$ is discrete, for instance a standardized binomial, the countable union $B$ of their supports has $\P(T_n \in B) = 1$ but $\P(Z \in B) = 0$.
+- [ ] $\P(|T_n| \le r_\alpha) \ge 1 - \alpha$ for $n$ large enough.
+  The limit can be approached from below: with $T_n = (1 + 1/n) Z$, $\P(|T_n| \le r_\alpha) < 1 - \alpha$ for every $n$.
+
+> See *Random vectors*, Part VI.
+
+## The Student statistic @further
+Let $X_1, X_2, \dots$ be i.i.d. with mean $\mu$ and variance $\sigma^2 \in (0, \infty)$, and $s_n^2 = \frac{1}{n-1} \sum_{i \le n} (X_i - \bar X_n)^2$. For gaussian observations, a classical result, not seen in class, states that $\sqrt{n}(\bar X_n - \mu)/s_n$ follows Student's law with $n - 1$ degrees of freedom, whose quantiles are larger than those of $\mathcal{N}(0, 1)$ and tend to them as $n \to \infty$. Which statements are true?
+
+- [x] $s_n^2 \cvp \sigma^2$.
+  $s_n^2 = \frac{n}{n-1}\big(\frac1n \sum_i X_i^2 - \bar X_n^2\big)$, and the law of large numbers applies to both averages.
+- [x] $\sqrt{n}(\bar X_n - \mu)/s_n \cvd \mathcal{N}(0, 1)$, with any value on $\{s_n = 0\}$.
+  Central limit theorem, continuous mapping and Slutsky's lemma.
+- [ ] The convergence $\sqrt{n}(\bar X_n - \mu)/s_n \cvd \mathcal{N}(0, 1)$ requires gaussian observations.
+  Only the finite variance is used.
+- [x] For gaussian observations and a small $n$, the interval $\bar X_n \pm r_\alpha s_n/\sqrt{n}$, with $r_\alpha$ the quantile of order $1 - \alpha/2$ of $\mathcal{N}(0, 1)$, contains $\mu$ with probability smaller than $1 - \alpha$.
+  The exact law is Student's, whose quantile of order $1 - \alpha/2$ is larger than $r_\alpha$: the gaussian interval is too short, and only asymptotically right.
+
+> The asymptotic result holds for every law with a finite variance; the exact Student law is specific to gaussian observations, and corrects the gaussian interval for small $n$.
+>
+> See *Random vectors*, Part VI.
+
+## Rates and convergence in law
+Let $\sqrt{n}(T_n - \theta) \cvd \mathcal{N}(0, \sigma^2)$ with $\sigma > 0$. Which statements are true?
+
+- [x] $T_n \cvp \theta$.
+  $T_n - \theta = O_P(n^{-1/2}) = o_P(1)$.
+- [ ] $T_n \cvas \theta$.
+  Let $Z \sim \mathcal{N}(0, \sigma^2)$ and $\xi_n$ independent with $\P(\xi_n = 1) = 1/n$, $\xi_n = 0$ otherwise, and $T_n = \theta + Z/\sqrt{n} + \xi_n$. Since $\sqrt{n}\xi_n \cvp 0$, $\sqrt{n}(T_n - \theta) \cvd \mathcal{N}(0, \sigma^2)$ by Slutsky's lemma, but $\xi_n = 1$ infinitely often almost surely by the second Borel–Cantelli lemma.
+- [ ] $n(T_n - \theta)$ converges in distribution.
+  $|n(T_n - \theta)| = \sqrt{n} \, |\sqrt{n}(T_n - \theta)|$ tends to infinity in probability, since the gaussian limit puts no mass at $0$; the sequence is not tight.
+- [x] $n^{1/4}(T_n - \theta) \cvp 0$.
+  $n^{1/4}(T_n - \theta) = n^{-1/4} \, O_P(1)$.
+
+> See *Random vectors*, Part VII.
+
+## Maxima of exponential variables @calc @further
+Let $X_1, X_2, \dots$ be i.i.d. exponential of parameter $1$, and $M_n = \max_{i \le n} X_i$. Which statements are true?
+
+- [x] $M_n / n \cvp 0$.
+  $\P(M_n > n\epsilon) \le n e^{-n\epsilon} \to 0$.
+- [x] $M_n / \log n \cvp 1$.
+  For $\epsilon \in (0, 1)$, $\P(M_n \le (1-\epsilon)\log n) = (1 - n^{-(1-\epsilon)})^n \le \exp(-n^{\epsilon}) \to 0$ and $\P(M_n > (1 + \epsilon) \log n) \le n \cdot n^{-(1+\epsilon)} \to 0$.
+- [x] $\P(M_n - \log n \le x) \to \exp(-e^{-x})$ for every $x \in \R$.
+  $\P(M_n - \log n \le x) = (1 - e^{-x}/n)^n$ as soon as $x \ge -\log n$. The limit is the Gumbel law.
+- [ ] $M_n - \log n$ converges in probability.
+  If it did, $(M_{2n} - \log 2n) - (M_n - \log n) = (M'_n - M_n)_+ - \log 2$ would tend to $0$ in probability, where $M'_n$ is the maximum of $X_{n+1}, \dots, X_{2n}$. But $(M'_n - M_n)_+$ converges in law to $(G' - G)_+$, with $G, G'$ independent Gumbel variables, which is $0$ with probability $1/2$ by symmetry, hence is not the constant $\log 2$.
+
+> The maximum grows like $\log n$, with fluctuations of order $1$ around it.
+>
+> Extreme value theory is not in the course, but these computations only use the distribution function of a maximum, as for the maximum of uniforms.
+
+# Exercises: convergence
+The same techniques, on examples that were not treated in class: distribution functions of maxima and minima, characteristic functions, Chebyshev's inequality, the symbols $o_P$ and $O_P$.
+
+## The minimum of exponential variables @calc
+Let $X_1, X_2, \dots$ be i.i.d. exponential of parameter $1$, and $m_n = \min_{i \le n} X_i$. Which statements are true?
+
+- [x] $n m_n$ follows the exponential law of parameter $1$, for every $n$.
+  $\P(n m_n > t) = \P(X_1 > t/n)^n = e^{-t}$.
+- [x] $m_n \cvp 0$.
+  $\P(m_n > \epsilon) = e^{-n\epsilon} \to 0$.
+- [x] $m_n \cvas 0$.
+  $(m_n)$ is nonincreasing, so it has an almost sure limit, which must be $0$ since $m_n \cvp 0$.
+- [ ] $n m_n \cvp 0$.
+  Its law is the exponential law of parameter $1$ for every $n$.
+- [ ] $\sqrt{n} \, m_n$ converges in distribution to a nondegenerate limit.
+  $\sqrt{n} \, m_n = n m_n / \sqrt{n}$ is $O_P(1) \, o(1)$, so it tends to $0$ in probability.
+
+? Compute $\P(n m_n > t)$ with the independence of the $X_i$.
+
+> The minimum of $n$ i.i.d. exponential variables of parameter $1$ is exponential of parameter $n$: the scaling $n$ is exact here, not only asymptotic.
+>
+> Same technique as the maximum of uniforms, *Random vectors*, Part II.
+
+## Maxima of Pareto variables @calc
+Let $X_1, X_2, \dots$ be i.i.d. with $\P(X > x) = x^{-\alpha}$ for $x \ge 1$, where $\alpha > 0$, and $M_n = \max_{i \le n} X_i$. Which statements are true?
+
+- [x] $\P(M_n \le n^{1/\alpha} t) \to \exp(-t^{-\alpha})$ for every $t > 0$.
+  As soon as $n^{1/\alpha} t \ge 1$, $\P(M_n \le n^{1/\alpha} t) = (1 - t^{-\alpha}/n)^n$.
+- [x] $M_n / n^{1/\alpha}$ converges in distribution.
+  $t \mapsto \exp(-t^{-\alpha})$ on $(0, \infty)$, extended by $0$, is continuous, nondecreasing, with limits $0$ and $1$: it is a distribution function (the Fréchet law).
+- [ ] $M_n / n \cvp 0$ for every $\alpha > 0$.
+  $M_n/n = (M_n/n^{1/\alpha}) \, n^{1/\alpha - 1}$ tends to $0$ in probability only for $\alpha > 1$; for $\alpha < 1$, it tends to infinity.
+- [x] $\alpha \log M_n - \log n$ converges in distribution to the Gumbel law.
+  The $\alpha \log X_i$ are i.i.d. exponential of parameter $1$, and $\alpha \log M_n$ is their maximum.
+
+> Heavy tails give maxima of polynomial size $n^{1/\alpha}$, whereas exponential tails give maxima of size $\log n$.
+>
+> Same technique as the maximum of uniforms, *Random vectors*, Part II.
+
+## From binomial to Poisson @calc
+Let $\lambda > 0$ and $X_n \sim \mathrm{Bin}(n, \lambda/n)$ for $n > \lambda$. Which statements are true?
+
+- [x] $\phi_{X_n}(t) = \big(1 - \frac{\lambda}{n} + \frac{\lambda}{n} e^{it}\big)^n$.
+  $X_n$ is a sum of $n$ independent $\mathrm{Ber}(\lambda/n)$ variables.
+- [x] $X_n$ converges in distribution to the Poisson law of parameter $\lambda$.
+  $\phi_{X_n}(t) \to \exp(\lambda(e^{it} - 1))$, which is the characteristic function of the Poisson law, continuous, and Lévy's theorem concludes.
+- [ ] $(X_n - \lambda)/\sqrt{\lambda} \cvd \mathcal{N}(0, 1)$ as $n \to \infty$, for fixed $\lambda$.
+  The limit is a Poisson variable, centered and scaled, not a gaussian: the variance $\lambda$ does not grow with $n$.
+- [x] $\P(X_n = k) \to e^{-\lambda} \lambda^k / k!$ for every $k \in \N$.
+  Apply item (vii) of portmanteau to $B = (k - 1/2, k + 1/2)$, whose boundary has no mass and which contains no other integer.
+
+? $(1 + z/n)^n \to e^z$ for every complex $z$.
+
+> Lévy's continuity theorem turns the limit of characteristic functions into a convergence in law; portmanteau then gives the probabilities of single points.
+>
+> See *Random vectors*, Parts II and IV.
+
+## A central limit theorem for the Poisson law @calc
+Let $N_\lambda$ follow the Poisson law of parameter $\lambda$, and let $\lambda \to \infty$. Which statements are true?
+
+- [x] $\phi_{(N_\lambda - \lambda)/\sqrt{\lambda}}(t) = \exp\big(\lambda(e^{it/\sqrt\lambda} - 1 - it/\sqrt\lambda)\big)$.
+  $\phi_{N_\lambda}(s) = \exp(\lambda(e^{is} - 1))$, and property (iv) of characteristic functions handles the centering and the scaling.
+- [x] $(N_\lambda - \lambda)/\sqrt{\lambda} \cvd \mathcal{N}(0, 1)$ as $\lambda \to \infty$.
+  With $u = t/\sqrt\lambda$, $\lambda(e^{iu} - 1 - iu) = \lambda(-u^2/2 + O(u^3)) = -t^2/2 + O(\lambda^{-1/2})$.
+- [x] For integer $\lambda = n$, it also follows from the central limit theorem.
+  $N_n$ has the law of a sum of $n$ i.i.d. Poisson variables of parameter $1$.
+- [ ] $(N_\lambda - \lambda)/\lambda \cvd \mathcal{N}(0, 1)$.
+  It tends to $0$ in probability, by Chebyshev's inequality: its variance is $1/\lambda$.
+
+> See *Random vectors*, Part IV.
+
+## From geometric to exponential @calc
+For $p \in (0, 1)$, let $G_p$ be geometric on $\{1, 2, \dots\}$, with $\P(G_p > k) = (1 - p)^k$, and let $p \to 0$. Which statements are true?
+
+- [x] $\P(p G_p > t) = (1 - p)^{\lfloor t/p \rfloor} \to e^{-t}$ for every $t > 0$.
+  $\lfloor t/p \rfloor \log(1 - p) \to -t$.
+- [x] $p G_p$ converges in distribution to the exponential law of parameter $1$.
+- [ ] $\E[p G_p] = 1$ for every $p$ suffices to prove this convergence in law.
+  A mean says nothing about a law; the distribution functions have to be computed.
+- [ ] $G_p = O_P(1)$ as $p \to 0$.
+  $\P(G_p > M) = (1 - p)^M \to 1$ for every fixed $M$.
+
+> The waiting time for a rare event, measured in units of its expected value, is asymptotically exponential.
+>
+> See *Random vectors*, Part I.
+
+## A discrete approximation of the uniform law @calc
+Let $U_n$ be uniform on $\{1/n, 2/n, \dots, n/n\}$ and $U \sim \mathrm{Unif}([0, 1])$. Which statements are true?
+
+- [x] $U_n \cvd U$.
+  $F_{U_n}(x) = \lfloor nx \rfloor / n \to x$ for $x \in [0, 1]$.
+- [x] $\sup_x |F_{U_n}(x) - F_U(x)| \le 1/n$.
+- [x] $\P(U_n \in \mathbb{Q}) = 1$ for every $n$, whereas $\P(U \in \mathbb{Q}) = 0$.
+  This does not contradict item (vii) of portmanteau: the boundary of $\mathbb{Q}$ is $\R$, of full mass.
+- [ ] $\E[g(U_n)] \to \E[g(U)]$ for every bounded measurable $g$.
+  $g = \mathbf{1}_{\mathbb{Q}}$ is a counterexample. For a bounded continuous $g$, $\E[g(U_n)]$ is a Riemann sum of $\int_0^1 g$, and the convergence holds.
+
+> See *Random vectors*, Part II.
+
+## A weighted average @calc
+Let $X_1, X_2, \dots$ be i.i.d. with mean $\mu \neq 0$ and variance $\sigma^2 > 0$, and $Y_n = \frac{1}{n^2} \sum_{i \le n} i X_i$. Which statements are true?
+
+- [ ] $\Var(Y_n) \sim \sigma^2/n$, as for $\bar X_n$.
+  $\sum_{i \le n} i^2 = n(n+1)(2n+1)/6$, so that $\Var(Y_n) = \sigma^2 (n+1)(2n+1)/(6n^3) \sim \sigma^2/(3n)$.
+- [x] $Y_n - \mu/2 = O_P(n^{-1/2})$.
+  $\E[Y_n] - \mu/2 = \mu/(2n)$, since $\sum_{i \le n} i = n(n+1)/2$, and $\Var(Y_n) \sim \sigma^2/(3n)$: Chebyshev's inequality.
+- [x] $Y_n \cvp \mu/2$.
+  The mean tends to $\mu/2$ and the variance to $0$: Chebyshev's inequality concludes.
+- [ ] $Y_n \cvp \mu$.
+  The weights $i/n^2$ add up to $(n+1)/(2n) \to 1/2$, and $\mu \neq \mu/2$.
+
+> The law of large numbers is not needed: a mean and a variance, then Chebyshev's inequality, are enough as soon as the variance tends to $0$.
+>
+> See *Random vectors*, Part V.
+
+## How large is the maximum? @calc
+Let $X_1, X_2, \dots$ be i.i.d. real and $M_n = \max_{i \le n} |X_i|$. Which statements are true?
+
+- [x] If $\E[X^2] < \infty$, then $M_n = o_P(\sqrt n)$.
+  $\P(M_n > \epsilon \sqrt n) \le n \P(X^2 > \epsilon^2 n) \le \epsilon^{-2} \E[X^2 \mathbf{1}\{X^2 > \epsilon^2 n\}] \to 0$ by dominated convergence.
+- [x] If $\E[|X|] < \infty$, then $M_n = o_P(n)$.
+  The same argument with the first moment.
+- [ ] If $X \sim \mathcal{N}(0, 1)$, then $M_n = O_P(1)$.
+  $M_n$ grows like $\sqrt{2 \log n}$.
+- [x] If $X \sim \mathcal{N}(0, 1)$, then $M_n = O_P(\sqrt{\log n})$.
+  For $c > \sqrt 2$, $\P(M_n > c\sqrt{\log n}) \le 2n e^{-c^2 \log n / 2} = 2n^{1 - c^2/2} \to 0$.
+
+? Use a union bound: $\P(M_n > a) \le n \P(|X| > a)$.
+
+> A union bound and a moment condition control the largest of $n$ observations. The first item is what makes a single observation negligible in the central limit theorem.
+>
+> See *Random vectors*, Part VII.
+
+## Which functions are characteristic functions? @calc
+Which of these functions of $t \in \R$ are characteristic functions?
+
+- [x] $\cos t$.
+  It is $\E[e^{itX}]$ for $X = \pm 1$ with probability $1/2$ each.
+- [x] $1/(1 + t^2)$.
+  It is the characteristic function of the Laplace density $\frac12 e^{-|x|}$: compute $\int_\R e^{itx} \frac12 e^{-|x|} dx$ on each half-line.
+- [ ] $e^{-t^4}$.
+  It is twice differentiable at $0$ with second derivative $0$, so $\E[X^2] = 0$, hence $X = 0$ almost surely and the characteristic function would be $1$.
+- [ ] $\mathbf{1}\{t = 0\}$.
+  A characteristic function is continuous.
+
+> The properties of the course (continuity, moments from even derivatives, $|\phi| \le 1$, $\phi(0) = 1$) are often enough to rule out a candidate.
+>
+> See *Random vectors*, Part III.
+
+## Bounded second moments @calc
+Let $X_n = \sqrt{n}$ with probability $1/n$ and $X_n = 0$ otherwise. Which statements are true?
+
+- [x] $X_n \cvd 0$.
+- [x] $\E[X_n] \to 0$.
+  $\E[X_n] = 1/\sqrt n$; this also follows from uniform integrability, since $\E[X_n^2] = 1$ for every $n$.
+- [ ] $\Var(X_n) \to 0$.
+  $\Var(X_n) = 1 - 1/n \to 1$.
+- [x] $(X_n^2)$ is not uniformly integrable.
+  $\E[X_n^2 \mathbf{1}\{X_n^2 \ge M\}] = 1$ for every $n \ge M$.
+
+> A bounded moment of order $2$ gives the convergence of the first moments, but not of the second ones: the criterion of the course needs a moment of order strictly above the one that should converge.
+>
+> See *Random vectors*, Part V.
+
+# The delta method
+
+## The theorem
+Let $r_n(\hat\theta_n - \theta) \cvd X$ in $\R^p$ with $r_n \to \infty$, and let $\phi : \R^p \to \R^m$ be differentiable at $\theta$. Which statements are true?
+
+- [ ] $\phi$ must be continuously differentiable on a neighbourhood of $\theta$.
+  Differentiability at the single point $\theta$ is enough, since $\hat\theta_n$ concentrates at $\theta$.
+- [x] $r_n(\phi(\hat\theta_n) - \phi(\theta)) \cvd J\phi(\theta) X$.
+- [x] $r_n(\phi(\hat\theta_n) - \phi(\theta)) - J\phi(\theta) \, r_n(\hat\theta_n - \theta) \cvp 0$.
+  This is the stronger statement: the linearization is exact up to $o_P(1)$ at the scale $r_n$.
+- [ ] The limit $X$ must be gaussian.
+  The theorem holds for any limit in law. When $X \sim \mathcal{N}(0, \Sigma)$, the limit is $\mathcal{N}(0, J\phi(\theta) \Sigma J\phi(\theta)^\top)$.
+
+> The proof writes $\phi(\theta + h) = \phi(\theta) + J\phi(\theta) h + R(h)$ with $R(h) = o(\|h\|)$. The transfer theorem gives $r_n R(\hat\theta_n - \theta) = o_P(\|r_n(\hat\theta_n - \theta)\|)$, which is $o_P(1)$ since $r_n(\hat\theta_n - \theta)$ converges in law, hence is $O_P(1)$ by Prohorov. Slutsky's lemma concludes.
+>
+> See *Delta method and method of moments*, Part I.
+
+## The inverse of a mean @calc
+Let $X_1, X_2, \dots$ be i.i.d. exponential of parameter $\lambda > 0$, so that $\E[X] = 1/\lambda$ and $\Var(X) = 1/\lambda^2$. What is the limit law of $\sqrt{n}(1/\bar X_n - \lambda)$?
+
+- [ ] $\mathcal{N}(0, 1/\lambda^2)$.
+  This is the limit of $\sqrt n (\bar X_n - 1/\lambda)$, before applying $x \mapsto 1/x$.
+- [ ] $\mathcal{N}(0, \lambda^4)$.
+  The factor $\phi'(1/\lambda)^2 = \lambda^4$ multiplies the variance $1/\lambda^2$; it does not replace it.
+- [x] $\mathcal{N}(0, \lambda^2)$.
+- [ ] $\mathcal{N}(0, 1)$.
+  The variance depends on $\lambda$. Removing this dependence is the purpose of variance stabilisation.
+
+? Apply the delta method to $\phi(x) = 1/x$ at $1/\lambda$.
+
+> By the central limit theorem, $\sqrt{n}(\bar X_n - 1/\lambda) \cvd \mathcal{N}(0, 1/\lambda^2)$. With $\phi(x) = 1/x$, $\phi'(1/\lambda) = -\lambda^2$, so the delta method gives the variance $\lambda^4 \cdot 1/\lambda^2 = \lambda^2$.
+>
+> See *Delta method and method of moments*, Part I.
+
+## The linear case
+Let $\sqrt{n}(\hat\theta_n - \theta) \cvd \mathcal{N}(0, \Sigma)$ in $\R^p$, and $M \in \R^{m \times p}$. Which statements are true?
+
+- [x] $\sqrt{n}(M\hat\theta_n - M\theta) \cvd \mathcal{N}(0, M \Sigma M^\top)$.
+  Continuous mapping with $x \mapsto Mx$, then the characteristic function of $MZ$ for $Z \sim \mathcal{N}(0, \Sigma)$.
+- [ ] $\sqrt{n}(M\hat\theta_n - M\theta) \cvd \mathcal{N}(0, M^\top \Sigma M)$.
+  The dimensions do not even match when $m \neq p$, and the two differ for square $M$ too: with $M = \begin{pmatrix} 1 & 1 \\ 0 & 0 \end{pmatrix}$ and $\Sigma = I_2$, $M M^\top = \mathrm{diag}(2, 0)$ whereas $M^\top M$ has all its entries equal to $1$.
+- [ ] If $M \Sigma M^\top$ is singular, $\sqrt{n}(M\hat\theta_n - M\theta)$ has no limit in distribution.
+  The limit is a degenerate gaussian, which is defined through its characteristic function.
+- [x] If $p = 2$, $\Sigma = I_2$ and $\phi(a, b) = a - b$, then $\sqrt{n}(\phi(\hat\theta_n) - \phi(\theta)) \cvd \mathcal{N}(0, 2)$.
+  $M = (1, -1)$ and $M M^\top = 2$.
+
+> See *Delta method and method of moments*, Part I.
+
+## The empirical variance @calc
+Let $X_1, X_2, \dots$ be i.i.d. real, not almost surely constant, with $\E[X^4] < \infty$, centered moments $\mu_\ell = \E[(X - \E[X])^\ell]$, and $\hat\mu_{2,n} = \frac1n \sum_{i \le n} (X_i - \bar X_n)^2$. Which statements are true?
+
+- [ ] $\sqrt{n}(\hat\mu_{2,n} - \mu_2) \cvd \mathcal{N}(0, \mu_4)$.
+  The variance of $(X - \E[X])^2$ is $\mu_4 - \mu_2^2$, not $\mu_4$.
+- [x] $\sqrt{n}(\hat\mu_{2,n} - \mu_2) \cvd \mathcal{N}(0, \mu_4 - \mu_2^2)$.
+- [x] For gaussian observations, the limit is $\mathcal{N}(0, 2\mu_2^2)$.
+  $\mu_4 = 3\mu_2^2$ for a gaussian.
+- [x] The fluctuation of $\bar X_n$ does not contribute at first order.
+  $\hat\mu_{2,n} = \phi(\bar Y_n)$ with $\phi(x, y) = y - x^2$ and $Y_i = (X_i - \E[X], (X_i - \E[X])^2)$, and $J\phi(0, \mu_2) = (0, 1)$.
+
+? Write $\hat\mu_{2,n}$ as a function of the averages of $X_i - \E[X]$ and of $(X_i - \E[X])^2$.
+
+> With $\mu_1 = \E[X]$, $\hat\mu_{2,n} = \frac1n \sum_i (X_i - \mu_1)^2 - \big(\frac1n \sum_i (X_i - \mu_1)\big)^2$. The central limit theorem for the pair and the delta method with $J\phi(0, \mu_2) = (0, 1)$ pick the lower right entry of the covariance, $\Var((X - \mu_1)^2) = \mu_4 - \mu_2^2$.
+>
+> See *Delta method and method of moments*, Part II.
+
+## When is the limit degenerate? @calc
+In the previous question, for which laws of $X$ is the limiting variance $\mu_4 - \mu_2^2$ equal to $0$?
+
+- [ ] $X$ uniform on $[0, 1]$.
+  $\mu_2 = 1/12$ and $\mu_4 = 1/80$, so that $\mu_4 - \mu_2^2 = 1/180 > 0$.
+- [x] $X \sim \mathrm{Ber}(1/2)$.
+  $(X - 1/2)^2 = 1/4$ almost surely.
+- [ ] $X \sim \mathrm{Ber}(p)$, for every $p \in (0, 1)$.
+  $(X - p)^2$ takes the values $p^2$ and $(1-p)^2$, which differ unless $p = 1/2$.
+- [x] Any $X$ that takes two values with probability $1/2$ each.
+  Then $X - \E[X] = \pm a$, so that $(X - \E[X])^2 = a^2$ is constant.
+
+> $\mu_4 - \mu_2^2 = \Var((X - \mu_1)^2)$ vanishes if and only if $(X - \mu_1)^2$ is almost surely constant, that is, since $X$ is not constant, $X$ takes the two values $\mu_1 \pm \sqrt{\mu_2}$, necessarily with probability $1/2$ each.
+>
+> See *Delta method and method of moments*, Part II.
+
+## The empirical standard deviation @calc
+Under the assumptions of the question on the empirical variance, with $\mu_2 > 0$, which statements about the limit law of $\sqrt{n}(\sqrt{\hat\mu_{2,n}} - \sqrt{\mu_2})$ are true?
+
+- [ ] It is $\mathcal{N}(0, \mu_4 - \mu_2^2)$.
+  The derivative of the square root is missing.
+- [x] It is $\mathcal{N}\big(0, (\mu_4 - \mu_2^2)/(4\mu_2)\big)$.
+- [ ] It is $\mathcal{N}\big(0, (\mu_4 - \mu_2^2)/(2\sqrt{\mu_2})\big)$.
+  The derivative $1/(2\sqrt{\mu_2})$ enters squared.
+- [ ] For gaussian observations, it is $\mathcal{N}(0, \mu_2)$.
+  With $\mu_4 = 3\mu_2^2$, the variance is $(3\mu_2^2 - \mu_2^2)/(4\mu_2) = \mu_2/2$.
+
+? Apply the delta method to $t \mapsto \sqrt t$ at $\mu_2$, starting from the limit law of $\hat\mu_{2,n}$.
+
+> The delta method only needs a limit in law as input, so it can be applied a second time: $\phi(t) = \sqrt t$ has $\phi'(\mu_2) = 1/(2\sqrt{\mu_2})$, and the variance is multiplied by $\phi'(\mu_2)^2 = 1/(4\mu_2)$.
+>
+> See *Delta method and method of moments*, Part II.
+
+## A vanishing derivative
+Let $\sqrt{n}(\hat\theta_n - \theta) \cvd \mathcal{N}(0, \sigma^2)$ in $\R$ with $\sigma^2 > 0$, and let $\phi$ be twice differentiable at $\theta$ with $\phi'(\theta) = 0$ and $\phi''(\theta) \neq 0$. Which statements are true?
+
+- [x] $\sqrt{n}(\phi(\hat\theta_n) - \phi(\theta)) \cvp 0$.
+  The first order delta method gives the limit $\phi'(\theta) X = 0$: true, but it only says that the rate $\sqrt n$ is too slow.
+- [ ] $n(\phi(\hat\theta_n) - \phi(\theta)) \cvd \mathcal{N}(0, \phi''(\theta)^2 \sigma^4 / 4)$.
+  The limit is a quadratic function of a gaussian, not a gaussian.
+- [x] $n(\phi(\hat\theta_n) - \phi(\theta)) \cvd \frac12 \phi''(\theta) Z^2$ with $Z \sim \mathcal{N}(0, \sigma^2)$, that is, $\frac12 \phi''(\theta) \sigma^2 \chi^2_1$.
+  Second order delta method, with $r_n = \sqrt{n}$ and the rate $r_n^2 = n$.
+- [x] The limit has, almost surely, the sign of $\phi''(\theta)$.
+  $Z^2 > 0$ almost surely.
+
+> When the derivative vanishes, the rate is squared (here from $n^{-1/2}$ to $n^{-1}$), and the limit becomes $\frac12 X^\top H\phi(\theta) X$.
+>
+> See *Delta method and method of moments*, Part III.
+
+## A proportion at one half @calc
+Let $X_1, X_2, \dots$ be i.i.d. $\mathrm{Ber}(1/2)$. What is the limit law of $n\big(\bar X_n(1 - \bar X_n) - 1/4\big)$?
+
+- [x] The law of $-Z^2$ with $Z \sim \mathcal{N}(0, 1/4)$, that is, $-\frac14 \chi^2_1$.
+- [ ] $\mathcal{N}(0, 1/16)$.
+  At $\theta = 1/2$, $\phi(\theta) = \theta(1-\theta)$ has a vanishing derivative, so the limit is not gaussian.
+- [ ] $\frac14 \chi^2_1$.
+  The sign is wrong: $\bar X_n(1 - \bar X_n) \le 1/4$ always.
+- [ ] $-\frac12 \chi^2_1$.
+  The constant is wrong: $\frac12 \phi''(1/2) = -1$, and $Z^2$ has the law of $\frac14 \chi^2_1$.
+
+? $\phi(\theta) = \theta(1 - \theta)$ has $\phi'(1/2) = 0$ and $\phi'' = -2$, and $\sqrt{n}(\bar X_n - 1/2) \cvd \mathcal{N}(0, 1/4)$.
+
+> The second order delta method gives $\frac12 \phi''(1/2) Z^2 = -Z^2$ with $Z \sim \mathcal{N}(0, 1/4)$, which is $-\frac14 \chi^2_1$. The limit is one sided, as it should be since $\bar X_n(1 - \bar X_n) \le 1/4$.
+>
+> See *Delta method and method of moments*, Part III.
+
+## A cosine at zero @calc
+Let $X_1, X_2, \dots$ be i.i.d. real with $\E[X] = 0$ and $\Var(X) = \sigma^2 \in (0, \infty)$. Which statements are true?
+
+- [ ] $\sqrt{n}(\cos \bar X_n - 1) \cvd \mathcal{N}(0, \sigma^2)$.
+  $\cos'(0) = 0$, so the first order limit is $0$.
+- [x] $\sqrt{n}(\cos \bar X_n - 1) \cvp 0$.
+- [ ] $n(\cos \bar X_n - 1) \cvd \frac{\sigma^2}{2} \chi^2_1$.
+  The sign is wrong: $\cos \le 1$.
+- [x] $n(\cos \bar X_n - 1) \cvd -\frac{\sigma^2}{2} \chi^2_1$.
+  $\cos''(0) = -1$, and the limit is $\frac12 \cdot (-1) \cdot Z^2$ with $Z \sim \mathcal{N}(0, \sigma^2)$.
+
+> See *Delta method and method of moments*, Part III.
+
+## Variance stabilisation
+Let $\sqrt{n}(\hat\theta_n - \theta) \cvd \mathcal{N}(0, \sigma^2(\theta))$ in $\R$, with $\sigma > 0$ continuous. We call $\phi$ variance stabilising when $\phi'(\theta)^2 \sigma^2(\theta) = 1$ for every $\theta$; the course takes the increasing choice $\phi' = 1/\sigma$. Which statements are true?
+
+- [x] If $\phi$ is variance stabilising, so is $\phi + c$ for every constant $c$.
+  Only $\phi'$ enters the delta method.
+- [x] If $\phi$ is variance stabilising, so is $-\phi$.
+  $(-\phi')^2 = \phi'^2$.
+- [ ] If $\phi$ is variance stabilising, so is $2\phi$.
+  The limit of $\sqrt{n}(2\phi(\hat\theta_n) - 2\phi(\theta))$ is $\mathcal{N}(0, 4)$: it no longer depends on $\theta$ either, but it is not standardized.
+- [x] For a variance stabilising $\phi$, $\sqrt{n}(\phi(\hat\theta_n) - \phi(\theta)) \cvd \mathcal{N}(0, 1)$ for every $\theta$.
+- [x] It gives confidence intervals without estimating the variance.
+  The limit law no longer involves the unknown, so that the studentisation step disappears.
+
+> See *Delta method and method of moments*, Part III.
+
+## The arcsine transformation @calc
+For i.i.d. $\mathrm{Ber}(\theta)$ observations, $\sigma^2(\theta) = \theta(1 - \theta)$. Which transformations are variance stabilising?
+
+- [x] $\phi(\theta) = 2 \arcsin \sqrt{\theta}$.
+  $\phi'(\theta) = \frac{2}{\sqrt{1 - \theta}} \cdot \frac{1}{2\sqrt\theta} = \frac{1}{\sqrt{\theta(1-\theta)}}$.
+- [ ] $\phi(\theta) = \log(\theta/(1 - \theta))$.
+  $\phi'(\theta) = 1/(\theta(1 - \theta))$, which gives the variance $1/(\theta(1-\theta))$, still a function of $\theta$.
+- [x] $\phi(\theta) = \arcsin(2\theta - 1)$.
+  $\phi'(\theta) = 2/\sqrt{1 - (2\theta - 1)^2} = 1/\sqrt{\theta(1-\theta)}$. In fact, $\arcsin(2\theta - 1) = 2\arcsin\sqrt\theta - \pi/2$.
+- [ ] $\phi(\theta) = \sqrt{\theta}$.
+  $\phi'(\theta)^2 \, \theta(1-\theta) = (1 - \theta)/4$.
+
+? Check whether $\phi'(\theta)^2 \, \theta(1 - \theta) = 1$.
+
+> Any primitive of $1/\sqrt{\theta(1-\theta)}$ works, and so does its opposite; two primitives differ by a constant.
+>
+> See *Delta method and method of moments*, Part III.
+
+## The Poisson model @calc
+Let $X_1, X_2, \dots$ be i.i.d. Poisson of parameter $\lambda > 0$, and $r_\alpha$ the quantile of order $1 - \alpha/2$ of $\mathcal{N}(0, 1)$. Which statements are true?
+
+- [x] $\sqrt{n}(\bar X_n - \lambda) \cvd \mathcal{N}(0, \lambda)$.
+- [ ] $\sqrt{n}(\sqrt{\bar X_n} - \sqrt{\lambda}) \cvd \mathcal{N}(0, 1)$.
+  The derivative of the square root at $\lambda$ is $1/(2\sqrt\lambda)$, which gives the variance $1/4$.
+- [x] $\sqrt{n}(2\sqrt{\bar X_n} - 2\sqrt{\lambda}) \cvd \mathcal{N}(0, 1)$.
+- [x] $\big[\max(0, \sqrt{\bar X_n} - \frac{r_\alpha}{2\sqrt n})^2, (\sqrt{\bar X_n} + \frac{r_\alpha}{2\sqrt n})^2\big]$ is an asymptotic confidence interval of level $1 - \alpha$ for $\lambda$.
+  It is the set of $\lambda$ with $|\sqrt{\bar X_n} - \sqrt{\lambda}| \le r_\alpha/(2\sqrt{n})$, an event of probability tending to $1 - \alpha$.
+
+> See *Delta method and method of moments*, Part III.
+
+## The Fisher transformation
+Let $(X_i, Y_i)$ be i.i.d. gaussian pairs with correlation $\rho \in (-1, 1)$, and $r_n$ their empirical correlation coefficient, so that $\sqrt{n}(r_n - \rho) \cvd \mathcal{N}(0, (1 - \rho^2)^2)$. Which statements are true?
+
+- [x] $\sqrt{n}(\operatorname{arctanh} r_n - \operatorname{arctanh} \rho) \cvd \mathcal{N}(0, 1)$.
+  $\operatorname{arctanh}'(\rho) = 1/(1 - \rho^2)$.
+- [ ] $\operatorname{arctanh}(\rho) = \log \frac{1 + \rho}{1 - \rho}$.
+  A factor is missing: $\operatorname{arctanh}(\rho) = \frac12 \log \frac{1 + \rho}{1 - \rho}$, whose derivative is $1/(1 - \rho^2)$.
+- [ ] The intervals built from this transformation keep their nominal level for any law of the pairs with finite fourth moments.
+  The limiting variance $(1 - \rho^2)^2$ relies on the fourth moments of the gaussian law. For other laws, it is in general different.
+- [ ] $\sqrt{n}(r_n - \rho) \cvd \mathcal{N}(0, 1 - \rho^2)$.
+  The variance is $(1 - \rho^2)^2$, which differs from $1 - \rho^2$ for every $\rho \neq 0$.
+
+> Mapping an interval for $\operatorname{arctanh}\rho$ back by $\tanh$ gives an interval for $\rho$ that stays inside $(-1, 1)$.
+>
+> See *Delta method and method of moments*, Part III.
+
+## A log transformation @calc
+Let $\hat\lambda_n = 1/\bar X_n$ for i.i.d. exponential observations of parameter $\lambda$, so that $\sqrt{n}(\hat\lambda_n - \lambda) \cvd \mathcal{N}(0, \lambda^2)$, and $r_\alpha$ the quantile of order $1 - \alpha/2$ of $\mathcal{N}(0, 1)$. Which statements are true?
+
+- [x] $\sqrt{n}(\log \hat\lambda_n - \log \lambda) \cvd \mathcal{N}(0, 1)$.
+  $\log$ is a primitive of $1/\sigma(\lambda) = 1/\lambda$.
+- [x] $[\hat\lambda_n e^{-r_\alpha/\sqrt{n}}, \hat\lambda_n e^{r_\alpha/\sqrt{n}}]$ is an asymptotic confidence interval of level $1 - \alpha$.
+  Exponentiate $|\log \hat\lambda_n - \log \lambda| \le r_\alpha/\sqrt{n}$.
+- [ ] The plug-in interval $\hat\lambda_n (1 \pm r_\alpha/\sqrt{n})$ always lies in $(0, \infty)$.
+  Its lower end is negative when $n < r_\alpha^2$.
+- [x] The interval $[\hat\lambda_n e^{-r_\alpha/\sqrt{n}}, \hat\lambda_n e^{r_\alpha/\sqrt{n}}]$ is not symmetric around $\hat\lambda_n$.
+  $e^{r_\alpha/\sqrt n} - 1 > 1 - e^{-r_\alpha/\sqrt n}$.
+
+> See *Delta method and method of moments*, Part III.
+
+## The bias correction
+Under the assumptions of the question on the empirical variance, let $s_n^2 = \frac{n}{n-1} \hat\mu_{2,n}$ be its unbiased version. Which statements are true?
+
+- [x] $\sqrt{n}(s_n^2 - \hat\mu_{2,n}) \cvp 0$.
+  $\sqrt{n}(s_n^2 - \hat\mu_{2,n}) = \frac{\sqrt{n}}{n-1} \hat\mu_{2,n}$, and $\hat\mu_{2,n} = O_P(1)$.
+- [x] $\sqrt{n}(s_n^2 - \mu_2)$ has the same limit law as $\sqrt{n}(\hat\mu_{2,n} - \mu_2)$.
+  By the theorem on asymptotically equivalent sequences.
+- [ ] Being unbiased, $s_n^2$ has a smaller asymptotic variance than $\hat\mu_{2,n}$.
+  The two limits are the same.
+- [ ] $\sqrt{n}(s_n^2 - \hat\mu_{2,n}) \cvd \mathcal{N}(0, \mu_2^2)$.
+  It tends to $0$.
+
+> Unbiasedness at fixed $n$ has no asymptotic content here.
+>
+> See *Delta method and method of moments*, Part II.
+
+# The method of moments
+
+## The method
+Let $f_1, \dots, f_p : \R^d \to \R$, $e(\theta) = (\E_\theta[f_1(X_1)], \dots, \E_\theta[f_p(X_1)])^\top$ and $e_n = \frac1n \sum_{i \le n} (f_1(X_i), \dots, f_p(X_i))^\top$. Which statements describe the method of moments estimator $\hat\theta_n$?
+
+- [x] $e(\hat\theta_n) = e_n$ whenever the system has a solution: the theoretical moments at $\hat\theta_n$ equal the empirical ones.
+- [x] In the gaussian model with $f_1(x) = x$ and $f_2(x) = x^2$, it coincides with maximum likelihood.
+  Both give the empirical mean and the empirical variance. The two methods differ in general.
+- [x] $\hat\theta_n = e^{-1}(e_n)$ whenever this inverse is available.
+- [x] $\hat\theta_n$ is a Z-estimator, with $Z_n(\theta) = e_n - e(\theta)$, on the event where the moment system has a solution.
+
+> See *Delta method and method of moments*, Part IV, and *M and Z estimators*, Part I.
+
+## The gaussian model @calc
+For the model $\mathcal{N}(m, \sigma^2)$, with $f_1(x) = x$ and $f_2(x) = x^2$, which statements are true?
+
+- [x] $\hat m_n = \bar X_n$.
+- [ ] $\hat\sigma_n^2 = \frac{1}{n-1} \sum_{i \le n}(X_i - \bar X_n)^2$.
+  The system gives $\hat\sigma_n^2 = \frac1n \sum_i X_i^2 - \bar X_n^2$, with $\frac1n$.
+- [x] $\hat\sigma_n^2 = \frac1n \sum_{i \le n} (X_i - \bar X_n)^2$.
+- [x] The asymptotic covariance of $\sqrt{n}\big((\hat m_n, \hat\sigma_n^2) - (m, \sigma^2)\big)$ is $\mathrm{diag}(\sigma^2, 2\sigma^4)$.
+  $Je(\theta)^{-1}$ has rows $(1, 0)$ and $(-2m, 1)$. The two estimators are asymptotically independent.
+
+? $\E_\theta[X] = m$ and $\E_\theta[X^2] = m^2 + \sigma^2$.
+
+> See *Delta method and method of moments*, Part IV.
+
+## Identifiability
+Let $\Theta = \R \setminus \{0\}$ and $L_\theta = \mathcal{N}(0, \theta^2)$, with one moment function. Which statements are true?
+
+- [x] With $f_1(x) = x$, $e$ is constant, so that the method cannot work.
+  $\E_\theta[X] = 0$ for every $\theta$.
+- [x] With $f_1(x) = x^2$, $Je(\theta_0) = 2\theta_0 \neq 0$, yet $\theta_0$ is not identifiable.
+  $e(-\theta_0) = e(\theta_0)$: local injectivity does not imply identifiability.
+- [ ] With $f_1(x) = x^4$, $\theta_0$ becomes identifiable.
+  $L_{-\theta} = L_\theta$, so that no method separates $\theta_0$ from $-\theta_0$: the problem is the model.
+- [x] With $\Theta = (0, \infty)$ and $f_1(x) = x^2$, $\hat\theta_n = (\frac1n \sum_{i \le n} X_i^2)^{1/2}$.
+
+> See *Delta method and method of moments*, Part IV.
+
+## Asymptotic normality
+Under the assumptions of the theorem of the course ($\theta_0$ interior, $e$ continuously differentiable near $\theta_0$ with $Je(\theta_0)$ invertible, $\E[f_j(X_1)^2] < \infty$ for every $j$), which statements about the limit law of $\sqrt{n}(\hat\theta_n - \theta_0)$ are true? We denote by $\Sigma_f$ the covariance of $(f_1(X_1), \dots, f_p(X_1))$.
+
+- [ ] It is $\mathcal{N}(0, Je(\theta_0) \Sigma_f Je(\theta_0)^\top)$.
+  The delta method is applied to $e^{-1}$, whose Jacobian at $e(\theta_0)$ is $Je(\theta_0)^{-1}$.
+- [x] It is $\mathcal{N}(0, Je(\theta_0)^{-1} \Sigma_f Je(\theta_0)^{-\top})$.
+- [ ] It is $\mathcal{N}(0, \Sigma_f)$.
+  This is the limit of $\sqrt{n}(e_n - e(\theta_0))$.
+- [x] For $p = 1$, it is $\mathcal{N}\big(0, \Var(f_1(X_1))/e'(\theta_0)^2\big)$.
+
+> The central limit theorem for $e_n$, then the delta method for $e^{-1}$, which the inverse function theorem makes differentiable at $e(\theta_0)$, with Jacobian $Je(\theta_0)^{-1}$.
+>
+> See *Delta method and method of moments*, Part IV.
+
+## Two moment functions @calc
+Let $L_\theta$ be the exponential law of parameter $\theta > 0$, for which $\E_\theta[X^k] = k!/\theta^k$. Which statements are true?
+
+- [x] With $f_1(x) = x$, the asymptotic variance is $\theta_0^2$.
+  $e(\theta) = 1/\theta$, $e'(\theta_0)^2 = 1/\theta_0^4$ and $\Var(X) = 1/\theta_0^2$.
+- [ ] With $f_1(x) = x^2$, the asymptotic variance is $\theta_0^2/4$.
+  This would be the result with $\Var(X^2) = 4/\theta_0^4$. In fact, $\Var(X^2) = \E[X^4] - \E[X^2]^2 = 20/\theta_0^4$.
+- [x] With $f_1(x) = x^2$, the asymptotic variance is $\frac54 \theta_0^2$.
+  $e(\theta) = 2/\theta^2$, $e'(\theta_0)^2 = 16/\theta_0^6$ and $\Var(X^2) = (24 - 4)/\theta_0^4$.
+- [ ] The second moment is better, since it gives more weight to large observations.
+  Moving from $x$ to $x^2$ multiplies the standard deviation of the noise by $\sqrt{20}/\theta_0$, but the signal $|e'(\theta_0)|$ only by $4/\theta_0$.
+
+> The asymptotic variance is noise over squared signal, $\Var(f_1(X_1))/e'(\theta_0)^2$, and the first moment wins for every $\theta_0$, by a factor $5/4$.
+>
+> See *Delta method and method of moments*, Part IV.
+
+## Higher moments @calc
+In the exponential model of the previous question, which statements are true?
+
+- [x] With $f_1(x) = x^3$, the asymptotic variance is $\frac{19}{9} \theta_0^2$.
+  $e'(\theta_0)^2 = 324/\theta_0^8$ and $\Var(X^3) = (720 - 36)/\theta_0^6$.
+- [ ] With $f_1(x) = x^3$, the asymptotic variance is $\frac32 \theta_0^2$.
+  Compute $\Var(X^3) = \E[X^6] - \E[X^3]^2$ with $\E[X^k] = k!/\theta^k$.
+- [x] With $f_1(x) = x^k$, the asymptotic variance is $\Big(\binom{2k}{k} - 1\Big)\dfrac{\theta_0^2}{k^2}$.
+  $\Var(X^k) = ((2k)! - (k!)^2)/\theta_0^{2k}$ and $e'(\theta_0)^2 = (k \cdot k!)^2/\theta_0^{2k+2}$.
+- [ ] All the choices $f_1(x) = x^k$ give the same asymptotic variance.
+  $k = 1, 2, 3, 4$ give $1, \frac54, \frac{19}{9}, \frac{69}{16}$ times $\theta_0^2$.
+
+? $\E[X^6] = 720/\theta^6$ and $\E[X^3] = 6/\theta^3$.
+
+> The higher the moment, the worse the estimator here: the noise of $x^k$ grows faster than its sensitivity to $\theta$.
+>
+> See *Delta method and method of moments*, Part IV.
+
+## The uniform model @calc
+Let $L_\theta = \mathrm{Unif}([0, \theta])$, $\theta > 0$, and $f_1(x) = x$. Which statements are true?
+
+- [x] $\hat\theta_n = 2 \bar X_n$.
+  $e(\theta) = \theta/2$.
+- [x] $\sqrt{n}(\hat\theta_n - \theta_0) \cvd \mathcal{N}(0, \theta_0^2/3)$.
+  $\Var(X) = \theta_0^2/12$ and $e'(\theta_0) = 1/2$.
+- [x] With $M_n = \max_{i \le n} X_i$, $n(\theta_0 - M_n)$ converges in distribution to the exponential law of mean $\theta_0$.
+  $\P(n(\theta_0 - M_n) > t) = (1 - t/(n\theta_0))^n \to e^{-t/\theta_0}$.
+- [ ] Being asymptotically normal, $2 \bar X_n$ is the better of the two estimators.
+  The maximum converges at the rate $1/n$, much faster than $1/\sqrt{n}$.
+
+> The information about $\theta_0$ lies in the largest observation rather than in an average, and no choice of moment functions repairs this.
+>
+> See *Delta method and method of moments*, Part IV.
+
+## Noise and signal
+For $p = 1$, the asymptotic variance of the method of moments is $\Var(f_1(X_1))/e'(\theta_0)^2$. Which statements are true?
+
+- [x] A good moment function has a small variance under $L_{\theta_0}$ relative to $e'(\theta_0)^2$, the squared speed at which its expectation varies with $\theta$.
+- [ ] For a suitable polynomial $f_1$, the method of moments always reaches the smallest possible asymptotic variance.
+  The method does not prescribe $f_1$, and in general no choice is optimal; think of the uniform model.
+- [x] Replacing $f_1$ by $a f_1 + b$ with $a \neq 0$ does not change the asymptotic variance.
+  It does not even change the estimator: both sides of $e(\theta) = e_n$ are transformed in the same way.
+- [ ] The asymptotic variance does not depend on $\theta_0$.
+  In the exponential model with $f_1(x) = x$, it is $\theta_0^2$.
+
+> See *Delta method and method of moments*, Part IV.
+
+## Inside the proof
+Which statements about the proof of the asymptotic normality of the method of moments are true?
+
+- [x] The moment system may have no solution for small $n$; $\hat\theta_n$ solves it on an event whose probability tends to $1$.
+  $e_n \cvp e(\theta_0)$, which lies in the open set $V$ on which $e^{-1}$ is defined.
+- [ ] The invertibility of $Je(\theta_0)$ implies identifiability from the moments.
+  It only gives local injectivity, through the inverse function theorem.
+- [x] The delta method is applied to $\phi = e^{-1}$ at $e(\theta_0)$.
+- [x] The arbitrary value given to $\hat\theta_n$ when the moment system has no solution near $\theta_0$ does not affect the limit law.
+  It only matters on an event of probability tending to $0$, which asymptotic equivalence removes.
+
+> See *Delta method and method of moments*, Part IV.
+
+## How many moment functions? @further
+The *generalized method of moments*, not seen in class, uses $q > p$ moment functions and minimizes $(e_n - e(\theta))^\top W (e_n - e(\theta))$ over $\theta$, for a symmetric positive definite weight matrix $W$. Which statements are true?
+
+- [x] The method of the course needs as many moment functions as parameters, so that $Je(\theta_0)$ is a square matrix that can be invertible.
+- [ ] With fewer moment functions than parameters, $\theta_0$ is still locally identified when $Je(\theta_0)$ has full rank.
+  $Je(\theta_0)$ is then $q \times p$ with $q < p$. If $e$ is continuously differentiable near $\theta_0$ and $Je(\theta_0)$ has rank $q$, the implicit function theorem shows that the solutions of $e(\theta) = e(\theta_0)$ near $\theta_0$ form a manifold of dimension $p - q \ge 1$, so that $\theta_0$ is not isolated among them: the system is underdetermined.
+- [x] With more moment functions than parameters, the system $e(\theta) = e_n$ generally has no solution, which is why the generalized method minimizes a distance instead.
+- [x] With $q = p$, a solution of the moment system minimizes the criterion of the generalized method of moments, whatever $W$.
+  The criterion is nonnegative, and it is $0$ exactly when $e(\theta) = e_n$, since $W$ is positive definite.
+
+> The generalized method of moments extends the method of the course to more moment functions than parameters; it is widely used in econometrics.
+>
+> See *Delta method and method of moments*, Part IV. The generalized method of moments is not in the course.
+
+## The gamma model @calc
+Let $L_{(k, \beta)}$ be the gamma law of shape $k > 0$ and rate $\beta > 0$, with $\E[X] = k/\beta$ and $\Var(X) = k/\beta^2$, and $\hat\sigma_n^2 = \frac1n \sum_{i \le n} (X_i - \bar X_n)^2$. Which statements about the method of moments with $f_1(x) = x$ and $f_2(x) = x^2$ are true?
+
+- [x] $\hat\beta_n = \bar X_n / \hat\sigma_n^2$.
+- [ ] $\hat\beta_n = \hat\sigma_n^2 / \bar X_n$.
+  This estimates the scale $1/\beta$.
+- [x] $\hat k_n = \bar X_n^2 / \hat\sigma_n^2$.
+- [x] It gives the same estimator as matching the mean and the variance, $k/\beta = \bar X_n$ and $k/\beta^2 = \hat\sigma_n^2$.
+  The two systems are equivalent, since $\hat\sigma_n^2 = \frac1n \sum_i X_i^2 - \bar X_n^2$ and $\Var(X) = \E[X^2] - \E[X]^2$.
+
+> Dividing the two equations gives $\beta = \bar X_n/\hat\sigma_n^2$, then $k = \beta \bar X_n$.
+>
+> See *Delta method and method of moments*, Part IV.
+
+## Poisson, first or second moment? @calc
+Let $L_\lambda$ be the Poisson law of parameter $\lambda > 0$, for which $\E[X^2] = \lambda + \lambda^2$ and $\E[X^4] = \lambda^4 + 6\lambda^3 + 7\lambda^2 + \lambda$. Which statements are true?
+
+- [x] With $f_1(x) = x$, the asymptotic variance is $\lambda_0$.
+- [ ] With $f_1(x) = x^2$, the asymptotic variance is $4\lambda_0^3 + 6\lambda_0^2 + \lambda_0$.
+  This is $\Var(X^2)$ alone; it must be divided by $e'(\lambda_0)^2 = (1 + 2\lambda_0)^2$.
+- [x] With $f_1(x) = x^2$, the asymptotic variance is $\lambda_0 \dfrac{4\lambda_0^2 + 6\lambda_0 + 1}{(1 + 2\lambda_0)^2}$.
+- [x] The first moment is better than the second for every $\lambda_0$.
+  $4\lambda_0^2 + 6\lambda_0 + 1 > 4\lambda_0^2 + 4\lambda_0 + 1 = (1 + 2\lambda_0)^2$.
+
+? $\Var(X^2) = \E[X^4] - \E[X^2]^2$ and $e(\lambda) = \lambda + \lambda^2$.
+
+> $\Var(X^2) = 4\lambda_0^3 + 6\lambda_0^2 + \lambda_0$ and $e'(\lambda_0) = 1 + 2\lambda_0$.
+>
+> See *Delta method and method of moments*, Part IV.
+
+## A misspecified model @further
+Let the $X_i$ be i.i.d. of a law $Q$ outside the model, with $\E_Q[\|f(X_1)\|^2] < \infty$, and assume that $e(\theta^\star) = \E_Q[f(X_1)]$ for some interior $\theta^\star$, near which $e$ is continuously differentiable with $Je(\theta^\star)$ invertible. Which statements are true?
+
+- [x] $\hat\theta_n \cvp \theta^\star$, the parameter whose moments match those of $Q$.
+  The proof only uses $e_n \cvp \E_Q[f(X_1)]$ and the continuity of $e^{-1}$.
+- [ ] $\hat\theta_n$ has no limit, since no parameter describes the data.
+- [x] $\sqrt{n}(\hat\theta_n - \theta^\star) \cvd \mathcal{N}(0, Je(\theta^\star)^{-1} \Sigma_Q Je(\theta^\star)^{-\top})$, with $\Sigma_Q$ the covariance of $f(X_1)$ under $Q$.
+  The central limit theorem and the delta method do not use the model.
+- [ ] The asymptotic covariance is the one computed as if the data had the law $L_{\theta^\star}$.
+  $\Sigma_Q$ is computed under the true law $Q$, which differs from $L_{\theta^\star}$ beyond the matched moments.
+
+> Under misspecification, the method still estimates something: the member of the model with the same moments as the data. Confidence intervals must then use the covariance under the true law.
+>
+> Not in the course as such, but its proof applies verbatim.
+
+## A symmetric uniform model @calc
+Let $L_\theta = \mathrm{Unif}([-\theta, \theta])$, $\theta > 0$. Which statements are true?
+
+- [ ] $f_1(x) = x$ gives a consistent estimator.
+  $\E_\theta[X] = 0$ for every $\theta$.
+- [x] With $f_1(x) = |x|$, $\hat\theta_n = \frac2n \sum_{i \le n} |X_i|$, with asymptotic variance $\theta_0^2/3$.
+  $|X| \sim \mathrm{Unif}([0, \theta])$, as in the uniform model.
+- [x] With $f_1(x) = x^2$, $\hat\theta_n = (\frac3n \sum_{i \le n} X_i^2)^{1/2}$, with asymptotic variance $\theta_0^2/5$.
+  $e(\theta) = \theta^2/3$, $e'(\theta_0)^2 = 4\theta_0^2/9$ and $\Var(X^2) = \theta_0^4/5 - \theta_0^4/9 = 4\theta_0^4/45$.
+- [ ] $f_1(x) = |x|$ is better than $f_1(x) = x^2$.
+  $\theta_0^2/3 > \theta_0^2/5$.
+
+? $\E_\theta[X^2] = \theta^2/3$ and $\E_\theta[X^4] = \theta^4/5$.
+
+> Unlike in the exponential model, the higher moment wins here.
+>
+> See *Delta method and method of moments*, Part IV.
+
+## The role of each hypothesis
+In the asymptotic normality theorem for the method of moments, which hypothesis makes the central limit theorem apply to $e_n$?
+
+- [ ] $\theta_0$ is in the interior of $\Theta$.
+  It is used for the local inversion of $e$.
+- [ ] $e$ is continuously differentiable near $\theta_0$ with $Je(\theta_0)$ invertible.
+  It is used for the inverse function theorem and the delta method.
+- [x] $\E[f_j(X_1)^2] < \infty$ for $j = 1, \dots, p$.
+- [ ] $\E[|f_j(X_1)|] < \infty$ for $j = 1, \dots, p$.
+  This only gives the law of large numbers.
+
+> See *Delta method and method of moments*, Part IV.
+
+# Exercises: delta method and method of moments
+The same techniques, on examples that were not treated in class: new functions of averages, a function that is not differentiable, a degenerate case, and moment estimators compared with maximum likelihood.
+
+## The coefficient of variation @calc
+Let $X_1, X_2, \dots$ be i.i.d. exponential of parameter $\lambda$, for which $\E[X^k] = k!/\lambda^k$ and $\sigma/\mu = 1$. Let $\hat c_n = \hat\sigma_n / \bar X_n$, with $\hat\sigma_n^2 = \frac1n \sum_{i \le n} (X_i - \bar X_n)^2$. Which statements are true?
+
+- [x] $\hat c_n = \phi\big(\bar X_n, \frac1n \sum_{i \le n} X_i^2\big)$ with $\phi(a, b) = \sqrt{b - a^2}/a$.
+- [x] $\sqrt{n}(\hat c_n - 1) \cvd \mathcal{N}(0, 1)$.
+  At $(a, b) = (1/\lambda, 2/\lambda^2)$, $\nabla\phi = (-2\lambda, \lambda^2/2)$, and the covariance of $(X, X^2)$ has entries $1/\lambda^2$, $4/\lambda^3$ and $20/\lambda^4$: the quadratic form is $4 - 8 + 5 = 1$.
+- [ ] The limit law depends on $\lambda$.
+  $\hat c_n$ does not change when all the $X_i$ are multiplied by the same constant, so its law does not depend on $\lambda$.
+- [ ] $\sqrt{n}(\hat c_n - 1) \cvd \mathcal{N}(0, 9)$.
+  This is $4 + 5$: it forgets the cross term $-8$, which comes from the covariance between $\bar X_n$ and $\frac1n \sum_i X_i^2$.
+
+? Compute $\nabla\phi$ at $(\E[X], \E[X^2])$, then the covariance matrix of $(X, X^2)$.
+
+> Delta method in dimension two, with the multivariate central limit theorem for the pair $(X_i, X_i^2)$; the computation can be done with $\lambda = 1$, by scale invariance.
+>
+> See *Delta method and method of moments*, Parts I and II.
+
+## The log-odds @calc
+Let $X_1, X_2, \dots$ be i.i.d. $\mathrm{Ber}(p)$, $p \in (0, 1)$, and $\hat\ell_n = \log\big(\bar X_n / (1 - \bar X_n)\big)$. Which statements are true?
+
+- [x] $\sqrt{n}\big(\hat\ell_n - \log\frac{p}{1-p}\big) \cvd \mathcal{N}\big(0, \frac{1}{p(1-p)}\big)$.
+  The derivative of $x \mapsto \log(x/(1-x))$ is $1/(x(1-x))$, and $\Var(X) = p(1-p)$.
+- [ ] $\sqrt{n}\big(\hat\ell_n - \log\frac{p}{1-p}\big) \cvd \mathcal{N}(0, p(1-p))$.
+  The squared derivative $1/(p(1-p))^2$ multiplies $p(1-p)$.
+- [x] $\hat\ell_n$ is infinite with probability $p^n + (1-p)^n$, which does not affect the limit law.
+  This event has a probability that tends to $0$; outside it, everything is finite.
+- [x] The limiting variance is smallest at $p = 1/2$.
+  $p(1-p)$ is largest at $p = 1/2$.
+
+> See *Delta method and method of moments*, Part I.
+
+## The product of two independent means @calc
+Let $X_1, \dots, X_n$ be i.i.d. with mean $\mu_X$ and variance $\sigma_X^2 > 0$, and $Y_1, \dots, Y_n$ i.i.d. with mean $\mu_Y$ and variance $\sigma_Y^2 > 0$, independent of the $X_i$. Which statements are true?
+
+- [x] $\sqrt{n}(\bar X_n \bar Y_n - \mu_X\mu_Y) \cvd \mathcal{N}(0, \mu_Y^2\sigma_X^2 + \mu_X^2\sigma_Y^2)$.
+  The gradient of $(a, b) \mapsto ab$ is $(b, a)$, and $(\sqrt n(\bar X_n - \mu_X), \sqrt n(\bar Y_n - \mu_Y))$ has independent gaussian limits.
+- [x] If $\mu_X = \mu_Y = 0$, then $\sqrt{n} \, \bar X_n \bar Y_n \cvp 0$.
+  The gradient vanishes at $(0, 0)$.
+- [x] If $\mu_X = \mu_Y = 0$, then $n \bar X_n \bar Y_n \cvd \sigma_X\sigma_Y Z_1 Z_2$ with $Z_1, Z_2$ independent $\mathcal{N}(0, 1)$.
+  $n\bar X_n \bar Y_n = (\sqrt n \bar X_n)(\sqrt n \bar Y_n)$, and continuous mapping. Equivalently, the second order delta method with the Hessian $\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$.
+- [ ] If $\mu_X = \mu_Y = 0$, then $n \bar X_n \bar Y_n$ converges in distribution to a multiple of a $\chi^2_1$ variable.
+  The Hessian is indefinite: the limit $\sigma_X\sigma_Y Z_1 Z_2$ is symmetric, not of one sign.
+
+> In the second order delta method, the limit $\frac12 X^\top H X$ is a weighted sum of $\chi^2_1$ variables with weights of both signs when the Hessian is indefinite.
+>
+> See *Delta method and method of moments*, Parts I and III.
+
+## Variance stabilisation for power laws @calc
+Let $\sqrt{n}(\hat\theta_n - \theta) \cvd \mathcal{N}(0, \theta^k)$ for $\theta > 0$. Which transformations $\phi$ satisfy $\phi'(\theta)^2 \theta^k = 1$?
+
+- [ ] For $k = 1$, as for the Poisson law: $\phi(\theta) = \sqrt{\theta}$.
+  $\phi'(\theta)^2 \theta = 1/4$: the right choice is $2\sqrt\theta$.
+- [x] For $k = 2$, as for the mean of an exponential law: $\phi(\theta) = \log \theta$.
+- [x] For $k = 3$: $\phi(\theta) = -2\theta^{-1/2}$.
+  $\phi'(\theta) = \theta^{-3/2}$.
+- [ ] For $k = 4$: $\phi(\theta) = \theta^{-2}$.
+  $\phi'(\theta)^2 \theta^4 = 4\theta^{-2}$. The right choice is $\phi(\theta) = -1/\theta$.
+
+> $\phi$ is a primitive of $\theta^{-k/2}$: $\frac{\theta^{1 - k/2}}{1 - k/2}$ for $k \neq 2$, and $\log\theta$ for $k = 2$.
+>
+> See *Delta method and method of moments*, Part III.
+
+## Model-based or nonparametric? @calc @further
+Let $X_1, X_2, \dots$ be i.i.d. $\mathcal{N}(\mu, 1)$, $c \in \R$, and $p = \P(X > c) = \Phi(\mu - c)$, with $\Phi$ the distribution function and $\varphi$ the density of $\mathcal{N}(0, 1)$. We compare $\hat p_n = \frac1n \sum_{i \le n} \mathbf{1}\{X_i > c\}$ and $\tilde p_n = \Phi(\bar X_n - c)$. Which statements are true?
+
+- [x] $\sqrt{n}(\hat p_n - p) \cvd \mathcal{N}(0, p(1-p))$.
+- [x] $\sqrt{n}(\tilde p_n - p) \cvd \mathcal{N}(0, \varphi(\mu - c)^2)$.
+  Delta method with $x \mapsto \Phi(x - c)$, whose derivative at $\mu$ is $\varphi(\mu - c)$.
+- [x] For $c = \mu$, the asymptotic variances are $1/4$ and $1/(2\pi) \approx 0.16$: the model-based estimator is better.
+- [ ] $\tilde p_n$ is still consistent when the data are not gaussian.
+  It tends to $\Phi(\E[X] - c)$, which is not $\P(X > c)$ in general; $\hat p_n$ is consistent for every law.
+
+> Using the model gains precision when the model is right, and loses consistency when it is wrong.
+>
+> See *Delta method and method of moments*, Part I.
+
+## The ratio estimator @calc
+Let $(X_i, Y_i)$ be i.i.d. pairs with finite second moments, $\mu_X \neq 0$, $\mu_Y \neq 0$, and $r = \mu_X/\mu_Y$. Which statements are true?
+
+- [ ] The gradient of $(a, b) \mapsto a/b$ at $(\mu_X, \mu_Y)$ is $(1/\mu_Y, \mu_X/\mu_Y^2)$.
+  The sign of the second coordinate is wrong: $\partial_b (a/b) = -a/b^2$.
+- [x] $\sqrt{n}(\bar X_n/\bar Y_n - r) \cvd \mathcal{N}\big(0, \Var(X - rY)/\mu_Y^2\big)$.
+  The quadratic form is $(\Var X - 2r\Cov(X, Y) + r^2 \Var Y)/\mu_Y^2$.
+- [ ] $\sqrt{n}(\bar X_n/\bar Y_n - r) \cvd \mathcal{N}\big(0, (\Var X + r^2\Var Y)/\mu_Y^2\big)$.
+  The covariance term is missing; this is only right when $X$ and $Y$ are uncorrelated.
+- [x] If $X = rY$ almost surely, the limit is degenerate.
+  Then $\bar X_n / \bar Y_n = r$ exactly.
+
+> A correlation between $X$ and $Y$ of the same sign as $r$ makes the ratio more precise than it would be with uncorrelated variables.
+>
+> See *Delta method and method of moments*, Part I.
+
+## A function that is not differentiable @calc
+Let $X_1, X_2, \dots$ be i.i.d. with mean $\mu$ and variance $\sigma^2 > 0$. Which statements are true?
+
+- [x] If $\mu \neq 0$, then $\sqrt{n}(|\bar X_n| - |\mu|) \cvd \mathcal{N}(0, \sigma^2)$.
+  $x \mapsto |x|$ is differentiable at $\mu \neq 0$, with derivative $\pm 1$.
+- [x] If $\mu = 0$, then $\sqrt{n} \, |\bar X_n| \cvd |Z|$ with $Z \sim \mathcal{N}(0, \sigma^2)$.
+  Continuous mapping, with no differentiability needed.
+- [ ] If $\mu = 0$, the delta method gives a gaussian limit for $\sqrt{n} \, |\bar X_n|$.
+  $x \mapsto |x|$ is not differentiable at $0$, and the limit $|Z|$ is nonnegative, not gaussian.
+- [x] If $\mu = 0$, then $\E[\sqrt{n} \, |\bar X_n|] \to \sigma\sqrt{2/\pi}$.
+  $\E[n\bar X_n^2] = \sigma^2$ for every $n$, so $(\sqrt n |\bar X_n|)$ is uniformly integrable; and $\E|Z| = \sigma\sqrt{2/\pi}$.
+
+> At a point where $\phi$ is not differentiable, the delta method does not apply, but continuous mapping often gives the limit. Here, $|\bar X_n|$ overestimates $|\mu| = 0$ by about $\sigma\sqrt{2/(\pi n)}$.
+>
+> See *Random vectors*, Part V, and *Delta method and method of moments*, Part I.
+
+## The law of density $\theta x^{\theta - 1}$ @calc
+Let $L_\theta$ have the density $\theta x^{\theta - 1}$ on $(0, 1)$, $\theta > 0$, for which $\E_\theta[X] = \theta/(\theta + 1)$ and $\Var_\theta(X) = \theta/((\theta+1)^2(\theta+2))$. Which statements are true?
+
+- [ ] The method of moments with $f_1(x) = x$ gives $\hat\theta_n = (1 - \bar X_n)/\bar X_n$.
+  Solving $\theta/(\theta + 1) = \bar X_n$ gives $\hat\theta_n = \bar X_n/(1 - \bar X_n)$.
+- [x] The method of moments estimator with $f_1(x) = x$ has the asymptotic variance $\theta_0(\theta_0 + 1)^2/(\theta_0 + 2)$.
+  $e'(\theta) = 1/(\theta + 1)^2$.
+- [x] The maximum likelihood estimator is $-n/\sum_{i \le n} \log X_i$, with asymptotic variance $\theta_0^2$.
+  $-\log X$ is exponential of parameter $\theta$, and $I(\theta) = 1/\theta^2$.
+- [ ] The method of moments is better than maximum likelihood when $\theta_0$ is large.
+  The difference of the asymptotic variances is $\theta_0(\theta_0+1)^2/(\theta_0+2) - \theta_0^2 = \theta_0/(\theta_0 + 2) > 0$: maximum likelihood is always better, although the ratio tends to $1$.
+
+> See *Delta method and method of moments*, Part IV, and *M and Z estimators*, Part I.
+
+## A symmetric mixture @calc
+Let $L_\theta = \frac12 \mathcal{N}(\theta, 1) + \frac12 \mathcal{N}(-\theta, 1)$ with $\theta \ge 0$, and $f_1(x) = x^2$. Which statements are true?
+
+- [x] $\E_\theta[X^2] = 1 + \theta^2$, so that the method of moments gives $\hat\theta_n = \big(\max(0, \frac1n \sum_{i \le n} X_i^2 - 1)\big)^{1/2}$.
+- [x] For $\theta_0 > 0$, $\sqrt{n}(\hat\theta_n - \theta_0) \cvd \mathcal{N}\big(0, 1 + \frac{1}{2\theta_0^2}\big)$.
+  $\Var_{\theta_0}(X^2) = 4\theta_0^2 + 2$ and $e'(\theta_0)^2 = 4\theta_0^2$.
+- [x] For $\theta_0 = 0$, $n^{1/4} \hat\theta_n$ converges in distribution to a nondegenerate limit.
+  $\sqrt{n}(\frac1n \sum_i X_i^2 - 1) \cvd \sqrt{2} Z$, so $n^{1/4}\hat\theta_n \cvd (\max(0, \sqrt 2 Z))^{1/2}$: the rate is $n^{-1/4}$.
+- [ ] With $f_1(x) = x$, the method works as well.
+  $\E_\theta[X] = 0$ for every $\theta$.
+
+> At $\theta_0 = 0$, $e'(\theta_0) = 0$, so the theorem of the course does not apply: the rate drops to $n^{-1/4}$. The asymptotic variance $1 + 1/(2\theta_0^2)$, which blows up as $\theta_0 \to 0$, announces it.
+>
+> See *Delta method and method of moments*, Parts III and IV.
+
+## The correlation under independence @calc @further
+Let $(X_i, Y_i)$ be i.i.d. pairs with finite fourth moments and positive variances, and $r_n$ their empirical correlation coefficient. Which statements are true?
+
+- [x] If $X$ and $Y$ are independent, then $\sqrt{n} \, r_n \cvd \mathcal{N}(0, 1)$, whatever their laws.
+  With standardized coordinates and $\rho = 0$, the limit is gaussian with the variance of $XY$, which is $\E[X^2]\E[Y^2] = 1$.
+- [ ] The same holds if $X$ and $Y$ are only uncorrelated.
+  For $X \sim \mathcal{N}(0, 1)$ and $Y = (X^2 - 1)/\sqrt 2$, $\Cov(X, Y) = 0$ but $\E[X^2 Y^2] = 5$.
+- [x] Rejecting independence when $\sqrt{n} \, |r_n| > r_\alpha$, with $r_\alpha$ the quantile of order $1 - \alpha/2$ of $\mathcal{N}(0,1)$, gives a test of asymptotic level $\alpha$.
+- [x] For gaussian pairs with $\rho = 0$, this agrees with the limit $\mathcal{N}(0, (1 - \rho^2)^2)$ of the course.
+
+> The delta method computation of the course, with $W = XY$ when $\rho = 0$, only uses the gaussian moments through $\Var(XY)$; under independence, this variance is $1$ for every law.
+>
+> See *Delta method and method of moments*, Part III.
+
+# M and Z estimators: definitions and consistency
+
+## M-estimators everywhere
+Which statements are true?
+
+- [x] The empirical mean is the M-estimator of $M_n(\theta) = -\frac1n \sum_{i \le n} \|\theta - X_i\|^2$.
+- [x] The maximum likelihood estimator is the M-estimator of $M_n(\theta) = \frac1n \sum_{i \le n} \log f_\theta(X_i)$.
+- [x] An empirical median of real observations is an M-estimator, with $M_n(\theta) = -\frac1n \sum_{i \le n} |X_i - \theta|$.
+  A median minimizes the sum of the absolute deviations.
+- [x] The empirical risk minimizer is the M-estimator of $M_n = -\widehat{R}_S$.
+- [ ] A zero $\hat\theta_n$ of an estimating equation $Z_n(\theta) = 0$ is never an M-estimator.
+  It maximizes $M_n(\theta) = -\|Z_n(\theta)\|^2$.
+
+> See *M and Z estimators*, Part I.
+
+## Maximum likelihood in the gaussian model @calc
+For the model $\mathcal{N}(\mu, \sigma^2)$, $(\mu, \sigma^2) \in \R \times (0, \infty)$, and $n \ge 2$ observations, which statements about the maximum likelihood estimator are true?
+
+- [x] $\hat\mu_n = \bar X_n$.
+- [ ] $\hat\sigma_n^2 = \frac{1}{n-1} \sum_{i \le n} (X_i - \bar X_n)^2$.
+  The factor is $\frac1n$, as the solution shows.
+- [x] $\hat\sigma_n^2 = \frac1n \sum_{i \le n} (X_i - \bar X_n)^2$.
+- [x] It coincides with the method of moments estimator for $f_1(x) = x$ and $f_2(x) = x^2$.
+  A coincidence of this model: the two methods differ in general.
+
+? $M_n(\mu, \sigma^2) = -\frac12 \log \sigma^2 - \frac12 \log(2\pi) - \frac{1}{2\sigma^2} \cdot \frac1n \sum_i (X_i - \mu)^2$. Set both partial derivatives to zero.
+
+> $\partial_\mu M_n = \frac{1}{\sigma^2} \cdot \frac1n \sum_i (X_i - \mu)$ vanishes only at $\mu = \bar X_n$, and $\partial_{\sigma^2} M_n = -\frac{1}{2\sigma^2} + \frac{1}{2\sigma^4} \cdot \frac1n \sum_i (X_i - \mu)^2$ vanishes at $\mu = \bar X_n$ exactly when $\sigma^2 = \frac1n \sum_i (X_i - \bar X_n)^2$.
+>
+> See *M and Z estimators*, Part I.
+
+## More maximum likelihood estimators @calc
+Which statements are true?
+
+- [x] For the exponential law of parameter $\lambda$, the maximum likelihood estimator is $1/\bar X_n$.
+  $M_n(\lambda) = \log \lambda - \lambda \bar X_n$ is maximal at $\lambda = 1/\bar X_n$.
+- [ ] For $\mathrm{Unif}([0, \theta])$, the maximum likelihood estimator is $2 \bar X_n$.
+  This is the method of moments estimator.
+- [x] For $\mathrm{Unif}([0, \theta])$, the maximum likelihood estimator is $\max_{i \le n} X_i$.
+  The likelihood is $\theta^{-n} \mathbf{1}\{\theta \ge \max_i X_i\}$, which decreases on $[\max_i X_i, \infty)$.
+- [ ] For $\mathrm{Unif}([0, \theta])$, the maximum likelihood estimator solves $\partial_\theta \log L_n(\theta) = 0$.
+  The maximum is reached at a discontinuity of the likelihood, where no derivative vanishes.
+- [x] For the Poisson law of parameter $\lambda > 0$, the maximum likelihood estimator is $\bar X_n$, on the event $\{\bar X_n > 0\}$, whose probability tends to $1$.
+  Up to a constant, $M_n(\lambda) = \bar X_n \log \lambda - \lambda$. When all the $X_i$ are $0$, $M_n(\lambda) = -\lambda$ has no maximizer in $(0, \infty)$.
+
+> See *M and Z estimators*, Part I.
+
+## The two stages of consistency
+Let $\Delta_n = \sup_{\theta \in \Theta} |M_n(\theta) - M(\theta)|$, and let $\hat\theta_n$ nearly maximize $M_n$. Which statements are true?
+
+- [x] $\sup_\theta M(\theta) - M(\hat\theta_n) \le 2\Delta_n + o_P(1)$.
+  For every $\theta$, $M(\hat\theta_n) \ge M_n(\hat\theta_n) - \Delta_n \ge M_n(\theta) - \Delta_n + o_P(1) \ge M(\theta) - 2\Delta_n + o_P(1)$.
+- [x] This first stage uses no topology, no identifiability and no compactness.
+- [ ] The second stage, well separation, needs the uniform convergence of $M_n$ to $M$.
+  Well separation is a deterministic property of $M$ alone.
+- [x] The second stage turns a small criterion gap $M(\theta_0) - M(\hat\theta_n)$ into a small distance $\|\hat\theta_n - \theta_0\|$.
+  If $\|\hat\theta_n - \theta_0\| \ge \epsilon$, the gap is at least $\delta(\epsilon) > 0$.
+
+> All the probability is in the uniform convergence $\Delta_n \cvp 0$, and all the geometry in the well separation of $\theta_0$.
+>
+> See *M and Z estimators*, Part II.
+
+## Well separated maximizers
+Which conditions ensure that $\theta_0$ is a well separated maximizer of $M : \Theta \to \R$?
+
+- [x] $\Theta$ is compact, $M$ is continuous and $\theta_0$ is its unique maximizer.
+  This is the lemma of the course.
+- [ ] $\theta_0$ is the unique maximizer of $M$.
+  On $\Theta = \R$, $M(\theta) = -\theta^2/(1 + \theta^4)$ has the unique maximizer $0$, but $M(\theta) \to 0 = M(0)$ as $|\theta| \to \infty$.
+- [x] $\Theta = \R^p$, $M$ is strictly concave and $\theta_0$ is its maximizer.
+  Along each ray from $\theta_0$, a concave function decreases beyond $\theta_0$, so that the supremum over $\{\|\theta - \theta_0\| \ge \epsilon\}$ is reached on the sphere of radius $\epsilon$, which is compact.
+- [ ] $M$ is continuous and $\theta_0$ is a strict local maximizer.
+  Another point far away may reach the same value: well separation is a global property.
+
+> See *M and Z estimators*, Part II.
+
+## Learning and identifiability
+Which statements are true?
+
+- [x] Permuting the hidden units of a neural network leaves the predictor, hence the risk, unchanged, so that the minimizer of the risk is in general not unique.
+- [x] In supervised learning, the model is usually misspecified on purpose: no parameter reproduces the law of the data.
+- [ ] Over-parameterized models have a unique empirical risk minimizer.
+  They typically have a continuum of exact minimizers.
+- [x] In a well specified model, even without identifiability, maximum likelihood satisfies $\mathrm{KL}(L_{\theta_0} \| L_{\hat\theta_n}) \le 2\Delta_n + o_P(1)$, where $\Delta_n$ is the uniform deviation of $\{\log f_\theta : \theta \in \Theta\}$, so that it is consistent for the law as soon as this class is $L_{\theta_0}$-Glivenko–Cantelli.
+
+> In learning, what matters is the risk of the returned predictor, which stage one controls; stage two is irrelevant there.
+>
+> See *M and Z estimators*, Parts II and III.
+
+## A rate from the separation @calc
+Assume that $\delta(\epsilon) \ge c \epsilon^\alpha$ for small $\epsilon$, and that $\Delta_n$ and the optimization error are $O_P(n^{-1/2})$. Which statements are true?
+
+- [x] The argument of stage two gives $\|\hat\theta_n - \theta_0\| = O_P(n^{-1/(2\alpha)})$.
+  Since $\theta_0$ is well separated, $\hat\theta_n \cvp \theta_0$. On the event where $\|\hat\theta_n - \theta_0\|$ is small enough for $\delta(\epsilon) \ge c\epsilon^\alpha$ to apply, whose probability tends to $1$, $\|\hat\theta_n - \theta_0\| \le \big((2\Delta_n + o_P(1))/c\big)^{1/\alpha}$, where the $o_P(1)$ is $O_P(n^{-1/2})$ here.
+- [x] With a quadratic separation, $\alpha = 2$, it gives the rate $n^{-1/4}$.
+- [ ] With $\alpha = 2$, this argument gives the rate $n^{-1/2}$.
+  The exponent $1/\alpha = 1/2$ loses a square root.
+- [x] In the smooth case, $\alpha = 2$ with $M$ twice differentiable at $\theta_0$ with a negative definite Hessian and a criterion regular enough near $\theta_0$, a local analysis over a shrinking neighbourhood of $\theta_0$ recovers the rate $n^{-1/2}$.
+  The uniform deviation over all of $\Theta$ is pessimistic; what matters is the fluctuation near $\theta_0$. Without a nondegenerate Hessian, slower rates do occur: with $X_i \sim \mathcal{N}(\theta^3, 1)$, $\theta_0 = 0$ and $M_n(\theta) = -\frac1n \sum_i (X_i - \theta^3)^2$, the limit $M(\theta) = -1 - \theta^6$ has a zero Hessian at $0$, so that $\alpha = 6$, and $\hat\theta_n = \bar X_n^{1/3}$ converges at the rate $n^{-1/6}$: better than the $n^{-1/12}$ of stage two, slower than $n^{-1/2}$.
+
+> See *M and Z estimators*, Part II.
+
+## Consistency of Z-estimators
+Which are hypotheses of the consistency theorem for Z-estimators?
+
+- [x] $\sup_{\theta \in \Theta} \|Z_n(\theta) - Z(\theta)\| \cvp 0$.
+- [x] $Z(\theta_0) = 0$ and $\inf_{\|\theta - \theta_0\| \ge \epsilon} \|Z(\theta)\| > 0$ for every $\epsilon > 0$.
+- [x] $Z_n(\hat\theta_n) = o_P(1)$.
+- [ ] $\theta \mapsto Z_n(\theta)$ is differentiable.
+  Consistency needs no smoothness: the empirical median is a Z-estimator with a discontinuous $Z_n$.
+
+> See *M and Z estimators*, Part II.
+
+## The monotone case and the median
+Let $\Theta = \R$. Which statements about the consistency theorem for monotone Z-estimators are true?
+
+- [x] The pointwise convergence $Z_n(\theta) \cvp Z(\theta)$ for every fixed $\theta$ suffices, with no uniformity.
+  In exchange, the theorem needs monotonicity and dimension one.
+- [x] It assumes $Z_n$ nondecreasing and $Z(\theta_0 - \epsilon) < 0 < Z(\theta_0 + \epsilon)$ for every $\epsilon > 0$.
+- [ ] Its proof works verbatim in $\R^p$.
+  The proof splits $\{|\hat\theta_n - \theta_0| \ge \epsilon\}$ into two half-lines, which only makes sense in dimension one.
+- [x] It applies to the empirical median with $Z_n(\theta) = \frac1n \sum_{i \le n} \mathrm{sign}(\theta - X_i)$, whose pointwise limit is $Z(\theta) = 2F_X(\theta) - 1$ when $F_X$ is continuous, provided that the median $m$ is unique: $F_X(m - \epsilon) < 1/2 < F_X(m + \epsilon)$ for every $\epsilon > 0$.
+
+> See *M and Z estimators*, Part II.
+
+## Empirical risk minimization
+Which statements about empirical risk minimization are true?
+
+- [x] $R(\hat\theta_n) - \inf_\theta R(\theta) \le 2 \sup_\theta |\widehat{R}_S(\theta) - R(\theta)|$ plus the optimization error.
+- [x] The gap between $\inf_\theta R(\theta)$ and the best possible risk is the approximation error, a deterministic quantity that the estimator cannot affect.
+- [ ] Bounding the excess risk by the uniform deviation requires the minimizer of $R$ to be unique.
+  Stage one uses no identifiability.
+- [x] Rademacher complexities, the VC dimension and metric entropy are tools to bound the uniform deviation $\sup_\theta |\widehat{R}_S(\theta) - R(\theta)|$.
+
+> Statistical learning theory is, to a large extent, the estimation of this uniform deviation.
+>
+> See *M and Z estimators*, Part II.
+
+# Uniform convergence
+
+## Glivenko–Cantelli classes
+Let $X_1, X_2, \dots$ be i.i.d. of law $L$, and $\mathcal{F}$ a class of integrable functions. Which statements are true?
+
+- [x] $\mathcal{F}$ is $L$-Glivenko–Cantelli if $\sup_{f \in \mathcal{F}} |\frac1n \sum_{i \le n} f(X_i) - \E[f(X)]| \cvp 0$.
+- [ ] $\mathcal{F}$ is $L$-Glivenko–Cantelli as soon as $\frac1n \sum_{i \le n} f(X_i) \cvp \E[f(X)]$ for each $f \in \mathcal{F}$.
+  This pointwise statement is the law of large numbers, which always holds; uniformity is the whole point.
+- [x] Every finite class of integrable functions is Glivenko–Cantelli.
+  The law of large numbers for each function, and a maximum over finitely many terms.
+- [x] The class $\{\mathbf{1}_{(-\infty, t]} : t \in \R\}$ is $L$-Glivenko–Cantelli for every law $L$ on $\R$.
+  This is the classical Glivenko–Cantelli theorem.
+
+> See *M and Z estimators*, Part III.
+
+## Covers and brackets for indicators @calc
+Let $L = \mathrm{Unif}([0, 1])$ and $\mathcal{F} = \{\mathbf{1}_{(-\infty, t]} : t \in [0, 1]\}$. Which statements are true?
+
+- [x] For $\epsilon < 1/2$, no finite family approximates every element of $\mathcal{F}$ within $\epsilon$ in supremum norm.
+  $\|\mathbf{1}_{(-\infty, t]} - \mathbf{1}_{(-\infty, s]}\|_\infty = 1$ for $s \neq t$, and $\mathcal{F}$ is uncountable.
+- [ ] $N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \asymp \epsilon^{-1}$.
+  The $L^2$ width of the bracket $[\mathbf{1}_{(-\infty,s]}, \mathbf{1}_{(-\infty,t]}]$ is $\sqrt{t - s}$, not $t - s$.
+- [x] $N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \asymp \epsilon^{-2}$.
+  A bracket of $L^2$ width $\epsilon$ covers an interval of values of $t$ of length $\epsilon^2$.
+- [x] $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) \asymp \epsilon^{-1}$.
+  The $L^1$ width of the same bracket is $t - s$.
+
+? The bracket $[\mathbf{1}_{(-\infty, s]}, \mathbf{1}_{(-\infty, t]}]$, $s \le t$, contains $\mathbf{1}_{(-\infty, r]}$ for every $r \in [s, t]$. What is its width?
+
+> Covering numbers in supremum norm are infinite on this simplest of classes, which is nevertheless Glivenko–Cantelli: brackets measured in $L^q(L)$ are the right notion.
+>
+> See *M and Z estimators*, Part III.
+
+## Brackets
+Which statements are true?
+
+- [x] The functions $l$ and $u$ of a bracket $[l, u]$ need not belong to $\mathcal{F}$.
+- [x] The width of a bracket is measured in $L^q(L)$, not in supremum norm.
+- [ ] If $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) < \infty$ for every $\epsilon > 0$, then $\mathcal{F}$ can be covered by finitely many balls of radius $\epsilon$ in supremum norm.
+  The indicators of the previous question are a counterexample.
+- [x] If $\mathcal{F}$ is a class of $L$-integrable functions with $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) < \infty$ for every $\epsilon > 0$, then $\mathcal{F}$ is $L$-Glivenko–Cantelli.
+  Sandwich each $f$ between some $l_j$ and $u_j$, and apply the law of large numbers to the $2N$ functions $l_j, u_j$.
+
+> See *M and Z estimators*, Part III.
+
+## Continuously parametrized classes
+Let $\mathcal{F} = \{g_\theta : \theta \in \Theta\}$ with $g_\theta : \R^d \to \R$. Which statements are true?
+
+- [x] If $\Theta$ is a compact metric space, $\theta \mapsto g_\theta(x)$ is continuous for every $x$, and $\int \sup_\theta |g_\theta| \, dL < \infty$, then $\mathcal{F}$ is $L$-Glivenko–Cantelli.
+- [ ] The integrable envelope can be dropped, as long as each $g_\theta$ is integrable.
+  Let $X$ be uniform on $[0, 1]$, $\Theta = [0, 1]$, $\psi \ge 0$ continuous, nonzero, supported in $[1, 2]$, $g_\theta(x) = \theta^{-2}\psi(x/\theta)$ and $g_0 = 0$. The other hypotheses hold, but for $\theta < \min_i X_i/2$ the empirical mean of $g_\theta$ is $0$ while $\E[g_\theta(X)] = \theta^{-1}\int \psi$, so that the supremum is infinite.
+- [x] Compactness is used to extract a finite subcover from balls on which $g_\theta$ varies little in $L^1(L)$.
+- [x] This proposition gives the uniform convergence step in the consistency of maximum likelihood, with $g_\theta = \log f_\theta$.
+
+> See *M and Z estimators*, Part III.
+
+## Consistency of maximum likelihood
+Which are hypotheses of the consistency theorem for maximum likelihood of the course?
+
+- [x] $\Theta$ is a compact subset of $\R^p$.
+- [ ] $\theta \mapsto f_\theta(x)$ is twice differentiable.
+  Continuity is enough for consistency; derivatives matter for the limit law.
+- [x] Identifiability: $L_\theta \neq L_{\theta_0}$ for every $\theta \neq \theta_0$.
+- [x] $\int \sup_{\theta \in \Theta} |\log f_\theta(x)| \, f_{\theta_0}(x) \, dx < \infty$.
+- [ ] The model is an exponential family.
+
+> The hypotheses also include $f_\theta > 0$ and the continuity of $\theta \mapsto f_\theta(x)$. Uniform convergence comes from the proposition on continuously parametrized classes, and well separation from identifiability, compactness and continuity.
+>
+> See *M and Z estimators*, Part III.
+
+## The separation of maximum likelihood @calc
+Let $M(\theta) = \E_{\theta_0}[\log f_\theta(X)]$ in a well specified model. Which statements are true?
+
+- [x] $M(\theta_0) - M(\theta) = \mathrm{KL}(L_{\theta_0} \| L_\theta) \ge 0$.
+- [ ] $\mathrm{KL}(L_{\theta_0} \| L_\theta) = \mathrm{KL}(L_\theta \| L_{\theta_0})$.
+  The relative entropy is not symmetric; the next question gives an example.
+- [x] With $\log t \le 2(\sqrt t - 1)$, $M(\theta) - M(\theta_0) \le -\int (\sqrt{f_\theta} - \sqrt{f_{\theta_0}})^2$, which is negative when $L_\theta \neq L_{\theta_0}$.
+- [x] For $L_\mu = \mathcal{N}(\mu, 1)$, $\mathrm{KL}(L_{\mu_0} \| L_\mu) = (\mu - \mu_0)^2/2$.
+  $\log \frac{f_{\mu_0}(x)}{f_\mu(x)} = \frac{(x - \mu)^2 - (x - \mu_0)^2}{2}$, whose expectation under $L_{\mu_0}$ is $(\mu - \mu_0)^2/2$.
+
+> See *M and Z estimators*, Part III.
+
+## Relative entropy between exponential laws @calc
+Let $L_\lambda$ be the exponential law of parameter $\lambda$. Which statements about $\mathrm{KL}(L_{\lambda_0} \| L_\lambda) = \E_{\lambda_0}[\log(f_{\lambda_0}(X)/f_\lambda(X))]$ are true?
+
+- [ ] It is $\log(\lambda/\lambda_0) + \lambda_0/\lambda - 1$.
+  This is $\mathrm{KL}(L_\lambda \| L_{\lambda_0})$: the roles are swapped.
+- [x] It is $\log(\lambda_0/\lambda) + \lambda/\lambda_0 - 1$.
+- [ ] It is $(\lambda - \lambda_0)^2/2$.
+  This is the gaussian formula, for the means.
+- [x] It is nonnegative, and zero if and only if $\lambda = \lambda_0$.
+  With $u = \lambda/\lambda_0$, it is $u - 1 - \log u$.
+
+? $\log(f_{\lambda_0}(x)/f_\lambda(x)) = \log(\lambda_0/\lambda) - (\lambda_0 - \lambda)x$, and $\E_{\lambda_0}[X] = 1/\lambda_0$.
+
+> See *M and Z estimators*, Part III.
+
+# Limit laws and the maximal inequality
+
+## The sandwich formula
+Let $Z_n(\theta) = \frac1n \sum_{i \le n} z(X_i, \theta)$ with $\E[z(X, \theta_0)] = 0$, let $\hat\theta_n \cvp \theta_0$ with $Z_n(\hat\theta_n) = 0$, and let $V = \E[J_z(X, \theta_0)]$ be invertible. Which statements are true?
+
+- [ ] $\sqrt{n}(\hat\theta_n - \theta_0) \cvd \mathcal{N}(0, \Cov(z(X, \theta_0)))$.
+  This is the limit of $\sqrt{n} Z_n(\theta_0)$, before solving for the error.
+- [x] The heuristic linearizes $0 = Z_n(\hat\theta_n) \approx Z_n(\theta_0) + JZ_n(\theta_0)(\hat\theta_n - \theta_0)$.
+- [x] Under regularity conditions, $\sqrt{n}(\hat\theta_n - \theta_0) \cvd \mathcal{N}(0, V^{-1} \Cov(z(X, \theta_0)) V^{-\top})$.
+  $JZ_n(\theta_0) \cvp V$ by the law of large numbers, and $\sqrt{n} Z_n(\theta_0) \cvd \mathcal{N}(0, \Cov(z(X, \theta_0)))$ by the central limit theorem.
+- [x] The same limit can hold when $\theta \mapsto z(x, \theta)$ is not differentiable, provided that $\theta \mapsto \E[z(X, \theta)]$ is smooth, with $V$ its Jacobian at $\theta_0$, and that the remainder is controlled uniformly near $\theta_0$, as the maximal inequality does.
+  Averaging over $x$ repairs what happens at each fixed $x$, as for the median.
+
+> See *M and Z estimators*, Part IV.
+
+## The empirical median @calc
+Let $X_1, X_2, \dots$ be i.i.d. real with a density $f$, continuous and positive at the median $m$, so that $\sqrt{n}(\hat m_n - m) \cvd \mathcal{N}(0, v)$ for the empirical median $\hat m_n$. Which statements are true?
+
+- [x] $v = 1/(4 f(m)^2)$.
+  With $z(x, \theta) = \mathrm{sign}(\theta - x)$, $\E[z(X, \theta)] = 2F(\theta) - 1$ has derivative $2f(m)$ at $m$, and $\Var(z(X, m)) = 1$.
+- [ ] $v = 1/f(m)^2$.
+  The derivative of $2F(\theta) - 1$ is $2f(\theta)$, not $f(\theta)$.
+- [x] For $\mathcal{N}(\mu, \sigma^2)$ observations, $v = \pi\sigma^2/2$, larger than the asymptotic variance $\sigma^2$ of the empirical mean.
+  $f(\mu) = 1/(\sigma\sqrt{2\pi})$.
+- [x] For the Laplace density $\frac12 e^{-|x - m|}$, $v = 1$, smaller than the asymptotic variance $2$ of the empirical mean.
+  Heavier tails favour the median.
+
+? Use the sandwich formula with $z(x, \theta) = \mathrm{sign}(\theta - x)$, and differentiate $\theta \mapsto \E[z(X, \theta)]$ rather than $z$.
+
+> The heuristic does not apply as such, since $\mathrm{sign}$ is not differentiable, but the limit it predicts is the right one.
+>
+> See *M and Z estimators*, Part IV.
+
+## Asymptotic normality of maximum likelihood @further
+In a regular model, the maximum likelihood estimator is a Z-estimator with $z(x, \theta) = \nabla_\theta \log f_\theta(x)$. Let $I(\theta) = \E_\theta[\nabla \log f_\theta(X) \, \nabla \log f_\theta(X)^\top]$ be the Fisher information. Which statements are true?
+
+- [x] $\E_{\theta_0}[\nabla \log f_{\theta_0}(X)] = 0$, so that $\Cov_{\theta_0}(\nabla \log f_{\theta_0}(X)) = I(\theta_0)$.
+  Differentiate $\int f_\theta = 1$ under the integral sign.
+- [x] $V = \E_{\theta_0}[\nabla^2 \log f_{\theta_0}(X)] = -I(\theta_0)$.
+  Differentiate $\int f_\theta = 1$ twice.
+- [x] The sandwich formula gives $\sqrt{n}(\hat\theta_n - \theta_0) \cvd \mathcal{N}(0, I(\theta_0)^{-1})$.
+  $V^{-1} I(\theta_0) V^{-\top} = I(\theta_0)^{-1}$.
+- [ ] $\sqrt{n}(\hat\theta_n - \theta_0) \cvd \mathcal{N}(0, I(\theta_0))$.
+  The covariance is the inverse of the information: more information, smaller error.
+- [x] For the exponential law of parameter $\lambda$, $I(\lambda) = 1/\lambda^2$, consistent with $\sqrt{n}(1/\bar X_n - \lambda) \cvd \mathcal{N}(0, \lambda^2)$.
+  $\partial_\lambda \log f_\lambda(x) = 1/\lambda - x$, whose variance is $1/\lambda^2$.
+
+> The variance of the score equals minus the expected Hessian of the log-likelihood, and the sandwich collapses to $I(\theta_0)^{-1}$.
+>
+> See van der Vaart, *Asymptotic Statistics*, Chapter 5.
+
+## Fisher information @calc @further
+Which values of the Fisher information $I(\theta)$ of one observation are right?
+
+- [x] $\mathrm{Ber}(p)$: $I(p) = 1/(p(1 - p))$.
+  The score is $x/p - (1-x)/(1-p) = (x - p)/(p(1-p))$.
+- [x] Poisson of parameter $\lambda$: $I(\lambda) = 1/\lambda$.
+  The score is $x/\lambda - 1$.
+- [x] $\mathcal{N}(\mu, \sigma^2)$ with $\sigma^2$ known, parameter $\mu$: $I(\mu) = 1/\sigma^2$.
+- [ ] $\mathcal{N}(0, \sigma^2)$, parameter $\sigma^2$: $I(\sigma^2) = 1/\sigma^4$.
+  The score is $-\frac{1}{2\sigma^2} + \frac{x^2}{2\sigma^4}$, whose variance is $\frac{2\sigma^4}{4\sigma^8} = \frac{1}{2\sigma^4}$. This matches the limit $\mathcal{N}(0, 2\sigma^4)$ of $\frac1n \sum_i X_i^2$, and of the empirical variance.
+
+> In each case, $I(\theta)^{-1}$ is the asymptotic variance of the maximum likelihood estimator, which is the empirical mean, or $\frac1n \sum_i X_i^2$ in the last model.
+>
+> Not in the course.
+
+## Efficiency @further
+The *Cramér–Rao bound*, not seen in class, states that in a regular model, an unbiased estimator of $\theta \in \R$ based on $n$ observations has a variance at least $1/(n I(\theta))$, with $I$ the Fisher information. Asymptotically, $I(\theta)^{-1}$ is the benchmark for the variance of the limit of $\sqrt{n}(\hat\theta_n - \theta)$. Which statements are true?
+
+- [x] In the model $\mathcal{N}(\theta, 1)$, $\bar X_n$ is unbiased and reaches the Cramér–Rao bound for every $n$.
+  $\Var(\bar X_n) = 1/n$ and $I(\theta) = 1$.
+- [x] In the exponential model, the method of moments with $f_1(x) = x^2$ has the asymptotic variance $\frac54\theta_0^2$, above $I(\theta_0)^{-1} = \theta_0^2$.
+- [ ] Every estimator has an asymptotic variance at least $I(\theta)^{-1}$ at every $\theta$.
+  In the model $\mathcal{N}(\theta, 1)$, Hodges' estimator, $\bar X_n$ replaced by $0$ when $|\bar X_n| \le n^{-1/4}$, has the asymptotic variance $0$ at $\theta = 0$. For estimators with a limit law at every $\theta$, in a regular model, such superefficiency can only happen on a set of Lebesgue measure zero (Le Cam).
+- [x] For gaussian data, the empirical median is less efficient than the empirical mean, by a factor $\pi/2$ in asymptotic variance.
+
+> In regular models, maximum likelihood is asymptotically efficient: its asymptotic variance $I(\theta_0)^{-1}$ is the best possible, in the sense of the convolution and local asymptotic minimax theorems.
+>
+> Not in the course; see van der Vaart, *Asymptotic Statistics*, Chapter 8.
+
+## The maximal inequality
+Let $\mathcal{F}$ have an envelope $F$ with $\E[F(X)^2] < \infty$. The maximal inequality of the course bounds $\E^\star\big[\sup_{f \in \mathcal{F}} |\frac1n \sum_{i \le n} f(X_i) - \E[f(X)]|\big]$ by $\frac{C}{\sqrt n} \int_0^{\|F\|_{L^2(L)}} \sqrt{1 + \log N_{[\,]}(\mathcal{F}, L^2(L), \epsilon)} \, d\epsilon$. Which statements are true?
+
+- [x] When the entropy integral is finite, the uniform deviation is $O_P(n^{-1/2})$.
+  Markov's inequality turns the bound on the expectation into a bound in probability.
+- [ ] The bracketing numbers are those in $L^1(L)$, as for Glivenko–Cantelli.
+  They are in $L^2(L)$: chaining keeps the fluctuations of the increments, whose size is an $L^2$ norm.
+- [x] The outer expectation $\E^\star$ is needed because a supremum over an uncountable class need not be measurable.
+- [x] With absolute values, the bound only changes $\log N_{[\,]}$ into $1 + \log N_{[\,]}$.
+  $\mathcal{F} \cup (-\mathcal{F})$ has at most twice as many brackets, and $\log 2 \le 1$.
+
+> See *M and Z estimators*, Part IV.
+
+## A finite entropy integral @calc
+Assume that $\log N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \le p \log(1/\epsilon)$ for $\epsilon \in (0, 1]$, with the envelope $1$. Which statements are true?
+
+- [ ] The entropy integral diverges because of the singularity of $\log(1/\epsilon)$ at $0$.
+  $\sqrt{\log(1/\epsilon)}$ is integrable at $0$.
+- [x] $\int_0^1 \sqrt{\log(1/\epsilon)} \, d\epsilon = \sqrt{\pi}/2$.
+  With $\epsilon = e^{-u}$, it is $\int_0^\infty \sqrt{u} \, e^{-u} \, du = \Gamma(3/2)$.
+- [x] The entropy integral is at most $1 + \sqrt{p \pi}/2$.
+  $\sqrt{1 + x} \le 1 + \sqrt{x}$.
+- [x] For $p \ge 1$, the uniform deviation is $O_P(\sqrt{p/n})$.
+
+? Substitute $\epsilon = e^{-u}$.
+
+> This is the parametric case: a class indexed by $p$ parameters typically has $\log N_{[\,]} \lesssim p \log(2/\epsilon)$, which changes the integral only by a constant factor, and the indicators $\mathbf{1}_{(-\infty, t]}$ are of this kind.
+>
+> See *M and Z estimators*, Part IV.
+
+## The empirical distribution function @further
+Let $X_1, X_2, \dots$ be i.i.d. real with a continuous distribution function $F$, and $F_n(t) = \frac1n \sum_{i \le n} \mathbf{1}\{X_i \le t\}$. The *Dvoretzky–Kiefer–Wolfowitz inequality*, not seen in class, states that $\P(\sqrt{n} \sup_t |F_n(t) - F(t)| > x) \le 2e^{-2x^2}$ for every $n$ and every $x > 0$. Which statements are true?
+
+- [x] $\sup_t |F_n(t) - F(t)| = O_P(n^{-1/2})$.
+  The maximal inequality, with $N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \lesssim \epsilon^{-2}$; the Dvoretzky–Kiefer–Wolfowitz inequality gives it too.
+- [ ] $\sqrt{n} \sup_t |F_n(t) - F(t)| \cvp 0$.
+  Since $F$ is continuous, some $t$ has $F(t) = 1/2$, and there $\sqrt n (F_n(t) - F(t)) \cvd \mathcal{N}(0, 1/4)$, which is not degenerate; the supremum is at least the absolute value of this term.
+- [x] The law of $\sup_t |F_n(t) - F(t)|$ does not depend on $F$.
+  Almost surely, $\mathbf{1}\{X_i \le t\} = \mathbf{1}\{F(X_i) \le F(t)\}$ for every $i$ and $t$, since the flat parts of $F$ have probability $0$. The $F(X_i)$ are i.i.d. uniform on $[0, 1]$, and $F$, being continuous, takes every value in $(0, 1)$: the statistic is $\sup_u |G_n(u) - u|$, with $G_n$ the empirical distribution function of the $F(X_i)$.
+- [x] For every $n$, the band $F_n(t) \pm \sqrt{\log(2/\alpha)/(2n)}$ contains $F(t)$ for all $t$ simultaneously with probability at least $1 - \alpha$.
+  Take $x = \sqrt{\log(2/\alpha)/2}$, so that $2e^{-2x^2} = \alpha$. Unlike the intervals of the course, this guarantee holds at fixed $n$.
+
+> The limit law of $\sqrt n \sup_t |F_n(t) - F(t)|$ is Kolmogorov's law, which gives the Kolmogorov–Smirnov test.
+>
+> See *M and Z estimators*, Part IV. The distribution-free property and the Dvoretzky–Kiefer–Wolfowitz inequality are not in the course.
+
+## Lipschitz functions @calc
+Let $\mathcal{F}$ be the class of $1$-Lipschitz functions $f : [0, 1]^d \to \R$ with $\|f\|_\infty \le 1$, for which $\log N(\mathcal{F}, \|\cdot\|_\infty, \epsilon) \lesssim \epsilon^{-d}$, and let the $X_i$ be i.i.d. uniform on $[0, 1]^d$. Which statements are true?
+
+- [x] $\int_0^1 \sqrt{\epsilon^{-d}} \, d\epsilon$ is finite if and only if $d < 2$.
+  $\epsilon^{-d/2}$ is integrable at $0$ if and only if $d/2 < 1$.
+- [ ] The uniform deviation over $\mathcal{F}$ is $O_P(n^{-1/2})$ for every $d$.
+  $f(x) = \min(1, \mathrm{dist}(x, \{X_1, \dots, X_n\}))$ belongs to $\mathcal{F}$, has empirical mean $0$ and an expectation of order $n^{-1/d}$, so that the uniform deviation is at least of order $n^{-1/d}$, much larger than $n^{-1/2}$ for $d \ge 3$.
+- [x] For $d \ge 2$, the course stops the chaining at a scale $\delta$, and optimizes $\delta$.
+  This is the truncated maximal inequality.
+- [ ] For $d = 4$, the rate is $n^{-1/2} \log n$.
+  This is what the truncated maximal inequality gives in the borderline case $d = 2$. For $d = 4$, the rate is $n^{-1/4}$, and the lower bound of another option shows that it cannot be improved.
+
+> The larger the class, the slower the uniform convergence: this is a form of the curse of dimensionality.
+>
+> See *M and Z estimators*, Part IV.
+
+## The three regimes @calc
+Let $\log N(\mathcal{F}, \|\cdot\|_\infty, \epsilon) \lesssim \epsilon^{-\alpha}$, with the envelope $1$. The truncated maximal inequality gives $\E^\star[\Delta_n] \lesssim \delta + n^{-1/2} \int_\delta^1 \epsilon^{-\alpha/2} \, d\epsilon$ for every small $\delta > 0$. Optimizing in $\delta$, which rates are right?
+
+- [x] For $\alpha < 2$: $n^{-1/2}$.
+  The integral stays bounded as $\delta \to 0$.
+- [x] For $\alpha = 2$: $n^{-1/2} \log n$.
+  The bound is $\delta + n^{-1/2}\log(1/\delta)$; take $\delta = n^{-1/2}$.
+- [x] For $\alpha > 2$: $n^{-1/\alpha}$.
+  The bound is of order $\delta + n^{-1/2} \delta^{1 - \alpha/2}$, balanced when $\delta^{\alpha/2} = n^{-1/2}$.
+- [ ] For $\alpha > 2$: $n^{-1/2}$.
+
+? For $\alpha > 2$, $\int_\delta^1 \epsilon^{-\alpha/2} \, d\epsilon \asymp \delta^{1 - \alpha/2}$.
+
+> Below $\alpha = 2$, the parametric rate. Above, the rate $n^{-1/\alpha}$ is slower, and the larger the class, the slower the rate.
+>
+> See *M and Z estimators*, Part IV.
+
+## Bernstein's inequality
+For a bounded $h$ with $\E[h(X)] = 0$ and $\mathbb{G}_n h = \frac{1}{\sqrt n} \sum_{i \le n} h(X_i)$, Bernstein's inequality states that $\P(|\mathbb{G}_n h| \ge t) \le 2\exp\Big(-\dfrac{t^2/2}{\|h\|_{L^2(L)}^2 + t\|h\|_\infty/(3\sqrt n)}\Big)$. Which statements are true?
+
+- [x] When $t \le 3\sqrt{n} \, \|h\|_{L^2(L)}^2 / \|h\|_\infty$, the bound is at most $2\exp(-t^2/(4\|h\|_{L^2(L)}^2))$, a gaussian tail.
+  The denominator is then at most $2\|h\|^2_{L^2(L)}$.
+- [x] For larger $t$, the bound is only exponential in $t$: it is at most $2\exp(-3\sqrt{n} \, t/(4\|h\|_\infty))$.
+  The denominator is then below $2t\|h\|_\infty/(3\sqrt n)$.
+- [x] $\|h\|_{L^2(L)}^2$ is the variance of $\mathbb{G}_n h$, and of its gaussian limit.
+  $\Var(\mathbb{G}_n h) = \Var(h(X)) = \E[h(X)^2]$, since $h(X)$ is centered.
+- [x] For fixed $t$, the range term vanishes as $n \to \infty$, consistently with the central limit theorem.
+  $\mathbb{G}_n h \cvd \mathcal{N}(0, \|h\|^2_{L^2(L)})$.
+
+> See *M and Z estimators*, Part IV.
+
+## Maxima of sub-gaussian variables @further
+Let $Z_1, \dots, Z_N$, $N \ge 2$, satisfy $\P(|Z_j| \ge t) \le 2e^{-t^2/(2\sigma^2)}$ for every $t > 0$. Which statements are true?
+
+- [x] $\E[\max_{j \le N} |Z_j|] \lesssim \sigma\sqrt{\log N}$.
+  Integrate the union bound $\P(\max_j |Z_j| \ge t) \le 2N e^{-t^2/(2\sigma^2)}$ beyond $t = \sigma\sqrt{2 \log(2N)}$.
+- [ ] $\E[\max_{j \le N} |Z_j|]$ can grow like $\sigma N$.
+  The union bound gives $\E[\max_j |Z_j|] \lesssim \sigma\sqrt{\log N}$.
+- [x] For i.i.d. $Z_j \sim \mathcal{N}(0, 1)$, $\max_{j \le N} Z_j / \sqrt{2\log N} \cvp 1$ as $N \to \infty$.
+  So the $\sqrt{\log N}$ cannot be improved in general.
+- [ ] The bound $\E[\max_{j \le N} |Z_j|] \lesssim \sigma\sqrt{\log N}$ requires the $Z_j$ to be independent.
+  The union bound does not use independence.
+
+> This is where the $\sqrt{\log N}$ of the entropy integral comes from: each resolution of the chain contributes the size of its increments times the square root of the logarithm of their number.
+>
+> See *M and Z estimators*, Part IV.
+
+## Why chaining?
+Which statements about the proof of the maximal inequality are true?
+
+- [x] With a single resolution, the bias of the brackets forces widths of order $n^{-1/2}$, hence too many brackets for a union bound.
+- [x] Writing $f = f_0 + \sum_{k \ge 1} (f_k - f_{k-1})$ leaves only fluctuations of increments, of which there are at most $N_k N_{k-1} \le N_k^2$ at resolution $k$.
+- [ ] Chaining only works for finite classes.
+- [x] The sum $\sum_k \epsilon_k \sqrt{\log N_k}$ over the resolutions $\epsilon_k = 2^{-k}\epsilon_0$ is at most a constant times the entropy integral, as a Riemann sum of a nonincreasing function.
+
+> See *M and Z estimators*, Part IV.
+
+# Exercises: M and Z estimators
+The same techniques, on estimators that were not treated in class: quantiles, least squares, misspecified and heavy-tailed models, exponential families.
+
+## Quantiles as Z-estimators @calc
+Let $X_1, X_2, \dots$ be i.i.d. real with a continuous density $f$, $\tau \in (0, 1)$, $q_\tau$ the unique point with $F(q_\tau) = \tau$, and $f(q_\tau) > 0$. Let $\hat\theta_n$ satisfy $Z_n(\hat\theta_n) = o_P(1)$, with $Z_n(\theta) = \frac1n \sum_{i \le n} (\mathbf{1}\{X_i \le \theta\} - \tau)$. Which statements are true?
+
+- [x] $Z_n$ is nondecreasing with pointwise limit $Z(\theta) = F(\theta) - \tau$, so that the monotone consistency theorem gives $\hat\theta_n \cvp q_\tau$.
+  $Z(q_\tau - \epsilon) < 0 < Z(q_\tau + \epsilon)$ since $q_\tau$ is unique.
+- [x] If moreover $Z_n(\hat\theta_n) = o_P(n^{-1/2})$, as for an empirical $\tau$-quantile, then $\sqrt{n}(\hat\theta_n - q_\tau) \cvd \mathcal{N}\big(0, \tau(1 - \tau)/f(q_\tau)^2\big)$.
+  Sandwich formula with $V = f(q_\tau)$, the derivative of $Z$, and $\Var(\mathbf{1}\{X \le q_\tau\}) = \tau(1-\tau)$.
+- [ ] $\sqrt{n}(\hat\theta_n - q_\tau) \cvd \mathcal{N}(0, \tau(1 - \tau))$.
+  This is the limit of $\sqrt{n} Z_n(q_\tau)$; the derivative $f(q_\tau)$ is missing.
+- [x] $\hat\theta_n$ can be taken as a minimizer of $\sum_{i \le n} \rho_\tau(X_i - \theta)$, with $\rho_\tau(u) = u(\tau - \mathbf{1}\{u < 0\})$.
+  The derivative of $\theta \mapsto \rho_\tau(X_i - \theta)$ is $\mathbf{1}\{X_i < \theta\} - \tau$ away from $X_i$: this is the check loss of quantile regression.
+
+> For $\tau = 1/2$, this is the median, with the asymptotic variance $1/(4f(m)^2)$ of the course. Extreme quantiles, where $f(q_\tau)$ is small, are hard to estimate.
+>
+> See *M and Z estimators*, Parts II and IV.
+
+## Least squares through the origin @calc
+Let $Y_i = \theta_0 X_i + \epsilon_i$, with $(X_i, \epsilon_i)$ i.i.d., $\E[\epsilon \mid X] = 0$, $\E[X^2] > 0$, $\E[\epsilon^2] < \infty$ and $\E[X^2 \epsilon^2] < \infty$, and $\hat\theta_n = \sum_i X_i Y_i / \sum_i X_i^2$. Which statements are true?
+
+- [x] $\hat\theta_n$ is the Z-estimator of $z((x, y), \theta) = x(y - \theta x)$.
+- [x] $\sqrt{n}(\hat\theta_n - \theta_0) \cvd \mathcal{N}\big(0, \E[X^2\epsilon^2]/\E[X^2]^2\big)$.
+  $V = -\E[X^2]$, and $\Cov(z) = \E[X^2 \epsilon^2]$ since $\E[X\epsilon] = 0$. Here the heuristic is exact: $\hat\theta_n - \theta_0 = \sum_i X_i\epsilon_i / \sum_i X_i^2$.
+- [x] If moreover $\E[\epsilon^2 \mid X] = \sigma^2$, the limit is $\mathcal{N}(0, \sigma^2/\E[X^2])$.
+- [ ] Without this extra assumption, $\hat\sigma_n^2 / (\frac1n \sum_i X_i^2)$, with $\hat\sigma_n^2$ the mean squared residual, is still a consistent estimator of the asymptotic variance.
+  It tends to $\E[\epsilon^2]/\E[X^2]$, which differs in general from $\E[X^2\epsilon^2]/\E[X^2]^2$ under heteroscedasticity. The sandwich estimator $\frac1n \sum_i X_i^2 \hat\epsilon_i^2 / (\frac1n \sum_i X_i^2)^2$ is consistent.
+
+> The sandwich formula is the origin of the heteroscedasticity-robust standard errors of econometrics.
+>
+> See *M and Z estimators*, Part IV.
+
+## A misspecified gaussian model @calc @further
+Let $X_1, X_2, \dots$ be i.i.d. of a law $Q$ with a density, mean $\mu$ and variance $s^2 \neq 1$, and let $\hat\theta_n$ be the maximum likelihood estimator in the model $\{\mathcal{N}(\theta, 1) : \theta \in \R\}$. Which statements are true?
+
+- [x] $\hat\theta_n = \bar X_n$, so that $\hat\theta_n \cvp \mu$.
+- [x] $\mu$ minimizes $\theta \mapsto \mathrm{KL}(Q \| \mathcal{N}(\theta, 1))$.
+  Up to a constant, this relative entropy is $\E_Q[(X - \theta)^2]/2$.
+- [ ] $\sqrt{n}(\hat\theta_n - \mu) \cvd \mathcal{N}(0, I(\mu)^{-1}) = \mathcal{N}(0, 1)$.
+  The limit is $\mathcal{N}(0, s^2)$: the inverse of the information is only right when the model is.
+- [x] The sandwich formula gives the right limit: $V = -1$ and $\Var_Q(z(X, \mu)) = s^2$, with $z(x, \theta) = x - \theta$.
+
+> Under misspecification, maximum likelihood estimates the member of the model closest to the data in relative entropy, and its asymptotic variance is given by the sandwich, not by the information.
+>
+> See *M and Z estimators*, Parts III and IV.
+
+## The Cauchy location model @calc @further
+Let $X_1, X_2, \dots$ be i.i.d. of density $\frac{1}{\pi(1 + (x - \theta)^2)}$. Which statements are true?
+
+- [ ] $\bar X_n$ is a consistent estimator of $\theta$.
+  $\bar X_n - \theta$ is standard Cauchy for every $n$.
+- [x] The empirical median $\hat m_n$ satisfies $\sqrt{n}(\hat m_n - \theta) \cvd \mathcal{N}(0, \pi^2/4)$.
+  The density at the median is $1/\pi$.
+- [x] The Fisher information is $I(\theta) = 1/2$, so that maximum likelihood has the asymptotic variance $2 < \pi^2/4 \approx 2.47$.
+  The score is $2u/(1 + u^2)$ with $u = x - \theta$, and $\E[4u^2/(1+u^2)^2] = 1/2$ under the standard Cauchy law.
+- [x] The likelihood equation can have several roots, so that a root must be chosen with care, for instance the one closest to the median.
+  The score is not monotone in $\theta$: far from the data, it tends to $0$.
+
+> Heavy tails ruin the mean, the median survives, and maximum likelihood does better than the median, at the price of a harder computation.
+>
+> See *M and Z estimators*, Part IV; the Fisher information is not in the course.
+
+## Well separated or not? @calc
+Let $\Theta = \R$. For which functions $M$ is $\theta_0 = 0$ a well separated maximizer?
+
+- [x] $M(\theta) = -\theta^2/(1 + \theta^2)$.
+  $M$ decreases in $|\theta|$, so $\sup_{|\theta| \ge \epsilon} M(\theta) = -\epsilon^2/(1+\epsilon^2) < 0$.
+- [ ] $M(\theta) = -\theta^2 e^{-\theta^2}$.
+  $0$ is the unique maximizer, but $M(\theta) \to 0 = M(0)$ as $|\theta| \to \infty$.
+- [ ] $M(\theta) = -|\theta|/(1 + \theta^2)$.
+  $0$ is the unique maximizer, but $M(\theta) \to 0 = M(0)$ as $|\theta| \to \infty$.
+- [x] $M(\theta) = -\min(\theta^2, 1)$.
+  $\sup_{|\theta| \ge \epsilon} M(\theta) = -\min(\epsilon^2, 1) < 0$: being flat far away does no harm, as long as it is below $M(0)$.
+
+? Compute $\sup_{|\theta| \ge \epsilon} M(\theta)$ and compare it with $M(0) = 0$.
+
+> Well separation fails when the criterion comes back close to its maximum far away, even without reaching it.
+>
+> See *M and Z estimators*, Part II.
+
+## Pointwise convergence is not enough @calc
+Let $M(\theta) = -\theta^2/(1 + \theta^2)$ on $\Theta = \R$, and $M_n(\theta) = M(\theta) + 2\max(0, 1 - |\theta - n|)$, deterministic. Which statements are true?
+
+- [x] $M_n(\theta) \to M(\theta)$ for every $\theta$.
+  The bump leaves every bounded set.
+- [ ] $\sup_\theta |M_n(\theta) - M(\theta)| \to 0$.
+  It is $2$ for every $n$, reached at $\theta = n$.
+- [x] Every maximizer of $M_n$ lies in $(n - 1, n + 1)$, so it tends to infinity, although $0$ is a well separated maximizer of $M$.
+  $M_n(n) > 1$, whereas $M_n = M \le 0$ outside $(n-1, n+1)$.
+- [x] This is why the consistency theorem asks for uniform convergence.
+
+> A pointwise limit can hide a bump that escapes to infinity and carries the maximizer with it.
+>
+> See *M and Z estimators*, Part II.
+
+## The Laplace model @calc
+Let $X_1, X_2, \dots$ be i.i.d. of density $\frac{1}{2b} e^{-|x - \theta|/b}$, with $\theta \in \R$ and $b > 0$. Which statements about the maximum likelihood estimator $(\hat\theta_n, \hat b_n)$ are true?
+
+- [x] $\hat\theta_n$ is an empirical median, whatever $b$.
+  The log-likelihood is $-\log(2b) - \frac{1}{nb} \sum_i |X_i - \theta|$.
+- [ ] $\hat\theta_n = \bar X_n$.
+  The mean is the maximum likelihood estimator of the gaussian model, which has a quadratic loss.
+- [x] $\hat b_n = \frac1n \sum_{i \le n} |X_i - \hat\theta_n|$.
+  $\partial_b$ of the log-likelihood is $-\frac1b + \frac{1}{nb^2} \sum_i |X_i - \theta|$.
+- [x] $\sqrt{n}(\hat\theta_n - \theta) \cvd \mathcal{N}(0, b^2)$.
+  The density at the median is $1/(2b)$, and $1/(4 f(\theta)^2) = b^2$.
+
+> See *M and Z estimators*, Parts I and IV.
+
+## Exponential families @calc @further
+Let $f_\theta(x) = h(x) \exp(\theta T(x) - A(\theta))$, with $\theta$ in an open interval and $A$ smooth. Which statements are true?
+
+- [x] The maximum likelihood estimator solves $\frac1n \sum_{i \le n} T(X_i) = A'(\theta)$: it is the method of moments with $f_1 = T$.
+  Differentiating $\int f_\theta = 1$ gives $\E_\theta[T(X)] = A'(\theta)$.
+- [x] The Fisher information is $I(\theta) = A''(\theta) = \Var_\theta(T(X))$.
+- [x] The asymptotic variance of the method of moments with $f_1 = T$ is $1/A''(\theta_0) = I(\theta_0)^{-1}$.
+  $\Var(T)/e'(\theta_0)^2 = A''(\theta_0)/A''(\theta_0)^2$.
+- [ ] For the Poisson law written in this form, $\theta = \lambda$.
+  $\frac{\lambda^x e^{-\lambda}}{x!} = \frac{1}{x!} \exp(x \log\lambda - e^{\log\lambda})$: the natural parameter is $\theta = \log\lambda$, with $T(x) = x$ and $A(\theta) = e^\theta$.
+
+> In an exponential family, the right moment function is the sufficient statistic $T$, and the method of moments is then efficient.
+>
+> See *Delta method and method of moments*, Part IV; exponential families are not in the course.
+
+# Exercises: brackets and entropy
+The same techniques, on classes of functions that were not treated in class: bracketing numbers to compute, entropy integrals, and a class that is too large.
+
+## Brackets for intervals @calc
+Let $L = \mathrm{Unif}([0, 1])$ and $\mathcal{F} = \{\mathbf{1}_{[a, b]} : 0 \le a \le b \le 1\}$. Which statements are true?
+
+- [x] $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) \lesssim \epsilon^{-2}$.
+  With a grid of mesh $\delta$ for both ends, the brackets $[\mathbf{1}_{[a_{i+1}, b_j]}, \mathbf{1}_{[a_i, b_{j+1}]}]$ have an $L^1$ width at most $2\delta$, and there are of order $\delta^{-2}$ of them.
+- [x] $N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \lesssim \epsilon^{-4}$.
+  When $u - l$ takes the values $0$ and $1$, the $L^2$ width is the square root of the $L^1$ width.
+- [ ] $N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \lesssim \epsilon^{-2}$.
+  Among the intervals of length at least $2\epsilon^2$, a bracket of $L^2$ width $\epsilon$ only contains intervals whose ends vary by at most $\epsilon^2$, and these pairs $(a, b)$ cover an area close to $1/2$: of order $\epsilon^{-4}$ brackets are needed.
+- [x] $\mathcal{F}$ is $L$-Glivenko–Cantelli.
+  Its bracketing numbers are finite.
+
+? Adapt the computation for the half-lines $\mathbf{1}_{(-\infty, t]}$ to two ends.
+
+> Two parameters double the exponent. The logarithm of the bracketing number is still of order $\log(1/\epsilon)$, so the entropy integral is finite.
+>
+> See *M and Z estimators*, Part III.
+
+## Lower orthants in dimension $d$ @calc
+Let $L = \mathrm{Unif}([0, 1]^d)$ and $\mathcal{F} = \{\mathbf{1}_{(-\infty, t]} : t \in [0, 1]^d\}$, where $(-\infty, t] = \prod_{j \le d} (-\infty, t_j]$. Which statements are true?
+
+- [x] For $s \le t$ coordinatewise with $t_j - s_j \le \delta$ for every $j$, the bracket $[\mathbf{1}_{(-\infty, s]}, \mathbf{1}_{(-\infty, t]}]$ has an $L^1$ width at most $d\delta$.
+  $(-\infty, t] \setminus (-\infty, s]$ is contained in the union of the $d$ slabs $\{s_j < x_j \le t_j\}$.
+- [x] $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) \lesssim (d/\epsilon)^d$.
+  A grid of mesh $\epsilon/d$ in each coordinate.
+- [x] The multivariate empirical distribution function converges uniformly: $\sup_t |F_n(t) - F(t)| \cvp 0$.
+- [ ] The entropy integral $\int_0^1 \sqrt{\log N_{[\,]}(\mathcal{F}, L^2(L), \epsilon)} \, d\epsilon$ is infinite for $d \ge 2$.
+  $\log N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \lesssim d \log(d/\epsilon)$, whose square root is integrable at $0$: the class behaves like a parametric one, with $d$ parameters.
+
+> See *M and Z estimators*, Parts III and IV.
+
+## Classes Lipschitz in the parameter @calc
+Let $\mathcal{F} = \{f_\theta : \theta \in \Theta\}$ with $\Theta \subset \R^p$ bounded, and $|f_\theta(x) - f_{\theta'}(x)| \le \|\theta - \theta'\| \, G(x)$ for all $x$, with $\E[G(X)^2] < \infty$. Which statements are true?
+
+- [x] If $\|\theta - \theta_j\| \le \delta$, then $f_\theta \in [f_{\theta_j} - \delta G, f_{\theta_j} + \delta G]$, a bracket of $L^2(L)$ width $2\delta \|G\|_{L^2(L)}$.
+- [x] $N_{[\,]}(\mathcal{F}, L^2(L), \epsilon)$ is at most the number of balls of radius $\epsilon/(2\|G\|_{L^2(L)})$ needed to cover $\Theta$, which is of order $\epsilon^{-p}$.
+- [x] With a square integrable envelope, the uniform deviation over $\mathcal{F}$ is $O_P(n^{-1/2})$.
+  $\log N_{[\,]} \lesssim p \log(1/\epsilon)$ near $0$, and the maximal inequality applies.
+- [ ] The functions $f_\theta$ must be continuous in $x$.
+  Only the dependence on $\theta$ matters; $G$ can be any square integrable function.
+
+> This is the standard way to bound the entropy of a parametric class: a Lipschitz parametrization turns a cover of $\Theta$ into brackets.
+>
+> See *M and Z estimators*, Parts III and IV.
+
+## The class of the median @calc
+Let $X$ have $\E[X^2] < \infty$, and $\mathcal{F} = \{x \mapsto |x - \theta| : \theta \in [-1, 1]\}$. Which statements are true?
+
+- [x] $\big||x - \theta| - |x - \theta'|\big| \le |\theta - \theta'|$, so that the construction of the previous question applies with $G \equiv 1$.
+- [x] $N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \lesssim 1/\epsilon$.
+  A grid of mesh $\epsilon/2$ on $[-1, 1]$.
+- [x] $x \mapsto |x| + 1$ is an envelope of $\mathcal{F}$.
+- [ ] $\mathcal{F}$ is Glivenko–Cantelli only if $X$ is bounded.
+  An integrable envelope and finite bracketing numbers in $L^1$ suffice.
+
+> This is the class of the M-estimator $\theta \mapsto -\frac1n \sum_i |X_i - \theta|$ of the median, whose uniform convergence follows.
+>
+> See *M and Z estimators*, Parts I and III.
+
+## Bracketing numbers depend on the law @calc
+Let $\mathcal{F} = \{\mathbf{1}_{(-\infty, t]} : t \in \R\}$. Which statements are true?
+
+- [x] If $L = \frac12 \delta_0 + \frac12 \delta_1$, then $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) \le 3$ for every $\epsilon > 0$.
+  The brackets $[0, \mathbf{1}_{(-\infty, 0)}]$, $[\mathbf{1}_{(-\infty, 0]}, \mathbf{1}_{(-\infty, 1)}]$ and $[\mathbf{1}_{(-\infty, 1]}, 1]$ cover $\mathcal{F}$ and have width $0$.
+- [x] If $L = \mathrm{Unif}([0, 1])$, then $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) \asymp 1/\epsilon$.
+- [ ] Bracketing numbers depend on $\mathcal{F}$ only, not on $L$.
+- [x] For every law $L$ on $\R$, $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon)$ is at most of order $1/\epsilon$.
+  Cut $\R$ at points $t_j$ such that $\P(t_{j-1} < X < t_j) \le \epsilon$; there are at most of order $1/\epsilon$ of them. This is the proof of the classical Glivenko–Cantelli theorem.
+
+> See *M and Z estimators*, Part III.
+
+## Finite entropy integrals @calc
+For which growths of $\log N(\epsilon)$ near $0$ is $\int_0^{1/2} \sqrt{\log N(\epsilon)} \, d\epsilon$ finite?
+
+- [x] $\log N(\epsilon) = \log^2(1/\epsilon)$.
+  $\int_0^{1/2} \log(1/\epsilon) \, d\epsilon < \infty$.
+- [ ] $\log N(\epsilon) = \epsilon^{-2} \log(1/\epsilon)$.
+  With $u = \log(1/\epsilon)$, $\int_0^{1/2} \epsilon^{-1} \sqrt{\log(1/\epsilon)} \, d\epsilon = \int_{\log 2}^\infty \sqrt{u} \, du = \infty$.
+- [ ] $\log N(\epsilon) = \epsilon^{-2}$.
+  $\int_0 \epsilon^{-1} \, d\epsilon = \infty$.
+- [x] $\log N(\epsilon) = \epsilon^{-2} \log^{-4}(1/\epsilon)$.
+  With $u = \log(1/\epsilon)$, $\int_0^{1/2} \frac{d\epsilon}{\epsilon \log^2(1/\epsilon)} = \int_{\log 2}^\infty \frac{du}{u^2} < \infty$.
+
+> The borderline is $\log N(\epsilon) \approx \epsilon^{-2}$: slightly smaller entropies, even by logarithmic factors, still give a finite integral.
+>
+> See *M and Z estimators*, Part IV.
+
+## A class that is too large @calc
+Let $L = \mathrm{Unif}([0, 1])$ and $\mathcal{F} = \{\mathbf{1}_A : A \subset [0, 1] \text{ finite}\}$. Which statements are true?
+
+- [x] $\E[f(X)] = 0$ for every $f \in \mathcal{F}$.
+- [x] For every $n$, $\sup_{f \in \mathcal{F}} |\frac1n \sum_{i \le n} f(X_i) - \E[f(X)]| = 1$.
+  Take $A = \{X_1, \dots, X_n\}$.
+- [ ] $\mathcal{F}$ is $L$-Glivenko–Cantelli, since each of its functions is $0$ $L$-almost everywhere.
+  Each function is negligible, but the supremum is taken after seeing the sample.
+- [x] $N_{[\,]}(\mathcal{F}, L^1(L), \epsilon) = \infty$ for some $\epsilon > 0$.
+  Otherwise, the theorem of the course would make $\mathcal{F}$ Glivenko–Cantelli.
+
+> Uniformity fails as soon as the class can fit any finite sample: this is the phenomenon that complexity measures (brackets, VC dimension, Rademacher complexity) quantify.
+>
+> See *M and Z estimators*, Part III.
+
+## Monotone functions @further
+Let $\mathcal{F}$ be the class of nondecreasing functions $f : \R \to [0, 1]$. A classical result, not seen in class, states that $\log N_{[\,]}(\mathcal{F}, L^2(L), \epsilon) \lesssim 1/\epsilon$ for every law $L$ (van der Vaart and Wellner, *Weak Convergence and Empirical Processes*, Section 2.7). Which statements are true?
+
+- [x] $\mathcal{F}$ is $L$-Glivenko–Cantelli for every law $L$.
+  Its bracketing numbers are finite in $L^2(L)$, hence in $L^1(L)$, and the functions are bounded.
+- [x] The uniform deviation over $\mathcal{F}$ is $O_P(n^{-1/2})$.
+  $\int_0^1 \epsilon^{-1/2} \, d\epsilon < \infty$, and the maximal inequality applies, with the envelope $1$.
+- [ ] $\mathcal{F}$ is a parametric class: $\log N_{[\,]} \lesssim p \log(1/\epsilon)$ for some $p$.
+  The bound $1/\epsilon$ is sharp, for instance for the uniform law on $[0, 1]$: the entropy grows like $1/\epsilon$, faster than any multiple of $\log(1/\epsilon)$, and the class is infinite dimensional.
+- [ ] The class of all measurable functions $f : \R \to [0, 1]$ satisfies the same bound.
+  It contains the indicators of finite sets of the previous question, which are not even Glivenko–Cantelli for a law with a density.
+
+> Monotonicity is a strong constraint: an infinite-dimensional class, yet small enough for the parametric rate. This is the basis of isotonic regression.
+>
+> Not in the course.
+    </script>
+    <script src="../../js/quiz.js"></script>
+</body>
+</html>

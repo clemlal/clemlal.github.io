@@ -3061,3 +3061,333 @@ body {
 .nn-fig-ua.is-drawing .nn-ua-main canvas {
   cursor: crosshair;
 }
+
+/* ---- Self-assessment quizzes ----
+   Pages with a <div class="quiz">, built by js/quiz.js, such as
+   teaching/2026_2027_M2RI_Asymptotic_Statistics/self-assessment.html. Right and
+   wrong options take the two colours of the demos, with a mark, so that they
+   stay apart in every theme. */
+
+.main.quiz-page {
+  padding-bottom: 60px;
+}
+
+.quiz-page .post-header,
+.quiz-prose,
+.quiz {
+  max-width: 52rem;
+}
+
+.quiz-prose {
+  font-size: 1.04em;
+  line-height: 1.65;
+}
+
+.quiz-prose p {
+  margin: 0 0 0.9em;
+}
+
+.quiz-page a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.quiz-page a:hover {
+  text-decoration: underline;
+}
+
+.quiz-page mjx-container[display="true"] {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.quiz [hidden] {
+  display: none !important;
+}
+
+.quiz-summary {
+  position: sticky;
+  top: calc(var(--quiz-nav, 52px) + 8px);  /* below the pinned navigation bar, measured by js/quiz.js */
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin: 28px 0 0;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background-color: var(--surface);
+}
+
+.quiz-score {
+  margin: 0;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-bar {
+  flex: 1;
+  min-width: 6rem;
+  height: 6px;
+  border-radius: 3px;
+  background-color: var(--border);
+  overflow: hidden;
+}
+
+.quiz-bar span {
+  display: block;
+  height: 100%;
+  background-color: var(--data-a);
+  transition: width 0.3s ease;
+}
+
+.quiz-toc ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: 2px 24px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: quiz-toc;
+}
+
+.quiz-toc li {
+  counter-increment: quiz-toc;
+}
+
+.quiz-toc a {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.quiz-toc a::before {
+  content: counter(quiz-toc) ".";
+  min-width: 1.2em;
+  color: var(--muted);
+}
+
+.quiz-toc a span:first-child {
+  flex: 1;
+}
+
+.quiz-toc-count {
+  color: var(--muted);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-section {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: calc(var(--quiz-nav, 52px) + 64px);
+  counter-increment: quiz-section;
+}
+
+.quiz {
+  counter-reset: quiz-section;
+}
+
+.quiz-section > h2 {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: var(--heading-weight);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.quiz-section > h2::before {
+  content: counter(quiz-section) ". ";
+  color: var(--muted);
+}
+
+.quiz-section > h2::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background-color: var(--data-a);
+}
+
+.quiz-q {
+  margin: 20px 0;
+  padding: 16px 20px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  line-height: 1.6;
+  scroll-margin-top: calc(var(--quiz-nav, 52px) + 72px);  /* below the navigation bar and the summary */
+}
+
+.quiz-q-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 6px;
+}
+
+.quiz-page .quiz-q-num {
+  min-width: 1.8em;
+  color: var(--muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-q-title {
+  flex: 1;
+  margin: 0;
+  color: var(--accent);
+  font-size: 1.05rem;
+  font-weight: var(--heading-weight);
+}
+
+.quiz-tag {
+  padding: 1px 10px;
+  border-radius: 999px;
+  background-color: var(--accent-soft);
+  color: var(--text-soft);
+  font-size: 0.78em;
+  white-space: nowrap;
+}
+
+.quiz-tag[data-tag="further"] {
+  border: 1px dashed var(--faint);
+  background: none;
+}
+
+/* A formula too long for a narrow screen scrolls in its own block rather than
+   widening the page (MathJax 3 does not break inline formulas). */
+.quiz-q-text,
+.quiz-option-text,
+.quiz-comment,
+.quiz-hint,
+.quiz-solution {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 3px;
+}
+
+.quiz-q-text p,
+.quiz-comment p,
+.quiz-hint p,
+.quiz-solution p {
+  margin: 0 0 0.6em;
+}
+
+.quiz-options {
+  margin: 8px 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.quiz-option label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.quiz-q:not(.is-locked) .quiz-option label:hover {
+  background-color: var(--surface);
+}
+
+.quiz-q.is-locked .quiz-option label {
+  cursor: default;
+}
+
+.quiz-option input {
+  flex: none;
+  margin: 0;
+  accent-color: var(--data-a);
+  transform: translateY(2px);
+}
+
+.quiz-letter {
+  min-width: 1em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.quiz-option-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.quiz-comment {
+  margin: 0 10px 8px 56px;
+  padding-left: 12px;
+  border-left: 3px solid var(--border);
+  color: var(--text-soft);
+  font-size: 0.95em;
+}
+
+.quiz-option[data-truth="true"] .quiz-comment {
+  border-left-color: var(--data-a);
+}
+
+.quiz-option[data-truth="false"] .quiz-comment {
+  border-left-color: var(--highlight);
+}
+
+.quiz-verdict {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.quiz-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quiz-actions .demo-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.quiz-feedback {
+  color: var(--text-soft);
+  font-size: 0.95em;
+}
+
+.quiz-feedback[data-result="right"] {
+  color: var(--data-a);
+  font-weight: 600;
+}
+
+.quiz-hint,
+.quiz-solution {
+  margin-top: 12px;
+  padding: 12px 16px 6px;
+  border-radius: 10px;
+  background-color: var(--surface);
+}
+
+.quiz-label {
+  color: var(--muted);
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.quiz-missed {
+  padding: 0 7px;
+  border-radius: 999px;
+  background-color: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .quiz-summary {
+    top: 0;  /* the navigation bar scrolls away */
+  }
+}
