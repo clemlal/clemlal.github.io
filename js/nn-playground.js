@@ -1,10 +1,15 @@
-// The playground of
-// teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html.
+// The neural network playground, used by
+// teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html
+// (in English, experiments in js/nn-experiments.js) and
+// teaching/2026_2027_SID_Advanced_Statistical_Learning/reseaux-de-neurones.html
+// (in French, experiments in js/nn-experiments-fr.js). The page's language
+// (<html lang>) picks the strings below; the experiments file sets
+// window.NN_EXPERIMENTS, window.NN_DEFAULTS and window.NN_PARTS.
 //
 // Settings on the left (data, network, training), the network in the middle
 // with one column per layer, the prediction and the risks on the right, and
-// the guided experiments (js/nn-experiments.js) below. Every computation is
-// done by js/nn-engine.js.
+// the guided experiments below (the panel of js/lab-kit.js). Every computation
+// is done by js/nn-engine.js, the drawing helpers are those of js/lab-kit.js.
 //
 // Every animation frame runs a few iterations of SGD (the speed), measures the
 // training and test risks, and redraws:
@@ -18,15 +23,53 @@
 // The gradient norms and the dead units, which need a pass over the training
 // data, are measured every SLOW_EVERY frames only.
 //
-// Colours come from the site's theme (js/themes.js): positive values, weights
+// Colours come from the site's theme (Lab.colours): positive values, weights
 // and the first class in dataA, negative ones and the second class in
-// highlight. The third class has a colour of its own (THIRD).
+// highlight. The third class has a colour of its own.
 
 (function () {
-  const root = document.querySelector('.nn-lab');
-  if (!root || !window.NN) return;
+  const root = document.querySelector('.nn-playground');
+  if (!root || !window.NN || !window.Lab) return;
   const NN = window.NN;
+  const { rgba, mix, fmt, power, subscript, niceStep, format } = Lab;
   const EXPERIMENTS = window.NN_EXPERIMENTS || [];
+
+  const T = Lab.strings({
+    en: {
+      parts: { I: 'Part I. Architectures', II: 'Part II. Optimization', III: 'Part III. Universal approximation', IV: 'Part IV. Generalization' },
+      datasets: {},
+      classification: 'Classification', regression: 'Regression',
+      perFrame: '{s} iteration(s) per frame', fullBatch: 'full batch, {n} (GD)',
+      train: '▶ Train', pause: '❚❚ Pause', counter: 'iteration {t} · epoch {e}',
+      stopped: 'Paused at iteration {t}, where the experiment stops. Press Train to go on.',
+      diverged: 'The risk is no longer finite: the steps are too large. Lower the learning rate γ, then start from a new initialization.',
+      noData: 'no data', noDataHere: 'no data here',
+      input: 'input', output: 'output', layer: 'layer {c}', removeUnit: 'Remove a unit from layer {c}', addUnit: 'Add a unit to layer {c}',
+      tipInput: 'Input', tipOutput: 'Output {j}', tipOutputClass: 'sm(z){j}: the probability of class {k}, shaded from 0 to 1',
+      tipOutputRegression: '<strong>Output</strong><br>f(x) = W h + b, no activation',
+      tipUnit: 'Layer {c}, unit {j}', kink: 'kink at x = −b/w = {x}',
+      dead: 'Dead: zero on every training point, so its gradient is zero too.',
+      shaded: 'shaded by value, on the input square', asFunction: 'value as a function of x',
+      rescaled: ', rescaled to its largest value', range: ', on the range of {a}',
+    },
+    fr: {
+      parts: {},
+      datasets: { blobs: 'Nuages', moons: 'Lunes', circles: 'Cercles', spirals: 'Spirales', sine: 'Sinus', kinks: '3 coudes' },
+      classification: 'Classification', regression: 'Régression',
+      perFrame: '{s} itération(s) par image', fullBatch: 'lot complet, {n} (GD)',
+      train: '▶ Entraîner', pause: '❚❚ Pause', counter: 'itération {t} · époque {e}',
+      stopped: 'En pause à l’itération {t}, où s’arrête l’expérience. Appuyez sur Entraîner pour continuer.',
+      diverged: 'Le risque n’est plus fini : les pas sont trop grands. Baissez le pas γ, puis repartez d’une nouvelle initialisation.',
+      noData: 'pas de données', noDataHere: 'pas de données ici',
+      input: 'entrée', output: 'sortie', layer: 'couche {c}', removeUnit: 'Retirer une unité de la couche {c}', addUnit: 'Ajouter une unité à la couche {c}',
+      tipInput: 'Entrée', tipOutput: 'Sortie {j}', tipOutputClass: 'sm(z){j} : la probabilité de la classe {k}, de 0 à 1',
+      tipOutputRegression: '<strong>Sortie</strong><br>f(x) = W h + b, sans activation',
+      tipUnit: 'Couche {c}, unité {j}', kink: 'coude en x = −b/w = {x}',
+      dead: 'Morte : nulle sur tous les points d’entraînement, donc de gradient nul.',
+      shaded: 'valeur en couleur, sur le carré des entrées', asFunction: 'valeur en fonction de x',
+      rescaled: ', ramenée à sa plus grande valeur', range: ', sur l’intervalle de {a}',
+    },
+  });
 
   // Positions of the sliders.
   const LEARNING_RATES = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.05, 0.1, 0.3, 1, 3, 10];
@@ -34,7 +77,7 @@
   const LAMBDAS = [0, 0.00001, 0.0001, 0.001, 0.003, 0.01, 0.03, 0.1];
   const SPEEDS = [1, 5, 20, 100];  // iterations per frame
   const ACTIVATIONS = ['relu', 'tanh', 'sigmoid', 'identity'];
-  const PARTS = { I: 'Part I. Architectures', II: 'Part II. Optimization', III: 'Part III. Universal approximation', IV: 'Part IV. Generalization' };
+  const PARTS = window.NN_PARTS || T.parts;
 
   const MAX_HIDDEN_LAYERS = 6;
   const MAX_WIDTH = 32;
@@ -47,7 +90,6 @@
   const TRACE_MAX = 1200;
   const DIAGRAM_HEIGHT = 440;         // nodes area of the diagram, in CSS pixels
   const BARS_HEIGHT = 46;             // gradient norms below it
-  const THIRD = { light: [24, 128, 104], dark: [94, 190, 160] };
 
   const $ = selector => root.querySelector(selector);
   const $$ = selector => root.querySelectorAll(selector);
@@ -59,7 +101,7 @@
   let trace = [], metrics = null, gradNorms = null, alive = null;
   let maps = [], logits = [], kinks = [];
   let running = false, notice = null, frameCount = 0, frameRequested = false, visible = true;
-  let experiment = null, variantIndex = -1;
+  let panel = null;  // the guided experiments (Lab.experiments)
   let C = null;  // colours of the theme
 
   const taskOf = name => NN.DATASETS[name].task;
@@ -75,7 +117,7 @@
   function buildNetwork() {
     const set = NN.DATASETS[state.dataset];
     const sizes = [train.dim, ...state.hidden, set.task === 'classification' ? set.classes : 1];
-    net = NN.createNetwork({ sizes, activation: state.activation, task: set.task, seed: state.seed });
+    net = NN.createNetwork({ sizes, activation: state.activation, task: set.task, seed: state.seed, init: state.init || 'random' });
     trainer = NN.createTrainer(net, train, state.seed + 1);
     trace = [];
     notice = null;
@@ -178,33 +220,8 @@
   // ---- Colours ----
 
   function readColours() {
-    const rgb = window.siteTheme.rgb;
-    const dark = 0.2126 * rgb.bg[0] + 0.7152 * rgb.bg[1] + 0.0722 * rgb.bg[2] < 110;
-    C = {
-      paper: rgb.bg, ink: rgb.text, soft: rgb.textSoft, muted: rgb.muted, faint: rgb.faint, border: rgb.border,
-      pos: rgb.dataA, neg: rgb.highlight,
-      classes: [rgb.dataA, rgb.highlight, dark ? THIRD.dark : THIRD.light],
-    };
+    C = Lab.colours();
     root.style.setProperty('--nn-third', `rgb(${C.classes[2].join(', ')})`);
-  }
-
-  const rgba = (c, a = 1) => `rgba(${Math.round(c[0])}, ${Math.round(c[1])}, ${Math.round(c[2])}, ${a})`;
-  const mix = (a, b, t) => [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1]), a[2] + t * (b[2] - a[2])];
-
-  // ---- Numbers ----
-
-  const SUPERSCRIPTS = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
-  const power = e => `10${String(e).replace(/[-0-9]/g, c => SUPERSCRIPTS[c])}`;
-
-  function fmt(v, digits = 3) {
-    if (v === null || v === undefined || Number.isNaN(v)) return '–';
-    if (!Number.isFinite(v)) return '∞';
-    const a = Math.abs(v);
-    if (a !== 0 && (a < 0.001 || a >= 10000)) {
-      const [m, e] = v.toExponential(1).split('e');
-      return `${m} × ${power(Number(e))}`;
-    }
-    return v.toFixed(digits);
   }
 
   const fmtRate = v => (v >= 0.01 ? String(v) : fmt(v));
@@ -212,18 +229,10 @@
   // ---- Canvases ----
 
   // Sizes a canvas to width × height CSS pixels, sharp on high-density screens.
-  function fit(canvas, width, height) {
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-    canvas.style.height = `${height}px`;
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    return ctx;
-  }
+  const fit = (canvas, width, height) => Lab.fit(canvas, height, width).ctx;
 
-  const plot = { canvas: $('.nn-plot canvas'), size: 0 };
-  const chart = { canvas: $('.nn-chart canvas'), width: 0, height: 150 };
+  const plot = { canvas: $('.lab-plot canvas'), size: 0 };
+  const chart = { canvas: $('.lab-chart canvas'), width: 0, height: 150 };
   const diagram = { canvas: $('.nn-diagram canvas'), width: 0, height: DIAGRAM_HEIGHT + BARS_HEIGHT, nodes: [] };
   const shade = document.createElement('canvas');
   shade.width = shade.height = GRID + 1;
@@ -252,7 +261,7 @@
     ctx.clearRect(0, 0, S, S);
     if (classification()) drawClassification(ctx, S);
     else drawRegression(ctx, S);
-    const box = $('.nn-message');
+    const box = $('.lab-message');
     box.hidden = !notice;
     if (notice) box.textContent = notice;
   }
@@ -346,42 +355,10 @@
     }
   }
 
-  // Marching squares: in every cell of the lattice, joins the points where
-  // field changes sign along the edges (found by linear interpolation).
+  // The zero level set of field on the lattice (Lab.contourPath).
   function drawLevelSet(ctx, field, S) {
-    const n = GRID + 1, cell = S / GRID;
-    const v = [0, 0, 0, 0], cuts = [];
-    const cx = [0, 1, 1, 0], cy = [0, 0, 1, 1];  // corners clockwise from the top-left
-    const segment = (p, q) => {
-      ctx.moveTo(p[0], p[1]);
-      ctx.lineTo(q[0], q[1]);
-    };
     ctx.beginPath();
-    for (let gy = 0; gy < GRID; gy++) {
-      for (let gx = 0; gx < GRID; gx++) {
-        for (let c = 0; c < 4; c++) v[c] = field[(gy + cy[c]) * n + gx + cx[c]];
-        cuts.length = 0;
-        for (let e = 0; e < 4; e++) {
-          const f = (e + 1) % 4;
-          if ((v[e] > 0) !== (v[f] > 0)) {
-            const t = v[e] / (v[e] - v[f]);
-            cuts.push([(gx + cx[e] + t * (cx[f] - cx[e])) * cell, (gy + cy[e] + t * (cy[f] - cy[e])) * cell]);
-          }
-        }
-        if (cuts.length === 2) {
-          segment(cuts[0], cuts[1]);
-        } else if (cuts.length === 4) {
-          const centre = v[0] + v[1] + v[2] + v[3] > 0;
-          if (centre === (v[0] > 0)) {
-            segment(cuts[0], cuts[1]);
-            segment(cuts[2], cuts[3]);
-          } else {
-            segment(cuts[3], cuts[0]);
-            segment(cuts[1], cuts[2]);
-          }
-        }
-      }
-    }
+    Lab.contourPath(ctx, field, GRID + 1, GRID + 1, 0, S, S);
     ctx.lineCap = 'round';
     ctx.lineWidth = 1.6;
     ctx.strokeStyle = rgba(C.ink, 0.85);
@@ -397,8 +374,8 @@
     ctx.fillStyle = rgba(C.muted);
     ctx.font = '11px ' + getComputedStyle(root).fontFamily;
     ctx.textAlign = 'center';
-    ctx.fillText('no data', toX(-1.25), 16);
-    ctx.fillText('no data', toX(1.25), 16);
+    ctx.fillText(T.noData, toX(-1.25), 16);
+    ctx.fillText(T.noData, toX(1.25), 16);
 
     ctx.strokeStyle = rgba(C.faint, 0.6);
     ctx.lineWidth = 1;
@@ -516,11 +493,6 @@
       ctx.strokeStyle = rgba(color);
       ctx.stroke();
     }
-  }
-
-  function niceStep(x) {
-    const p = 10 ** Math.floor(Math.log10(x)), m = x / p;
-    return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
   }
 
   // ---- The network ----
@@ -705,8 +677,6 @@
     }
   }
 
-  const subscript = k => String(k).replace(/[0-9]/g, c => '₀₁₂₃₄₅₆₇₈₉'[c]);
-
   // The column headings above the diagram, with the width controls of the hidden layers.
   function renderLayerControls() {
     const box = $('.nn-layer-controls');
@@ -719,14 +689,14 @@
       head.style.left = `${diagram.xs[c]}px`;
       let title, detail;
       if (c === 0) {
-        title = 'input';
+        title = T.input;
         detail = isClassification ? 'x ∈ ℝ²' : 'x ∈ ℝ';
       } else if (c === L) {
-        title = 'output';
+        title = T.output;
         detail = isClassification ? `sm(z) ∈ Δ${subscript(d - 1)}` : 'f(x) ∈ ℝ';
       } else {
-        title = `layer ${c}`;
-        detail = `<button type="button" data-width="${c - 1}" data-delta="-1" aria-label="Remove a unit from layer ${c}">−</button><span>${d}</span><button type="button" data-width="${c - 1}" data-delta="1" aria-label="Add a unit to layer ${c}">+</button>`;
+        title = format(T.layer, { c });
+        detail = `<button type="button" data-width="${c - 1}" data-delta="-1" aria-label="${format(T.removeUnit, { c })}">−</button><span>${d}</span><button type="button" data-width="${c - 1}" data-delta="1" aria-label="${format(T.addUnit, { c })}">+</button>`;
       }
       head.innerHTML = `<span class="nn-layer-title">${title}</span><span class="nn-layer-detail">${detail}</span>`;
       box.appendChild(head);
@@ -738,9 +708,9 @@
 
   // ---- Hover ----
 
-  const tip = $('.nn-diagram .nn-tooltip');
+  const tip = $('.nn-diagram .lab-tooltip');
   const tipCanvas = tip.querySelector('canvas');
-  const tipText = tip.querySelector('.nn-tooltip-text');
+  const tipText = tip.querySelector('.lab-tooltip-text');
 
   function nodeAt(event) {
     const rect = diagram.canvas.getBoundingClientRect();
@@ -761,24 +731,24 @@
     const L = net.sizes.length - 1, isClassification = classification(), act = NN.ACTIVATIONS[state.activation].label;
     let html;
     if (node.c === 0) {
-      html = `<strong>Input ${isClassification ? `x${subscript(node.j + 1)}` : 'x'}</strong>`;
+      html = `<strong>${T.tipInput} ${isClassification ? `x${subscript(node.j + 1)}` : 'x'}</strong>`;
     } else if (node.c === L) {
       html = isClassification
-        ? `<strong>Output ${node.j + 1}</strong><br>sm(z)${subscript(node.j + 1)}: the probability of class ${node.j + 1}, shaded from 0 to 1`
-        : '<strong>Output</strong><br>f(x) = W h + b, no activation';
+        ? `<strong>${format(T.tipOutput, { j: node.j + 1 })}</strong><br>${format(T.tipOutputClass, { j: subscript(node.j + 1), k: node.j + 1 })}`
+        : T.tipOutputRegression;
     } else {
       const layer = net.layers[node.c - 1], nIn = layer.nIn;
       let norm = 0;
       for (let i = 0; i < nIn; i++) norm += layer.W[node.j * nIn + i] ** 2;
-      html = `<strong>Layer ${node.c}, unit ${node.j + 1}</strong><br>a = ${act}(w·h + b), with ‖w‖ = ${fmt(Math.sqrt(norm), 2)}, b = ${fmt(layer.b[node.j], 2)}`;
+      html = `<strong>${format(T.tipUnit, { c: node.c, j: node.j + 1 })}</strong><br>a = ${act}(w·h + b), ‖w‖ = ${fmt(Math.sqrt(norm), 2)}, b = ${fmt(layer.b[node.j], 2)}`;
       if (!isClassification && node.c === 1 && state.activation === 'relu') {
         const w = layer.W[node.j];
-        html += `<br>kink at x = −b/w = ${w !== 0 ? fmt(-layer.b[node.j] / w, 2) : '∞'}`;
+        html += `<br>${format(T.kink, { x: w !== 0 ? fmt(-layer.b[node.j] / w, 2) : '∞' })}`;
       }
-      if (alive && !alive[node.c][node.j]) html += '<br><em>Dead: zero on every training point, so its gradient is zero too.</em>';
+      if (alive && !alive[node.c][node.j]) html += `<br><em>${T.dead}</em>`;
     }
-    const scaleNote = node.c === L ? '' : mapScale(node.c, maps[node.c][node.j]).rescaled ? ', rescaled to its largest value' : `, on the range of ${act}`;
-    html += `<br><span class="nn-tooltip-scale">${isClassification ? 'shaded by value, on the input square' : 'value as a function of x'}${scaleNote}</span>`;
+    const scaleNote = node.c === L ? '' : mapScale(node.c, maps[node.c][node.j]).rescaled ? T.rescaled : format(T.range, { a: act });
+    html += `<br><span class="lab-tooltip-scale">${isClassification ? T.shaded : T.asFunction}${scaleNote}</span>`;
     tipText.innerHTML = html;
     const w = isClassification ? 132 : 180, h = isClassification ? 132 : 110;
     const ctx = fit(tipCanvas, w, h);
@@ -794,7 +764,7 @@
   diagram.canvas.addEventListener('mousemove', event => showNode(nodeAt(event), event));
   diagram.canvas.addEventListener('mouseleave', () => { tip.hidden = true; });
 
-  const plotTip = $('.nn-plot .nn-tooltip');
+  const plotTip = $('.lab-plot .lab-tooltip');
   plot.canvas.addEventListener('mousemove', event => {
     const rect = plot.canvas.getBoundingClientRect();
     const u = (event.clientX - rect.left) / rect.width, v = (event.clientY - rect.top) / rect.height;
@@ -805,7 +775,7 @@
       html = `x = (${x.map(a => a.toFixed(2)).join(', ')})<br>logits z = (${z.map(a => a.toFixed(2)).join(', ')})<br>sm(z) = (${Array.from(p, a => a.toFixed(3)).join(', ')})`;
     } else {
       const x = -VIEW_X + 2 * VIEW_X * u, f = NN.forward(net, [x], 0)[0];
-      html = `x = ${x.toFixed(2)}<br>f(x) = ${f.toFixed(3)}` + (Math.abs(x) <= 1 ? `<br>E[y | x] = ${NN.DATASETS[state.dataset].g(x).toFixed(3)}` : '<br>no data here');
+      html = `x = ${x.toFixed(2)}<br>f(x) = ${f.toFixed(3)}` + (Math.abs(x) <= 1 ? `<br>E[y | x] = ${NN.DATASETS[state.dataset].g(x).toFixed(3)}` : `<br>${T.noDataHere}`);
     }
     plotTip.innerHTML = html;
     plotTip.hidden = false;
@@ -823,7 +793,7 @@
       if (el) el.textContent = text;
     };
     const P = NN.parameterCount(net.sizes), m = metrics;
-    set('counter', `iteration ${trainer.iteration} · epoch ${trainer.epoch}`);
+    set('counter', format(T.counter, { t: trainer.iteration, e: trainer.epoch }));
     set('train-risk', fmt(m.trainRisk, 4));
     set('test-risk', fmt(m.testRisk, 4));
     const gap = m.testRisk - m.trainRisk;
@@ -839,7 +809,7 @@
     $$('[data-when="regression-relu"]').forEach(el => { el.hidden = classification() || state.activation !== 'relu'; });
     $$('[data-when="penalty"]').forEach(el => { el.hidden = state.lambda === 0; });
     const play = $('[data-action="play"]');
-    play.textContent = running ? '❚❚ Pause' : '▶ Train';
+    play.textContent = running ? T.pause : T.train;
     play.setAttribute('aria-pressed', String(running));
   }
 
@@ -866,13 +836,13 @@
       const steps = state.speed;
       for (let s = 0; s < steps; s++) {
         if (state.stopAt && trainer.iteration >= state.stopAt) {
-          pause(`Paused at iteration ${trainer.iteration}, where the experiment stops. Press Train to go on.`);
+          pause(format(T.stopped, { t: trainer.iteration }));
           state.stopAt = null;
           break;
         }
         trainer.step(state.lr, batchSize(), state.lambda);
         if (trainer.diverged) {
-          pause('The risk is no longer finite: the steps are too large. Lower the learning rate γ, then start from a new initialization.');
+          pause(T.diverged);
           break;
         }
       }
@@ -899,20 +869,7 @@
 
   // ---- Controls ----
 
-  function pills(group, items, isPressed, onClick) {
-    const box = $(`[data-group="${group}"]`);
-    box.innerHTML = '';
-    for (const item of items) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'demo-button';
-      button.textContent = item.label;
-      if (item.title) button.title = item.title;
-      button.setAttribute('aria-pressed', String(isPressed(item.value)));
-      button.addEventListener('click', () => onClick(item.value));
-      box.appendChild(button);
-    }
-  }
+  const pills = (group, items, isPressed, onClick) => Lab.pills($(`[data-group="${group}"]`), items, isPressed, onClick);
 
   const nearest = (list, value) => {
     let best = 0;
@@ -922,7 +879,7 @@
 
   function syncControls() {
     const task = taskOf(state.dataset);
-    pills('task', [{ label: 'Classification', value: 'classification' }, { label: 'Regression', value: 'regression' }],
+    pills('task', [{ label: T.classification, value: 'classification' }, { label: T.regression, value: 'regression' }],
       v => v === task, v => {
         if (v === taskOf(state.dataset)) return;
         state.dataset = v === 'classification' ? 'moons' : 'sine';
@@ -930,7 +887,7 @@
         markManual();
         rebuild('data');
       });
-    pills('dataset', Object.entries(NN.DATASETS).filter(([, d]) => d.task === task).map(([key, d]) => ({ label: d.label, value: key })),
+    pills('dataset', Object.entries(NN.DATASETS).filter(([, d]) => d.task === task).map(([key, d]) => ({ label: T.datasets[key] || d.label, value: key })),
       v => v === state.dataset, v => {
         state.dataset = v;
         markManual();
@@ -942,7 +899,7 @@
         markManual();
         rebuild();
       });
-    pills('speed', SPEEDS.map(s => ({ label: `×${s}`, value: s, title: `${s} iteration${s > 1 ? 's' : ''} per frame` })),
+    pills('speed', SPEEDS.map(s => ({ label: `×${s}`, value: s, title: format(T.perFrame, { s }) })),
       v => v === state.speed, v => {
         state.speed = v;
         syncControls();
@@ -958,7 +915,7 @@
     out('lr', fmtRate(state.lr));
     const b = state.batch >= state.n ? BATCH_SIZES.length - 1 : nearest(BATCH_SIZES.slice(0, -1), state.batch);
     value('batch', b);
-    out('batch', state.batch >= state.n ? `full batch, ${state.n} (GD)` : String(state.batch));
+    out('batch', state.batch >= state.n ? format(T.fullBatch, { n: state.n }) : String(state.batch));
     value('lambda', LAMBDAS.indexOf(state.lambda) >= 0 ? LAMBDAS.indexOf(state.lambda) : nearest(LAMBDAS, state.lambda));
     out('lambda', state.lambda === 0 ? '0' : fmtRate(state.lambda));
     const random = $('[data-input="randomLabels"]');
@@ -972,8 +929,7 @@
 
   // A setting changed by hand: the experiment's variant is no longer what is shown.
   function markManual() {
-    variantIndex = -1;
-    renderVariants();
+    if (panel) panel.manual();
   }
 
   root.addEventListener('click', event => {
@@ -1044,69 +1000,6 @@
 
   // ---- Experiments ----
 
-  const list = $('.nn-exp-list'), detail = $('.nn-exp-detail');
-
-  function renderList() {
-    list.innerHTML = '';
-    for (const part of Object.keys(PARTS)) {
-      const heading = document.createElement('div');
-      heading.className = 'nn-exp-part';
-      heading.textContent = PARTS[part];
-      list.appendChild(heading);
-      for (const e of EXPERIMENTS.filter(x => x.part === part)) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'nn-exp-item';
-        button.dataset.experiment = e.id;
-        button.innerHTML = `<span class="nn-exp-id">${e.id}</span> ${e.title}`;
-        button.setAttribute('aria-pressed', String(experiment === e));
-        list.appendChild(button);
-      }
-    }
-  }
-
-  function selectExperiment(id) {
-    experiment = EXPERIMENTS.find(e => e.id === id) || null;
-    variantIndex = -1;
-    renderList();
-    if (!experiment) return;
-    detail.innerHTML = `
-      <div class="nn-exp-head"><span class="nn-exp-id">Experiment ${experiment.id}</span></div>
-      <h3>${experiment.title}</h3>
-      <div class="nn-exp-question"><span class="nn-exp-label">Predict first.</span> ${experiment.question}</div>
-      <div class="nn-exp-variants"></div>
-      <p class="nn-exp-watch"><span class="nn-exp-label">Watch:</span> ${experiment.watch}</p>
-      <details class="nn-exp-explanation"><summary>What happens, and why</summary>${experiment.explanation}</details>`;
-    renderVariants();
-    const mj = window.MathJax;
-    if (mj && mj.typesetPromise) mj.typesetPromise([detail]).catch(() => {});
-  }
-
-  function renderVariants() {
-    if (!experiment) return;
-    const box = detail.querySelector('.nn-exp-variants');
-    box.innerHTML = '';
-    const loads = experiment.variants.filter(v => v.set);
-    const buttons = loads.length ? experiment.variants : [{ label: '▶ Run', set: {} }, ...experiment.variants];
-    buttons.forEach((variant, index) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'demo-button';
-      button.textContent = variant.set && loads.length ? `▶ ${variant.label}` : variant.label;
-      if (variant.set) button.setAttribute('aria-pressed', String(index === variantIndex));
-      button.addEventListener('click', () => {
-        if (variant.action === 'permute') {
-          permute();
-          return;
-        }
-        loadSetup({ ...experiment.setup, ...variant.set });
-        variantIndex = index;
-        renderVariants();
-      });
-      box.appendChild(button);
-    });
-  }
-
   function loadSetup(setup) {
     state = { ...window.NN_DEFAULTS, ...setup, hidden: (setup.hidden || window.NN_DEFAULTS.hidden).slice(), showTest: state.showTest };
     running = false;
@@ -1114,32 +1007,17 @@
     play();
   }
 
-  list.addEventListener('click', event => {
-    const item = event.target.closest('[data-experiment]');
-    if (item) selectExperiment(item.dataset.experiment);
-  });
-
-  // Links to an experiment from the rest of the page (data-experiment="II.3"),
-  // and #II.3 at the end of the address: select it and bring the playground into view.
-  document.addEventListener('click', event => {
-    const link = event.target.closest('a[data-experiment]');
-    if (!link) return;
-    event.preventDefault();
-    selectExperiment(link.dataset.experiment);
-    window.history.replaceState(null, '', `#${link.dataset.experiment}`);
-    root.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, true);
-
   // ---- Start ----
 
   readColours();
   buildData();
   buildNetwork();
   syncControls();
-  renderList();
-  const fromAddress = decodeURIComponent(window.location.hash.slice(1));
-  selectExperiment(EXPERIMENTS.some(e => e.id === fromAddress) ? fromAddress : EXPERIMENTS[0] && EXPERIMENTS[0].id);
-  if (EXPERIMENTS.some(e => e.id === fromAddress)) root.scrollIntoView({ block: 'start' });
+  panel = Lab.experiments({
+    root, list: $('.lab-exp-list'), detail: $('.lab-exp-detail'), items: EXPERIMENTS, parts: PARTS,
+    load: loadSetup,
+    action: name => { if (name === 'permute') permute(); },
+  });
 
   window.addEventListener('sitethemechange', () => {
     readColours();

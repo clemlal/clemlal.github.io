@@ -1,42 +1,44 @@
-// Interactive figures of the page on neural networks
-// (teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html):
+// Interactive figures on neural networks, each built in every element of the
+// page that has its class, so that any page can use any of them:
 //   .nn-fig-activation   an activation function σ and its derivative σ'
 //   .nn-fig-softmax      logits, their softmax, and the gradient sm(z) - e_c of the cross-entropy
 //   .nn-fig-xent         cross-entropy = entropy + Kullback-Leibler divergence, two classes
 //   .nn-fig-backprop     forward and backward pass, step by step, on a 2 → 2 → 1 network
 //   .nn-fig-ua           the proof of universal approximation: one ReLU unit per knot
-// Each figure is independent; colours come from the site's theme (js/themes.js)
-// and follow its switch.
+//   .nn-fig-neuron       one neuron σ(w·x + b) on the plane: its hyperplane and its values
+//   .nn-fig-xor          a 2 → 2 → 1 ReLU network whose weights are typed in, on the XOR points
+//   .nn-fig-vanishing    gradient norms layer by layer at initialization (js/nn-engine.js)
+//   .nn-fig-double-descent   test error of random-feature networks against their width,
+//                        with the minimum-norm fit (double descent) or a ridge penalty
+// Used by teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html
+// (English) and teaching/2026_2027_SID_Advanced_Statistical_Learning/reseaux-de-neurones.html
+// (French): the texts of a figure are in its markup, the few words drawn on
+// the canvases are in STRINGS below. Colours come from the site's theme and
+// redraws on theme switches and resizes are handled by js/lab-kit.js.
 
 (function () {
-  const font = () => getComputedStyle(document.body).fontFamily;
-  let C = null;
+  if (!window.Lab) return;
+  const { rgba, font, format } = Lab;
+  let C = Lab.colours();
 
-  function readColours() {
-    const rgb = window.siteTheme.rgb;
-    const dark = 0.2126 * rgb.bg[0] + 0.7152 * rgb.bg[1] + 0.0722 * rgb.bg[2] < 110;
-    C = {
-      paper: rgb.bg, ink: rgb.text, soft: rgb.textSoft, muted: rgb.muted, faint: rgb.faint, border: rgb.border,
-      pos: rgb.dataA, neg: rgb.highlight,
-      classes: [rgb.dataA, rgb.highlight, dark ? [94, 190, 160] : [24, 128, 104]],
-    };
-  }
-  const rgba = (c, a = 1) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+  const T = Lab.strings({
+    en: {
+      sigmoidMax: 'σ′(0) = 1/4, the maximum', logits: 'logits z', gradient: 'gradient sm(z) − e_c',
+      prediction: 'prediction q (probability of class 1)', start: 'start', forward: 'forward {k}/4', backward: 'backward {k}/5',
+      units: 'number of units N', unitsOf: '{k} of {n}', notLipschitz: 'none: g is not Lipschitz',
+      layer: 'layer', gradNorm: '‖∇W_l F‖ (log scale)', width: 'width p (log scale)', testError: 'test error (solid), training error (dashed)',
+      norm: 'norm of the last layer ‖a‖', solved: '✓ XOR solved', notSolved: 'not yet',
+    },
+    fr: {
+      sigmoidMax: 'σ′(0) = 1/4, le maximum', logits: 'logits z', gradient: 'gradient sm(z) − e_c',
+      prediction: 'prédiction q (probabilité de la classe 1)', start: 'départ', forward: 'aller {k}/4', backward: 'retour {k}/5',
+      units: 'nombre d’unités N', unitsOf: '{k} sur {n}', notLipschitz: 'aucune : g n’est pas lipschitzienne',
+      layer: 'couche', gradNorm: '‖∇W_l F‖ (échelle log)', width: 'largeur p (échelle log)', testError: 'erreur de test (trait), d’entraînement (tirets)',
+      norm: 'norme de la dernière couche ‖a‖', solved: '✓ XOR résolu', notSolved: 'pas encore',
+    },
+  });
 
-  // Sizes a canvas to its width in the page (100% of its parent, see
-  // css/styles.css) and the given height, sharp on high-density screens;
-  // returns the context and the width.
-  function fit(canvas, height) {
-    const width = canvas.clientWidth;
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-    canvas.style.height = `${height}px`;
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-    return { ctx, width, height };
-  }
+  const fit = Lab.fit;
 
   // Axes of a plot of [x0, x1] × [y0, y1] in a box: returns the maps to pixels.
   function frame(ctx, box, x0, x1, y0, y1) {
@@ -45,20 +47,16 @@
     return { X, Y };
   }
 
-  // Groups of pill buttons, [data-pills="name"] holding buttons with data-value.
-  function bindPills(root, name, onChange) {
-    const buttons = root.querySelectorAll(`[data-pills="${name}"] button`);
-    buttons.forEach(button => button.addEventListener('click', () => {
-      buttons.forEach(b => b.setAttribute('aria-pressed', String(b === button)));
-      onChange(button.dataset.value);
-    }));
-  }
+  const bindPills = Lab.bindPills;
 
-  const figures = [];
+  // A figure of this file: its draw function reads the theme's colours first.
   function register(selector, setup) {
-    document.querySelectorAll(selector).forEach(root => {
+    Lab.figure(selector, root => {
       const draw = setup(root);
-      figures.push(draw);
+      return () => {
+        C = Lab.colours();
+        draw();
+      };
     });
   }
 
@@ -137,7 +135,7 @@
         ctx.fill();
         ctx.textAlign = 'left';
         ctx.fillStyle = rgba(C.ink);
-        ctx.fillText("σ′(0) = 1/4, the maximum", X(0.25), Y(0.08));
+        ctx.fillText(T.sigmoidMax, X(0.25), Y(0.08));
       }
     }
     return draw;
@@ -180,9 +178,9 @@
 
       const { ctx, width, height } = fit(canvas, 220);
       const panels = [
-        { title: 'logits z', values: z, lo: -RANGE, hi: RANGE, text: short },
+        { title: T.logits, values: z, lo: -RANGE, hi: RANGE, text: short },
         { title: 'sm(z) ∈ Δ₂', values: p, lo: 0, hi: 1, text: v => v.toFixed(2) },
-        { title: 'gradient sm(z) − e_c', values: grad, lo: -1, hi: 1, text: v => v.toFixed(2) },
+        { title: T.gradient, values: grad, lo: -1, hi: 1, text: v => v.toFixed(2) },
       ];
       const gap = 18, panelWidth = (width - 2 * gap) / 3, top = 24, bottom = height - 20;
       ctx.font = `12px ${font()}`;
@@ -284,7 +282,7 @@
       }
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText('prediction q (probability of class 1)', box.left + box.width / 2, box.top + box.height + 18);
+      ctx.fillText(T.prediction, box.left + box.width / 2, box.top + box.height + 18);
 
       ctx.save();
       ctx.beginPath();
@@ -391,7 +389,7 @@
         el.classList.toggle('is-current', at.includes(step));
       });
       root.querySelectorAll('[data-from]').forEach(el => { el.classList.toggle('is-known', step >= Number(el.dataset.from)); });
-      root.querySelector('[data-out="step"]').textContent = step === 0 ? 'start' : step <= 4 ? `forward ${step}/4` : `backward ${step - 4}/5`;
+      root.querySelector('[data-out="step"]').textContent = step === 0 ? T.start : step <= 4 ? format(T.forward, { k: step }) : format(T.backward, { k: step - 4 });
       root.querySelector('[data-action="back"]').disabled = step === 0;
       root.querySelector('[data-action="next"]').disabled = step === STEPS - 1;
       root.querySelector('[data-action="descend"]').disabled = step !== STEPS - 1;
@@ -623,10 +621,10 @@
 
       const G = lipschitz(), eta = (b - a) / (N - 1), error = supError(N);
       root.querySelector('[data-out="knots"]').textContent = N;
-      root.querySelector('[data-out="units"]').textContent = `${count} of ${N}`;
+      root.querySelector('[data-out="units"]').textContent = format(T.unitsOf, { k: count, n: N });
       root.querySelector('[data-out="error"]').textContent = error.toFixed(4);
       root.querySelector('[data-out="spacing"]').textContent = eta.toFixed(4);
-      root.querySelector('[data-out="bound"]').textContent = Number.isFinite(G) ? `${(G * eta).toFixed(4)}  (G ≈ ${G.toFixed(2)})` : 'none: g is not Lipschitz';
+      root.querySelector('[data-out="bound"]').textContent = Number.isFinite(G) ? `${(G * eta).toFixed(4)}  (G ≈ ${G.toFixed(2)})` : T.notLipschitz;
       drawErrors(N, G);
     }
 
@@ -659,7 +657,7 @@
         ctx.stroke();
         ctx.fillText(String(v), X(Math.log10(v)), box.top + box.height + 6);
       }
-      ctx.fillText('number of units N', box.left + box.width / 2, box.top + box.height + 20);
+      ctx.fillText(T.units, box.left + box.width / 2, box.top + box.height + 20);
       ctx.save();
       ctx.beginPath();
       ctx.rect(box.left, box.top, box.width, box.height);
@@ -697,19 +695,295 @@
     return draw;
   });
 
-  // ---- Start, theme and size ----
 
-  readColours();
-  const drawAll = () => figures.forEach(draw => draw());
-  drawAll();
-  window.addEventListener('sitethemechange', () => {
-    readColours();
-    drawAll();
+  const out = (root, key, text) => root.querySelectorAll(`[data-out="${key}"]`).forEach(el => { el.textContent = text; });
+  const n3 = v => (Math.abs(v) < 5e-5 ? 0 : v).toFixed(4).replace('-', '−');
+
+  // ---- One neuron ----
+
+  register('.nn-fig-neuron', root => {
+    const canvas = root.querySelector('canvas'), inputs = ['w1', 'w2', 'b'].map(k => root.querySelector(`[data-input="${k}"]`));
+    let act = 'relu', probe = [1, 1];
+    bindPills(root, 'activation', v => { act = v; draw(); });
+    inputs.forEach(i => i.addEventListener('input', () => draw()));
+    const VIEW = 2.5;
+    canvas.addEventListener('click', event => {
+      const rect = canvas.getBoundingClientRect(), S = rect.width;
+      probe = [-VIEW + 2 * VIEW * (event.clientX - rect.left) / S, VIEW - 2 * VIEW * (event.clientY - rect.top) / S];
+      draw();
+    });
+
+    function draw() {
+      const [w1, w2, b] = inputs.map(i => Number(i.value)), { f } = ACT[act];
+      const z = w1 * probe[0] + w2 * probe[1] + b;
+      out(root, 'w1', w1.toFixed(1)); out(root, 'w2', w2.toFixed(1)); out(root, 'b', b.toFixed(1));
+      out(root, 'x', `(${probe.map(v => v.toFixed(2)).join(' ; ')})`);
+      out(root, 'z', n3(z)); out(root, 'a', n3(f(z)));
+      const width = canvas.clientWidth, S = Math.min(width, 360);
+      const { ctx } = fit(canvas, S, S);
+      // Values on a lattice: from the page colour to the first colour (positive) or the second (negative).
+      const N = 80, image = ctx.createImageData(N, N), lo = act === 'sigmoid' ? 0.5 : 0, scale = act === 'sigmoid' ? 0.5 : act === 'tanh' ? 1 : Math.max(1e-9, (Math.abs(w1) + Math.abs(w2)) * VIEW + Math.abs(b));
+      for (let gy = 0; gy < N; gy++) for (let gx = 0; gx < N; gx++) {
+        const x1 = -VIEW + 2 * VIEW * (gx + 0.5) / N, x2 = VIEW - 2 * VIEW * (gy + 0.5) / N;
+        const t = Math.max(-1, Math.min(1, (f(w1 * x1 + w2 * x2 + b) - lo) / scale));
+        const c = Lab.mix(C.paper, t >= 0 ? C.pos : C.neg, 0.75 * Math.abs(t)), k = 4 * (gy * N + gx);
+        image.data[k] = c[0]; image.data[k + 1] = c[1]; image.data[k + 2] = c[2]; image.data[k + 3] = 255;
+      }
+      const small = document.createElement('canvas');
+      small.width = small.height = N;
+      small.getContext('2d').putImageData(image, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(small, 0, 0, S, S);
+      const P = (x1, x2) => [(x1 + VIEW) / (2 * VIEW) * S, (VIEW - x2) / (2 * VIEW) * S];
+      Lab.polyline(ctx, [P(-VIEW, 0), P(VIEW, 0)], { color: C.faint, width: 1 });
+      Lab.polyline(ctx, [P(0, -VIEW), P(0, VIEW)], { color: C.faint, width: 1 });
+      // The hyperplane w·x + b = 0 and the normal w from its point closest to 0.
+      const norm2 = w1 * w1 + w2 * w2;
+      if (norm2 > 1e-12) {
+        const x0 = [-b * w1 / norm2, -b * w2 / norm2], dir = [-w2, w1], far = 10;
+        Lab.polyline(ctx, [P(x0[0] - far * dir[0], x0[1] - far * dir[1]), P(x0[0] + far * dir[0], x0[1] + far * dir[1])], { color: C.ink, width: 1.6, dash: [6, 4] });
+        const len = Math.sqrt(norm2), tip = [x0[0] + w1 / len * 0.8, x0[1] + w2 / len * 0.8];
+        Lab.arrow(ctx, ...P(...x0), ...P(...tip), { color: C.ink, width: 2, head: 8 });
+        const [lx, ly] = P(...tip);
+        ctx.fillStyle = rgba(C.ink);
+        ctx.font = `12px ${font()}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText('w', lx + 6, ly - 4);
+      }
+      Lab.dot(ctx, ...P(...probe), 5, C.ink, C.paper);
+    }
+    return draw;
   });
-  let width = window.innerWidth;
-  window.addEventListener('resize', () => {
-    if (window.innerWidth === width) return;
-    width = window.innerWidth;
-    drawAll();
+
+  // ---- XOR with two ReLU units, by hand ----
+
+  register('.nn-fig-xor', root => {
+    const canvas = root.querySelector('canvas');
+    const keys = ['w11', 'w12', 'w21', 'w22', 'b1', 'b2', 'v1', 'v2', 'c'];
+    const field = k => root.querySelector(`[data-weight="${k}"]`);
+    const PRESETS = {
+      course: { w11: 1, w12: 1, w21: 1, w22: 1, b1: 0, b2: -1, v1: 1, v2: -2, c: 0 },
+      zero: Object.fromEntries(keys.map(k => [k, 0])),
+    };
+    const POINTS = [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]];
+    const set = values => { keys.forEach(k => { field(k).value = values[k]; }); draw(); };
+    root.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.preset === 'random') {
+        const rand = Lab.random(Math.floor(Math.random() * 1e9));
+        set(Object.fromEntries(keys.map(k => [k, Number(rand.uniform(-2, 2).toFixed(1))])));
+      } else set(PRESETS[b.dataset.preset]);
+    }));
+    keys.forEach(k => field(k).addEventListener('input', () => draw()));
+    const read = () => Object.fromEntries(keys.map(k => [k, Number(String(field(k).value).replace(',', '.')) || 0]));
+    const net = (p, x1, x2) => {
+      const h1 = Math.max(0, p.w11 * x1 + p.w12 * x2 + p.b1), h2 = Math.max(0, p.w21 * x1 + p.w22 * x2 + p.b2);
+      return { h1, h2, f: p.v1 * h1 + p.v2 * h2 + p.c };
+    };
+
+    function draw() {
+      const p = read();
+      const rows = POINTS.map(([x1, x2, y]) => ({ x1, x2, y, ...net(p, x1, x2) }));
+      const ok = rows.every(r => Math.abs(r.f - r.y) < 0.1);
+      const table = root.querySelector('[data-out="table"]');
+      table.innerHTML = `<tr><th>x</th><th>h₁</th><th>h₂</th><th>f(x)</th><th>XOR</th></tr>` + rows.map(r => `<tr><td>(${r.x1}, ${r.x2})</td><td>${n3(r.h1)}</td><td>${n3(r.h2)}</td><td><strong>${n3(r.f)}</strong></td><td>${r.y}</td></tr>`).join('');
+      out(root, 'verdict', ok ? T.solved : T.notSolved);
+      const width = canvas.clientWidth, S = Math.min(width, 320), lo = -0.5, hi = 1.5;
+      const { ctx } = fit(canvas, S, S);
+      const N = 80, image = ctx.createImageData(N, N);
+      for (let gy = 0; gy < N; gy++) for (let gx = 0; gx < N; gx++) {
+        const x1 = lo + (hi - lo) * (gx + 0.5) / N, x2 = hi - (hi - lo) * (gy + 0.5) / N;
+        const v = net(p, x1, x2).f, t = Math.max(-1, Math.min(1, v));
+        const c = Lab.mix(C.paper, t >= 0 ? C.pos : C.neg, 0.7 * Math.abs(t)), k = 4 * (gy * N + gx);
+        image.data[k] = c[0]; image.data[k + 1] = c[1]; image.data[k + 2] = c[2]; image.data[k + 3] = 255;
+      }
+      const small = document.createElement('canvas');
+      small.width = small.height = N;
+      small.getContext('2d').putImageData(image, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(small, 0, 0, S, S);
+      const P = (x1, x2) => [(x1 - lo) / (hi - lo) * S, (hi - x2) / (hi - lo) * S];
+      // The level line f = 1/2, which separates the two answers.
+      const M = 61, values = new Float64Array(M * M);
+      for (let gy = 0; gy < M; gy++) for (let gx = 0; gx < M; gx++) values[gy * M + gx] = net(p, lo + (hi - lo) * gx / (M - 1), hi - (hi - lo) * gy / (M - 1)).f;
+      ctx.beginPath();
+      Lab.contourPath(ctx, values, M, M, 0.5, S, S);
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = rgba(C.ink, 0.85);
+      ctx.stroke();
+      for (const r of rows) {
+        const [px, py] = P(r.x1, r.x2);
+        Lab.dot(ctx, px, py, 7, r.y ? C.pos : C.paper, C.ink);
+      }
+    }
+    return draw;
+  });
+
+  // ---- Vanishing gradients at initialization ----
+
+  register('.nn-fig-vanishing', root => {
+    if (!window.NN) return () => {};
+    const canvas = root.querySelector('canvas'), depthInput = root.querySelector('[data-input="depth"]');
+    let act = 'sigmoid', seed = 1;
+    const data = NN.makeData('circles', 200, 0.1, 1);
+    bindPills(root, 'activation', v => { act = v; draw(); });
+    depthInput.addEventListener('input', () => draw());
+    root.querySelector('[data-action="reseed"]').addEventListener('click', () => { seed += 1; draw(); });
+
+    function draw() {
+      const depth = Number(depthInput.value);
+      const net = NN.createNetwork({ sizes: [2, ...Array(depth).fill(8), 2], activation: act, task: 'classification', seed });
+      const norms = NN.gradientNorms(net, data, 0);
+      out(root, 'depth', depth);
+      out(root, 'first', Lab.fmt(norms[0], 2));
+      out(root, 'last', Lab.fmt(norms[norms.length - 1], 2));
+      out(root, 'ratio', Lab.fmt(norms[0] / norms[norms.length - 1], 2));
+      out(root, 'bound', Lab.fmt(0.25 ** depth, 2));
+      const { ctx, width, height } = fit(canvas, 230);
+      const box = { left: 44, top: 14, width: width - 54, height: height - 44 };
+      const L = norms.length;
+      const map = Lab.axes(ctx, box, { x: [0.4, L + 0.6], y: [-8, 1], logY: true, xTicks: Array.from({ length: L }, (_, i) => i + 1), yTicks: [1, 0, -2, -4, -6, -8], xLabel: `${T.layer} l`, yLabel: T.gradNorm });
+      const bar = Math.min(40, box.width / L * 0.6);
+      norms.forEach((g, i) => {
+        const v = Math.log10(Math.max(g, 1e-8)), x = map.X(i + 1);
+        ctx.fillStyle = rgba(C.pos, 0.85);
+        ctx.fillRect(x - bar / 2, map.Y(v), bar, map.Y(-8) - map.Y(v));
+      });
+    }
+    return draw;
+  });
+
+  // ---- Double descent with random features ----
+
+  register('.nn-fig-double-descent', root => {
+    const N = 40, D = 10, TEST = 400, DRAWS = 9;
+    const WIDTHS = [1, 2, 3, 5, 8, 10, 15, 20, 25, 30, 35, 38, 40, 42, 45, 50, 60, 80, 100, 150, 200, 300, 500];
+    const RIDGES = [0, 1e-3, 1e-2, 1e-1];
+    const canvases = root.querySelectorAll('canvas');
+    let seed = 1, ridge = 0, results = [], job = 0;
+    const noiseInput = root.querySelector('[data-input="noise"]');
+    bindPills(root, 'ridge', v => { ridge = RIDGES[Number(v)]; start(); });
+    noiseInput.addEventListener('input', () => start());
+    root.querySelector('[data-action="reseed"]').addEventListener('click', () => { seed += 1; start(); });
+
+    // Points on the sphere of radius √D, a teacher f*(x) = ReLU(v·x) + 0.3 v·x.
+    function problem() {
+      const rand = Lab.random(1000 + seed), noise = Number(noiseInput.value);
+      const sphere = () => {
+        const z = Array.from({ length: D }, () => rand.normal()), r = Math.hypot(...z) / Math.sqrt(D);
+        return z.map(v => v / r);
+      };
+      const v = Array.from({ length: D }, () => rand.normal()), nv = Math.hypot(...v);
+      const teacher = x => { const s = x.reduce((a, xi, i) => a + xi * v[i] / nv, 0); return Math.max(0, s) + 0.3 * s; };
+      const X = Array.from({ length: N }, sphere), Xt = Array.from({ length: TEST }, sphere);
+      return { X, y: X.map(x => teacher(x) + noise * rand.normal()), Xt, yt: Xt.map(teacher), rand };
+    }
+
+    // Solves A u = r (m × m, row major) by Gaussian elimination with partial pivoting.
+    function solve(A, r, m) {
+      A = A.slice(); r = r.slice();
+      for (let k = 0; k < m; k++) {
+        let piv = k;
+        for (let i = k + 1; i < m; i++) if (Math.abs(A[i * m + k]) > Math.abs(A[piv * m + k])) piv = i;
+        if (piv !== k) {
+          for (let j = 0; j < m; j++) [A[k * m + j], A[piv * m + j]] = [A[piv * m + j], A[k * m + j]];
+          [r[k], r[piv]] = [r[piv], r[k]];
+        }
+        const d = A[k * m + k] || 1e-300;
+        for (let i = k + 1; i < m; i++) {
+          const f = A[i * m + k] / d;
+          if (f === 0) continue;
+          for (let j = k; j < m; j++) A[i * m + j] -= f * A[k * m + j];
+          r[i] -= f * r[k];
+        }
+      }
+      const u = new Float64Array(m);
+      for (let k = m - 1; k >= 0; k--) {
+        let s = r[k];
+        for (let j = k + 1; j < m; j++) s -= A[k * m + j] * u[j];
+        u[k] = s / (A[k * m + k] || 1e-300);
+      }
+      return u;
+    }
+
+    // Least squares on p random ReLU features ReLU(W x)/√p: the minimum-norm
+    // solution (λ = 0) or the ridge one, through the smaller Gram matrix.
+    function fit1(pb, p) {
+      const W = Array.from({ length: p }, () => Array.from({ length: D }, () => pb.rand.normal() / Math.sqrt(D)));
+      const feats = X => X.map(x => W.map(w => Math.max(0, w.reduce((a, wi, i) => a + wi * x[i], 0)) / Math.sqrt(p)));
+      const F = feats(pb.X);
+      let a;
+      if (p < N) {
+        const G = new Float64Array(p * p), r = new Float64Array(p);
+        for (let i = 0; i < p; i++) {
+          for (let j = 0; j < p; j++) { let s = 0; for (let k = 0; k < N; k++) s += F[k][i] * F[k][j]; G[i * p + j] = s + (i === j ? ridge : 0); }
+          let s = 0; for (let k = 0; k < N; k++) s += F[k][i] * pb.y[k]; r[i] = s;
+        }
+        a = solve(G, r, p);
+      } else {
+        const G = new Float64Array(N * N);
+        for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { let s = 0; for (let k = 0; k < p; k++) s += F[i][k] * F[j][k]; G[i * N + j] = s + (i === j ? ridge : 0); }
+        const u = solve(G, pb.y, N);
+        a = new Float64Array(p);
+        for (let k = 0; k < p; k++) { let s = 0; for (let i = 0; i < N; i++) s += F[i][k] * u[i]; a[k] = s; }
+      }
+      const predict = rows => rows.map(f => f.reduce((s, fk, k) => s + fk * a[k], 0));
+      const mse = (pred, y) => pred.reduce((s, v, i) => s + (v - y[i]) ** 2, 0) / y.length;
+      return { train: mse(predict(F), pb.y), test: mse(predict(feats(pb.Xt)), pb.yt), norm: Math.hypot(...a) };
+    }
+    const median = v => { const s = v.slice().sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+
+    // One width per animation frame, so that the curve appears from left to right.
+    function start() {
+      const id = ++job, pb = problem();
+      results = [];
+      let k = 0;
+      const step = () => {
+        if (id !== job) return;
+        const p = WIDTHS[k], fits = Array.from({ length: DRAWS }, () => fit1(pb, p));
+        results.push({ p, train: median(fits.map(f => f.train)), test: median(fits.map(f => f.test)), norm: median(fits.map(f => f.norm)) });
+        k += 1;
+        draw();
+        if (k < WIDTHS.length) requestAnimationFrame(step);
+      };
+      draw();
+      requestAnimationFrame(step);
+    }
+
+    function draw() {
+      out(root, 'noise', Number(noiseInput.value).toFixed(2));
+      const before = results.filter(r => r.p < N), at = results.find(r => r.p === N), last = results[results.length - 1];
+      const best = before.length ? before.reduce((a, r) => (r.test < a.test ? r : a)) : null;
+      out(root, 'best', best ? `${Lab.fmt(best.test, 3)} (p = ${best.p})` : '…');
+      out(root, 'peak', at ? Lab.fmt(at.test, 3) : '…');
+      out(root, 'wide', last && last.p === WIDTHS[WIDTHS.length - 1] ? Lab.fmt(last.test, 3) : '…');
+      const panels = [
+        { canvas: canvases[0], y: [-3, 3], key: 'test', label: T.testError },
+        { canvas: canvases[1], y: [-1, 4], key: 'norm', label: T.norm },
+      ];
+      for (const panel of panels) {
+        const { ctx, width, height } = fit(panel.canvas, 240);
+        const box = { left: 40, top: 18, width: width - 50, height: height - 50 };
+        const map = Lab.axes(ctx, box, { x: [0, Math.log10(500)], y: panel.y, logX: true, logY: true, xTicks: [0, 1, 2], xLabel: T.width });
+        ctx.fillStyle = rgba(C.muted);
+        ctx.font = `11px ${font()}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(panel.label, 4, 11);
+        Lab.clip(ctx, box);
+        Lab.polyline(ctx, [[map.X(Math.log10(N)), box.top], [map.X(Math.log10(N)), box.top + box.height]], { color: C.neg, width: 1.2, dash: [4, 3] });
+        const P = (p, v) => [map.X(Math.log10(p)), map.Y(Math.log10(Math.max(v, 1e-12)))];
+        if (panel.key === 'test') Lab.polyline(ctx, results.map(r => P(r.p, r.train)), { color: C.muted, width: 1.6, dash: [5, 4] });
+        Lab.polyline(ctx, results.map(r => P(r.p, r[panel.key])), { color: C.pos, width: 2.2 });
+        for (const r of results) Lab.dot(ctx, ...P(r.p, r[panel.key]), 2.5, C.pos);
+        ctx.restore();
+        ctx.fillStyle = rgba(C.neg);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText('p = n', map.X(Math.log10(N)) + 4, box.top + 4);
+      }
+    }
+    start();
+    return draw;
   });
 })();

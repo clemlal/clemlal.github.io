@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réseaux de neurones - Clément Lalanne</title>
+    <meta name="description" content="Cours-TD interactif (M2 SID) : neurones et couches, non-linéarités, rétropropagation, entraînement par SGD, approximation universelle, généralisation et double descente, avec un terrain de jeu, des figures animées, des exercices corrigés et des scripts Python.">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <script src="../../js/themes.js"></script>
+    <script src="../../js/post.js"></script>
+</head>
+<body>
+    <!-- Top navigation, the same on every page (../../ paths on course pages) -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="../../index.html#news">News</a></li>
+                <li><a href="../../index.html#publications">Publications</a></li>
+                <li><a href="../../index.html#blog">Blog</a></li>
+                <li><a href="../../index.html#teaching">Teaching</a></li>
+                <li><a href="../../index.html#curriculum">Curriculum</a></li>
+            </ul>
+            <ul class="nav-links nav-external">
+                <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+                <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="main lab-page">
+            <header class="post-header">
+                <p class="post-kicker">Cours-TD interactif · M2 SID · Apprentissage statistique avancé · <a href="index.html">page du cours</a></p>
+                <h1 class="post-title">Réseaux de neurones</h1>
+            </header>
+
+            <div class="lab-prose">
+                <p>Les cours précédents ont construit des prédicteurs de deux façons. Les modèles linéaires, comme la régression logistique, cherchent $f(x) = w^\top x + b$ : faciles à entraîner, mais limités à des frontières droites. Les méthodes à noyau (cours 3) écrivent $f(x) = \langle w, \Phi(x)\rangle$ avec une représentation $\Phi$ <em>choisie à l'avance</em> par le noyau. Un réseau de neurones fait la même chose avec une représentation <em>apprise</em> : $f(x) = W_L\, \Phi_\theta(x) + b_L$, où $\Phi_\theta$ est elle-même une composée de couches simples, et où tous les paramètres sont entraînés ensemble, par le gradient stochastique.</p>
+                <p><strong>Mode d'emploi.</strong> Le cours-TD occupe deux séances : les parties 1 à 4, puis les parties 5 à 8. Suivez-le dans l'ordre. Cherchez chaque exercice avant d'ouvrir l'indication, puis la solution, et vérifiez vos calculs dans les cases « Votre réponse ». Dans le terrain de jeu, répondez à la question de chaque expérience avant de la lancer. ★ : approfondissement.</p>
+                <p><strong>Prérequis.</strong> Régression logistique et risque empirique (cours 1 et 2), et pour la fin les cours 3 et 4 (noyaux, VC-dimension). <strong>Notations.</strong> Données $(x_i, y_i)_{i \le n}$, paramètres $\theta$, perte $\ell$, risque empirique $\widehat R_n(f) = \frac1n\sum_i \ell(f(x_i), y_i)$, risque $R(f)$.</p>
+            </div>
+
+            <nav class="lab-toc" aria-label="Sommaire">
+                <span class="lab-toc-title">Sommaire</span>
+                <div class="lab-toc-sessions">
+                    <div>
+                        <span class="lab-toc-session">Séance 1 · le modèle et son gradient</span>
+                        <ol>
+                            <li><a href="#neurone">Le neurone</a></li>
+                            <li><a href="#couches">Couches, sorties et pertes</a></li>
+                            <li><a href="#non-lineaire">Pourquoi une non-linéarité</a></li>
+                            <li><a href="#retropropagation">Calculer le gradient : la rétropropagation</a></li>
+                        </ol>
+                    </div>
+                    <div>
+                        <span class="lab-toc-session">Séance 2 · entraîner, représenter, généraliser</span>
+                        <ol start="5">
+                            <li><a href="#entrainer">Entraîner un réseau</a></li>
+                            <li><a href="#approximation">Ce qu'un réseau sait représenter</a></li>
+                            <li><a href="#generalisation">Généralisation et double descente</a></li>
+                            <li><a href="#retenir">Ce qu'il faut retenir</a></li>
+                        </ol>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- ==================== The playground (js/nn-playground.js, on js/lab-kit.js) ==================== -->
+            <section class="lab-section" id="terrain">
+                <h2>Le terrain de jeu</h2>
+                <div class="lab-prose">
+                    <p>Le terrain de jeu entraîne un petit réseau sur des données du plan (classification) ou de la droite (régression), sous vos yeux : la passe avant, la rétropropagation et SGD tournent dans la page. Au milieu, le réseau : une colonne de carrés par couche, chaque carré montrant ce que calcule l'unité en fonction de l'entrée (survolez-les). À droite, la prédiction, les données, et les risques d'entraînement et de test. Les expériences guidées, en dessous, sont appelées tout au long du cours.</p>
+                </div>
+                <div class="lab-panel nn-playground" id="playground" role="region" aria-label="Terrain de jeu des réseaux de neurones">
+                    <div class="lab-toolbar">
+                        <button type="button" class="demo-button lab-play" data-action="play">▶ Entraîner</button>
+                        <button type="button" class="demo-button" data-action="step" title="Une itération de SGD">Un pas</button>
+                        <button type="button" class="demo-button" data-action="reset" title="Repartir de nouveaux poids aléatoires, sur les mêmes données">↻ Nouvelle initialisation</button>
+                        <button type="button" class="demo-button" data-action="permute" title="Mélanger les unités de chaque couche cachée, avec leurs poids">⇄ Permuter les unités</button>
+                        <span class="lab-counter" data-out="counter"></span>
+                        <span class="lab-speed"><span class="lab-label">Vitesse</span> <span class="lab-pills" data-group="speed"></span></span>
+                    </div>
+
+                    <div class="nn-columns">
+                        <div class="lab-settings">
+                            <h3>Données</h3>
+                            <div class="lab-pills" data-group="task"></div>
+                            <div class="lab-pills" data-group="dataset"></div>
+                            <label class="demo-control">Bruit <output data-out="noise"></output>
+                                <input type="range" data-input="noise" min="0" max="1" step="0.05">
+                            </label>
+                            <label class="demo-control">Points d'entraînement $n$ = <output data-out="n"></output>
+                                <input type="range" data-input="n" min="10" max="500" step="10">
+                            </label>
+                            <label class="lab-check"><input type="checkbox" data-input="randomLabels"> Étiquettes aléatoires</label>
+                            <label class="lab-check"><input type="checkbox" data-input="showTest"> Montrer les points de test</label>
+                            <button type="button" class="demo-button lab-small" data-action="resample">Nouvel échantillon</button>
+
+                            <h3>Réseau</h3>
+                            <div class="lab-label">Activation $\sigma$</div>
+                            <div class="lab-pills" data-group="activation"></div>
+                            <div class="nn-layers">Couches cachées
+                                <button type="button" class="lab-round" data-action="remove-layer" aria-label="Retirer une couche cachée">−</button>
+                                <span data-out="layers"></span>
+                                <button type="button" class="lab-round" data-action="add-layer" aria-label="Ajouter une couche cachée">+</button>
+                            </div>
+
+                            <h3>Entraînement</h3>
+                            <label class="demo-control">Pas $\gamma$ = <output data-out="lr"></output>
+                                <input type="range" data-input="lr" min="0" max="11" step="1">
+                            </label>
+                            <label class="demo-control">Taille de lot $|B|$ = <output data-out="batch"></output>
+                                <input type="range" data-input="batch" min="0" max="8" step="1">
+                            </label>
+                            <label class="demo-control">Pénalité $\lambda$ = <output data-out="lambda"></output>
+                                <input type="range" data-input="lambda" min="0" max="7" step="1">
+                            </label>
+                        </div>
+
+                        <div class="nn-network">
+                            <div class="nn-network-summary">Profondeur $L$ = <span data-out="depth"></span> · $P$ = <span data-out="params"></span> paramètres</div>
+                            <div class="nn-diagram">
+                                <div class="nn-layer-controls"></div>
+                                <canvas role="img" aria-label="Le réseau : une colonne d'unités par couche, et les poids entre elles"></canvas>
+                                <div class="lab-tooltip" hidden><canvas></canvas><div class="lab-tooltip-text"></div></div>
+                            </div>
+                            <p class="lab-caption">Chaque carré montre ce que calcule une unité, en fonction de l'entrée : survolez-le pour les détails. Un carré en pointillés est une unité ReLU morte. Les arêtes sont les poids, plus épaisses quand ils sont grands : <span class="lab-swatch lab-swatch-pos"></span> positifs, <span class="lab-swatch lab-swatch-neg"></span> négatifs. Sous le réseau, la norme du gradient de $F$ par rapport aux poids de chaque couche.</p>
+                        </div>
+
+                        <div class="nn-output">
+                            <div class="lab-plot">
+                                <canvas role="img" aria-label="La prédiction du réseau sur l'espace des entrées, avec les points d'entraînement"></canvas>
+                                <div class="lab-tooltip" hidden></div>
+                            </div>
+                            <div class="lab-message" role="status" hidden></div>
+                            <div class="lab-chart-legend"><span><span class="lab-swatch lab-swatch-pos"></span> risque d'entraînement $\widehat{R}_n(f_\theta)$</span> <span><span class="lab-swatch lab-swatch-neg"></span> risque de test</span> <span class="lab-muted">échelle log, en fonction des itérations</span></div>
+                            <div class="lab-chart"><canvas role="img" aria-label="Risques d'entraînement et de test en fonction des itérations"></canvas></div>
+                            <table class="lab-readouts">
+                                <tr><th>Risque d'entraînement $\widehat{R}_n(f_\theta)$</th><td data-out="train-risk"></td></tr>
+                                <tr><th>Risque de test, sur 1000 nouveaux points, qui estime $R(f_\theta)$</th><td data-out="test-risk"></td></tr>
+                                <tr><th>Écart $R - \widehat{R}_n$</th><td data-out="gap"></td></tr>
+                                <tr data-when="classification"><th>Erreur d'entraînement / de test</th><td><span data-out="train-error"></span> / <span data-out="test-error"></span></td></tr>
+                                <tr data-when="penalty"><th>Pénalité $\Omega(\theta) = \lambda \sum_l \|W_l\|_F^2$</th><td data-out="penalty"></td></tr>
+                                <tr data-when="regression-relu"><th>Morceaux affines de $f_\theta$ sur la figure</th><td data-out="pieces"></td></tr>
+                                <tr><th>$P$, $n$ et $\sqrt{P/n}$</th><td><span data-out="P"></span>, <span data-out="n-readout"></span>, <span data-out="sqrt-P-n"></span></td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="lab-experiments">
+                        <div class="lab-exp-list" aria-label="Expériences guidées"></div>
+                        <div class="lab-exp-detail" aria-live="polite"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== 1 ==================== -->
+            <section class="lab-section" id="neurone">
+                <h2>1. Le neurone</h2>
+                <div class="statement">
+                    <p><span class="statement-title">Définition.</span> Un <strong>neurone</strong> (une <em>unité</em>) d'entrée $x \in \mathbb{R}^d$ calcule</p>
+                    $$a = \sigma\big(w^\top x + b\big) = \sigma\Big(\sum_{j=1}^d w_j x_j + b\Big),$$
+                    <p>où $w \in \mathbb{R}^d$ sont ses <strong>poids</strong>, $b \in \mathbb{R}$ son <strong>biais</strong>, et $\sigma : \mathbb{R} \to \mathbb{R}$ une fonction fixée, l'<strong>activation</strong>. Les plus courantes : $\mathrm{ReLU}(u) = \max(0, u)$, la sigmoïde $\sigma(u) = 1/(1 + e^{-u})$ et la tangente hyperbolique $\tanh u$.</p>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <p>Un neurone est une <em>fonction affine suivie d'une déformation</em>. Sa géométrie est simple : $w^\top x + b$ est constant le long des droites (des hyperplans en dimension $d$) orthogonales à $w$. L'hyperplan $\{w^\top x + b = 0\}$ coupe l'espace en deux, et le neurone mesure de quel côté on est, et à quelle distance :</p>
+                        <ul>
+                            <li>avec ReLU, il vaut $0$ d'un côté et croît linéairement de l'autre : une <em>rampe</em> ;</li>
+                            <li>avec la sigmoïde ou tanh, il passe doucement d'une valeur à l'autre : une <em>marche</em>, d'autant plus raide que $\|w\|$ est grand.</li>
+                        </ul>
+                        <p>Bougez $w$ et $b$ : $w$ tourne l'hyperplan et fixe la pente, $b$ le déplace. Cliquez sur la figure pour calculer le neurone en un point.</p>
+                    </div>
+                    <figure class="lab-fig nn-fig-neuron">
+                        <div class="lab-pills" data-pills="activation">
+                            <button type="button" class="demo-button" data-value="relu" aria-pressed="true">ReLU</button>
+                            <button type="button" class="demo-button" data-value="sigmoid" aria-pressed="false">sigmoïde</button>
+                            <button type="button" class="demo-button" data-value="tanh" aria-pressed="false">tanh</button>
+                        </div>
+                        <label class="demo-control">$w_1$ = <output data-out="w1"></output><input type="range" data-input="w1" min="-3" max="3" step="0.1" value="1"></label>
+                        <label class="demo-control">$w_2$ = <output data-out="w2"></output><input type="range" data-input="w2" min="-3" max="3" step="0.1" value="-2"></label>
+                        <label class="demo-control">$b$ = <output data-out="b"></output><input type="range" data-input="b" min="-3" max="3" step="0.1" value="0.5"></label>
+                        <canvas role="img" aria-label="Valeurs du neurone sur le plan, avec son hyperplan et son vecteur de poids"></canvas>
+                        <div class="lab-fig-legend"><span><span class="lab-swatch lab-swatch-pos"></span> valeurs positives</span> <span><span class="lab-swatch lab-swatch-neg"></span> négatives</span> <span>tirets : $w^\top x + b = 0$, flèche : $w$</span></div>
+                        <div class="lab-fig-readout">en $x$ = <span data-out="x"></span> : $w^\top x + b$ = <span data-out="z"></span>, $a = \sigma(w^\top x + b)$ = <span data-out="a"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-1-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 1.1 · Un neurone, à la main</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">avec la figure</span></div>
+                    <p>$w = (1, -2)$, $b = 0{,}5$ (les valeurs de départ de la figure).</p>
+                    <ol>
+                        <li>En $x = (1, 1)$, calculer $w^\top x + b$, puis la sortie avec ReLU : <span class="exo-check" data-answer="0" data-tol="1e-6"></span> avec la sigmoïde : <span class="exo-check" data-answer="0.3775" data-tol="0.0005"></span> avec tanh : <span class="exo-check" data-answer="-0.4621" data-tol="0.0005"></span></li>
+                        <li>Même question avec la sigmoïde en $x = (2\,;\,0{,}5)$ : <span class="exo-check" data-answer="0.8176" data-tol="0.0005"></span></li>
+                        <li>Quelle est l'équation de la droite où la sortie de la sigmoïde vaut $1/2$ ? Que se passe-t-il quand on multiplie $w$ et $b$ par $10$ ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $w^\top x + b = 1 - 2 + 0{,}5 = -0{,}5$. ReLU : $0$ ; sigmoïde : $1/(1 + e^{0{,}5}) \approx 0{,}3775$ ; tanh : $\approx -0{,}4621$.</p>
+                        <p>2. $w^\top x + b = 2 - 1 + 0{,}5 = 1{,}5$, et $1/(1 + e^{-1{,}5}) \approx 0{,}8176$.</p>
+                        <p>3. $\sigma(u) = 1/2 \iff u = 0$ : c'est la droite $x_1 - 2x_2 + 0{,}5 = 0$. Multiplier $(w, b)$ par $10$ ne change pas cette droite, mais rend la marche dix fois plus raide : à la limite, le neurone devient la fonction indicatrice d'un demi-plan.</p>
+                    </div></details>
+                </div>
+
+                <div class="exo" id="exo-1-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 1.2 · Un neurone, c'est une régression logistique</span><span class="exo-tag">rappel</span></div>
+                    <p>On classe $y \in \{-1, 1\}$ avec un seul neurone sigmoïde, $p(x) = \sigma(w^\top x + b)$, lu comme $\mathbb{P}(y = 1 \mid x)$, et la perte $-\log$ de la probabilité donnée à la vraie classe.</p>
+                    <ol>
+                        <li>Vérifier que $1 - \sigma(u) = \sigma(-u)$, puis que la perte vaut $\log\big(1 + e^{-y(w^\top x + b)}\big)$ dans les deux cas $y = \pm 1$.</li>
+                        <li>Conclure : quel modèle du cours 1 obtient-on ? Quelle est la forme de sa frontière de décision ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $1 - \frac{1}{1 + e^{-u}} = \frac{e^{-u}}{1 + e^{-u}} = \frac{1}{1 + e^{u}} = \sigma(-u)$. Avec $u = w^\top x + b$ : si $y = 1$, la perte est $-\log\sigma(u) = \log(1 + e^{-u})$ ; si $y = -1$, elle est $-\log(1 - \sigma(u)) = -\log\sigma(-u) = \log(1 + e^{u})$. Dans les deux cas, $\log(1 + e^{-yu})$.</p>
+                        <p>2. C'est exactement la régression logistique, et minimiser le risque empirique, c'est le maximum de vraisemblance. La frontière $\{p(x) = 1/2\} = \{w^\top x + b = 0\}$ est un hyperplan. Pour des frontières courbes, il faut <em>composer</em> des neurones : c'est la suite.</p>
+                    </div></details>
+                </div>
+            </section>
+
+            <!-- ==================== 2 ==================== -->
+            <section class="lab-section" id="couches">
+                <h2>2. Couches, sorties et pertes</h2>
+                <div class="statement">
+                    <p><span class="statement-title">Définition.</span> Une <strong>couche</strong> de $d'$ neurones applique $d'$ neurones à la même entrée $h \in \mathbb{R}^{d}$ : $h \mapsto \sigma(Wh + b)$, avec $W \in \mathbb{R}^{d' \times d}$ (une ligne par neurone), $b \in \mathbb{R}^{d'}$, et $\sigma$ appliquée coordonnée par coordonnée.</p>
+                    <p>Un <strong>réseau de neurones</strong> (perceptron multicouche) de profondeur $L$ compose $L - 1$ couches cachées et une dernière couche affine :</p>
+                    $$h_0 = x, \qquad h_l = \sigma(W_l h_{l-1} + b_l) \ \ (1 \le l \le L - 1), \qquad f_\theta(x) = W_L h_{L-1} + b_L,$$
+                    <p>de paramètres $\theta = (W_1, b_1, \dots, W_L, b_L)$. Les largeurs $d_0 = d, d_1, \dots, d_L$ et l'activation forment l'<strong>architecture</strong>, fixée avant l'entraînement. Avec $W_l \in \mathbb{R}^{d_l \times d_{l-1}}$, le nombre de paramètres est $P = \sum_{l=1}^L d_l (d_{l-1} + 1)$.</p>
+                </div>
+                <div class="lab-prose">
+                    <p>La dernière couche dépend de la tâche :</p>
+                    <ul>
+                        <li><strong>régression</strong> : $f_\theta(x) \in \mathbb{R}$, perte quadratique $(f_\theta(x) - y)^2$ ; la cible est la moyenne conditionnelle $\mathbb{E}[Y \mid X = x]$ (règle de Bayes, cours 1) ;</li>
+                        <li><strong>classification en $K$ classes</strong> : $f_\theta(x) = z \in \mathbb{R}^K$ est le vecteur des <strong>logits</strong>, transformé en probabilités par le <strong>softmax</strong> $\mathrm{sm}(z)_k = e^{z_k} / \sum_{j} e^{z_j}$, avec la perte d'<strong>entropie croisée</strong> $-\log \mathrm{sm}(z)_c$ pour la vraie classe $c$. Pour $K = 2$, c'est la régression logistique de l'exercice 1.2, appliquée à $h_{L-1}$ au lieu de $x$.</li>
+                    </ul>
+                    <p>Ainsi, <em>un réseau de classification est une régression logistique sur des caractéristiques $h_{L-1}$ apprises</em>, là où les noyaux du cours 3 fixaient ces caractéristiques à l'avance.</p>
+                </div>
+
+                <div class="exo" id="exo-2-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 2.1 · Compter les paramètres</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Le réseau par défaut du terrain de jeu : entrée $x \in \mathbb{R}^2$, deux couches cachées de 8 unités, une sortie. Combien de paramètres ? <span class="exo-check" data-answer="105" data-tol="0.5"></span> (Vérifiez avec le terrain de jeu, en passant en régression.)</li>
+                        <li>Un réseau pour les chiffres manuscrits : images $28 \times 28$ en entrée, une couche cachée de 128 unités, 10 classes. Combien de paramètres ? <span class="exo-check" data-answer="101770" data-tol="0.5"></span></li>
+                        <li>Que devient $P$ quand on double toutes les largeurs cachées d'un réseau profond ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $2 \times 8 + 8 = 24$, puis $8 \times 8 + 8 = 72$, puis $8 + 1 = 9$ : $P = 105$.</p>
+                        <p>2. $784 \times 128 + 128 = 100\,480$ et $128 \times 10 + 10 = 1290$ : $P = 101\,770$, pour seulement $60\,000$ images d'entraînement dans le jeu MNIST.</p>
+                        <p>3. Les termes $d_l d_{l-1}$ entre couches cachées sont multipliés par $4$ : $P$ croît comme le carré de la largeur.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Le softmax et l'entropie croisée</h3>
+                        <p>Le softmax transforme des logits quelconques en un vecteur de probabilités. Essayez les boutons : ajouter la même constante à tous les logits ne change rien, car le softmax ne voit que leurs différences ; les doubler rend la distribution plus piquée vers le plus grand.</p>
+                        <p>Le gradient de la perte par rapport aux logits est remarquablement simple : $\mathrm{sm}(z) - e_c$, la distribution prédite moins la vérité (exercice 2.2, troisième panneau de la figure). Il ne s'annule qu'à la limite $\mathrm{sm}(z) \to e_c$ : sur des données séparables, l'entraînement fait grandir les logits indéfiniment.</p>
+                        <p>Sans couche cachée, $\mathrm{sm}(Wx + b)$ est la régression logistique multinomiale : la frontière entre deux classes $k$ et $k'$ est la droite $\{z_k = z_{k'}\}$. Voyez l'<a href="#A.5" data-experiment="A.5">expérience A.5</a>, à trois classes, avec et sans couche cachée.</p>
+                    </div>
+                    <figure class="lab-fig nn-fig-softmax">
+                        <div class="nn-softmax-controls">
+                            <label class="demo-control">$z_1$ = <output data-logit></output><input type="range" min="-10" max="10" step="0.1" value="1.5"></label>
+                            <label class="demo-control">$z_2$ = <output data-logit></output><input type="range" min="-10" max="10" step="0.1" value="0.5"></label>
+                            <label class="demo-control">$z_3$ = <output data-logit></output><input type="range" min="-10" max="10" step="0.1" value="-1"></label>
+                        </div>
+                        <div class="lab-fig-line"><span class="lab-label">Vraie classe $c$</span>
+                            <span class="lab-pills" data-pills="class">
+                                <button type="button" class="demo-button" data-value="0" aria-pressed="true">1</button>
+                                <button type="button" class="demo-button" data-value="1" aria-pressed="false">2</button>
+                                <button type="button" class="demo-button" data-value="2" aria-pressed="false">3</button>
+                            </span>
+                        </div>
+                        <div class="lab-fig-line">
+                            <button type="button" class="demo-button lab-small" data-action="shift">$z + 1$</button>
+                            <button type="button" class="demo-button lab-small" data-action="double">$2z$</button>
+                            <button type="button" class="demo-button lab-small" data-action="halve">$z/2$</button>
+                            <button type="button" class="demo-button lab-small" data-action="reset">Revenir</button>
+                        </div>
+                        <canvas role="img" aria-label="Logits, softmax et gradient de l'entropie croisée"></canvas>
+                        <div class="lab-fig-readout">$\sum_k \mathrm{sm}(z)_k$ = <span data-out="sum"></span> · perte $-\log \mathrm{sm}(z)_c$ = <span data-out="loss"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-2-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 2.2 · Le gradient du softmax et de l'entropie croisée</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">avec la figure</span></div>
+                    <ol>
+                        <li>Montrer que $\mathrm{sm}(z + t\mathbf 1) = \mathrm{sm}(z)$ pour tout $t \in \mathbb{R}$.</li>
+                        <li>Pour $z = (1, 0, -1)$, calculer $\mathrm{sm}(z)_1$ : <span class="exo-check" data-answer="0.6652" data-tol="0.0005"></span> et la perte pour $c = 1$ : <span class="exo-check" data-answer="0.4076" data-tol="0.0005"></span></li>
+                        <li>Montrer que $\partial\, \mathrm{sm}(z)_j / \partial z_i = \mathrm{sm}(z)_j(\delta_{ij} - \mathrm{sm}(z)_i)$, puis que le gradient de $-\log\mathrm{sm}(z)_c$ par rapport à $z$ est $\mathrm{sm}(z) - e_c$. Avec $z = (1, 0, -1)$ et $c = 1$, que vaut sa première coordonnée ? <span class="exo-check" data-answer="-0.3348" data-tol="0.0005"></span></li>
+                        <li>Sur $n$ exemples, montrer que le risque empirique d'entropie croisée est $-\frac1n$ fois la log-vraisemblance du modèle $\mathbb{P}(y = k \mid x) = \mathrm{sm}(f_\theta(x))_k$.</li>
+                    </ol>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>3. Plus simple : $-\log\mathrm{sm}(z)_c = -z_c + \log\sum_j e^{z_j}$, et la dérivée de $\log\sum_j e^{z_j}$ par rapport à $z_i$ est $\mathrm{sm}(z)_i$.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. Numérateur et dénominateur sont multipliés par $e^t$.</p>
+                        <p>2. $\mathrm{sm}(z)_1 = e/(e + 1 + e^{-1}) \approx 2{,}718/4{,}086 \approx 0{,}6652$, et la perte vaut $-\log 0{,}6652 \approx 0{,}4076$.</p>
+                        <p>3. Avec l'indication, $\partial_i(-\log\mathrm{sm}(z)_c) = -\delta_{ic} + \mathrm{sm}(z)_i$. Ici $\mathrm{sm}(z) - e_1 \approx (-0{,}3348\,;\, 0{,}2447\,;\, 0{,}0900)$ : on pousse le logit de la vraie classe vers le haut, les autres vers le bas, proportionnellement à la probabilité qu'ils prennent à tort.</p>
+                        <p>4. $\prod_i \mathbb{P}(y_i \mid x_i) = \prod_i \mathrm{sm}(f_\theta(x_i))_{y_i}$, et $-\frac1n\log$ de ce produit est la moyenne des pertes. Minimiser le risque empirique, c'est maximiser la vraisemblance.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>L'entropie croisée est une divergence</h3>
+                        <p>Pour deux lois $p$ (l'étiquette) et $q$ (la prédiction), $\ell(p, q) = -\sum_i p_i\log q_i = H(p) + \mathrm{KL}(p\,\|\,q)$, où $H(p) = \ell(p, p)$ est l'entropie de $p$. Seule la divergence dépend de $q$ : la perte est minimale exactement en $q = p$. Mais son minimum vaut $H(p)$, pas $0$ : avec $p = q = (1/2, 1/2)$, la perte vaut $\log 2 \approx 0{,}693$. Avec des étiquettes « dures » ($p = e_c$), $H(p) = 0$. Faites glisser sur la figure pour déplacer $q$.</p>
+                    </div>
+                    <figure class="lab-fig nn-fig-xent">
+                        <label class="demo-control">Étiquette $p$ = <output data-out="p"></output><input type="range" data-input="p" min="0" max="1" step="0.01" value="0.7"></label>
+                        <label class="demo-control">Prédiction $q$ = <output data-out="q"></output><input type="range" data-input="q" min="0.01" max="0.99" step="0.01" value="0.3"></label>
+                        <div class="lab-fig-line">
+                            <button type="button" class="demo-button lab-small" data-action="onehot">Étiquette dure, $p = 1$</button>
+                            <button type="button" class="demo-button lab-small" data-action="half">$p = q = 1/2$</button>
+                        </div>
+                        <canvas role="img" aria-label="L'entropie croisée en fonction de la prédiction"></canvas>
+                        <div class="lab-fig-readout">$\ell(p, q)$ = <span data-out="loss"></span> = $H(p)$ <span class="lab-swatch lab-swatch-pos"></span> <span data-out="entropy"></span> + $\mathrm{KL}(p \,\|\, q)$ <span class="lab-swatch lab-swatch-neg"></span> <span data-out="kl"></span></div>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- ==================== 3 ==================== -->
+            <section class="lab-section" id="non-lineaire">
+                <h2>3. Pourquoi une non-linéarité</h2>
+                <div class="statement">
+                    <p><span class="statement-title">Proposition.</span> Une composée d'applications affines est affine. En particulier, un réseau dont l'activation est l'identité, quelle que soit sa profondeur, calcule une fonction affine de $x$.</p>
+                </div>
+                <div class="lab-prose">
+                    <p>La profondeur seule ne sert donc à rien : ce qui donne leur pouvoir aux réseaux, c'est l'<em>alternance</em> d'applications affines et de non-linéarités. Lancez les expériences <a href="#A.1" data-experiment="A.1">A.1</a> (sans couche cachée) et <a href="#A.2" data-experiment="A.2">A.2</a> (quatre couches, sans non-linéarité).</p>
+                </div>
+
+                <div class="exo" id="exo-3-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.1 · Démontrer la proposition</span></div>
+                    <ol>
+                        <li>Écrire $W_2(W_1 x + b_1) + b_2$ sous la forme $Wx + b$.</li>
+                        <li>Conclure par récurrence sur la profondeur. ★ Montrer de plus que $\operatorname{rang}(W_2W_1) \le \min(\operatorname{rang} W_1, \operatorname{rang} W_2)$ : empiler des couches affines étroites ne peut que <em>perdre</em> de l'expressivité.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $W = W_2W_1$ et $b = W_2b_1 + b_2$. 2. Si $h_{l-1}$ est affine en $x$, $h_l = W_l h_{l-1} + b_l$ l'est aussi. Le rang : l'image de $W_2W_1$ est contenue dans celle de $W_2$, et son noyau contient celui de $W_1$. Une couche de largeur $1$ au milieu réduit tout le réseau à une fonction de $w^\top x$.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Le XOR</h3>
+                        <p>Le « ou exclusif » vaut $1$ en $(0, 1)$ et $(1, 0)$, et $0$ en $(0, 0)$ et $(1, 1)$. Aucune droite ne sépare ces deux paires (exercice 3.2) : aucun modèle linéaire, donc aucun neurone seul, ne peut le calculer. Deux neurones cachés suffisent.</p>
+                        <p>La figure calcule le réseau $f(x) = v_1\,\mathrm{ReLU}(w_{11}x_1 + w_{12}x_2 + b_1) + v_2\,\mathrm{ReLU}(w_{21}x_1 + w_{22}x_2 + b_2) + c$ avec les poids que vous tapez. Cherchez des poids qui résolvent le XOR (la table doit afficher $f = $ XOR), puis comparez avec la solution de l'exercice 3.3. La courbe noire est la ligne de niveau $f = 1/2$.</p>
+                    </div>
+                    <figure class="lab-fig nn-fig-xor">
+                        <div class="nn-xor-weights">
+                            <span class="lab-label">couche cachée</span>
+                            <label>$w_{11}$ <input type="text" inputmode="decimal" data-weight="w11" value="1"></label>
+                            <label>$w_{12}$ <input type="text" inputmode="decimal" data-weight="w12" value="-1"></label>
+                            <label>$b_1$ <input type="text" inputmode="decimal" data-weight="b1" value="0"></label>
+                            <span></span>
+                            <label>$w_{21}$ <input type="text" inputmode="decimal" data-weight="w21" value="-1"></label>
+                            <label>$w_{22}$ <input type="text" inputmode="decimal" data-weight="w22" value="1"></label>
+                            <label>$b_2$ <input type="text" inputmode="decimal" data-weight="b2" value="0"></label>
+                            <span class="lab-label">sortie</span>
+                            <label>$v_1$ <input type="text" inputmode="decimal" data-weight="v1" value="0.5"></label>
+                            <label>$v_2$ <input type="text" inputmode="decimal" data-weight="v2" value="0.5"></label>
+                            <label>$c$ <input type="text" inputmode="decimal" data-weight="c" value="0"></label>
+                        </div>
+                        <div class="lab-fig-line">
+                            <button type="button" class="demo-button lab-small" data-preset="random">Poids au hasard</button>
+                            <button type="button" class="demo-button lab-small" data-preset="zero">Tout à zéro</button>
+                            <button type="button" class="demo-button lab-small" data-preset="course">Solution de l'exercice 3.3</button>
+                            <strong data-out="verdict"></strong>
+                        </div>
+                        <div class="lab-two">
+                            <canvas role="img" aria-label="La sortie du réseau sur le plan, et les quatre points du XOR"></canvas>
+                            <div class="lab-table-wrap"><table class="lab-table" data-out="table"></table></div>
+                        </div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-3-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.2 · Le XOR n'est pas linéairement séparable</span></div>
+                    <p>On suppose qu'il existe $w \in \mathbb{R}^2$ et $b$ tels que $w^\top x + b > 0$ en $(0, 1)$ et $(1, 0)$, et $w^\top x + b \le 0$ en $(0, 0)$ et $(1, 1)$. Aboutir à une contradiction.</p>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>Additionner les deux premières inégalités, puis les deux dernières.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div><p>Les deux premières donnent $w_2 + b > 0$ et $w_1 + b > 0$, d'où $w_1 + w_2 + 2b > 0$. Les deux dernières donnent $b \le 0$ et $w_1 + w_2 + b \le 0$, d'où $w_1 + w_2 + 2b \le 0$. Contradiction : $(0,0)$ et $(1,1)$ ont pour milieu $(1/2, 1/2)$, comme $(0,1)$ et $(1,0)$, et une fonction affine prend la même valeur en ce milieu des deux côtés.</p></div></details>
+                </div>
+
+                <div class="exo" id="exo-3-3">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.3 · Le XOR avec deux unités ReLU</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">avec la figure</span></div>
+                    <p>Soit $f(x) = \mathrm{ReLU}(x_1 + x_2) - 2\,\mathrm{ReLU}(x_1 + x_2 - 1)$.</p>
+                    <ol>
+                        <li>Calculer $f$ aux quatre points du XOR. Quels poids $w_{11}, \dots, c$ faut-il taper dans la figure ?</li>
+                        <li>Que vaut $f(0{,}5\,;\,0{,}5)$ ? <span class="exo-check" data-answer="1" data-tol="1e-6"></span> Décrire $f$ comme fonction de $s = x_1 + x_2$.</li>
+                        <li>Les poids de départ de la figure, $\frac12\mathrm{ReLU}(x_1 - x_2) + \frac12\mathrm{ReLU}(x_2 - x_1) = \frac12|x_1 - x_2|$, ne résolvent pas le XOR. Les corriger en ne changeant que $v_1$ et $v_2$.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $f(0,0) = 0$, $f(0,1) = f(1,0) = 1 - 0 = 1$, $f(1,1) = 2 - 2 = 0$. Poids : $w_{11} = w_{12} = w_{21} = w_{22} = 1$, $b_1 = 0$, $b_2 = -1$, $v_1 = 1$, $v_2 = -2$, $c = 0$.</p>
+                        <p>2. $f$ ne dépend que de $s$ : $0$ pour $s \le 0$, $s$ sur $[0, 1]$, $2 - s$ pour $s \ge 1$ : un « toit » de sommet $(s = 1, f = 1)$, d'où $f(0{,}5\,;\,0{,}5) = 1$. Les deux coudes, en $s = 0$ et $s = 1$, viennent des deux unités.</p>
+                        <p>3. $v_1 = v_2 = 1$ : $|x_1 - x_2|$ vaut bien $1$ en $(0,1)$ et $(1,0)$, $0$ en $(0,0)$ et $(1,1)$. Deux solutions très différentes : il n'y a pas unicité des poids (voir aussi la partie 5).</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Les fonctions d'activation</h3>
+                        <p>L'activation $\sigma$ compte deux fois. Dans la passe avant, elle fixe les fonctions que le réseau sait représenter : un réseau ReLU est continu et affine par morceaux, avec des coudes là où des unités s'allument ou s'éteignent (<a href="#A.3" data-experiment="A.3">expérience A.3</a>, <a href="#A.4" data-experiment="A.4">A.4</a>). Dans la passe arrière, $\sigma'$ multiplie le gradient à chaque couche (partie 4) : un $\sigma'$ petit, répété sur beaucoup de couches, fait disparaître le gradient.</p>
+                    </div>
+                    <figure class="lab-fig nn-fig-activation">
+                        <div class="lab-pills" data-pills="activation">
+                            <button type="button" class="demo-button" data-value="relu" aria-pressed="true">ReLU</button>
+                            <button type="button" class="demo-button" data-value="sigmoid" aria-pressed="false">sigmoïde</button>
+                            <button type="button" class="demo-button" data-value="tanh" aria-pressed="false">tanh</button>
+                            <button type="button" class="demo-button" data-value="identity" aria-pressed="false">identité</button>
+                        </div>
+                        <canvas role="img" aria-label="La fonction d'activation et sa dérivée"></canvas>
+                        <div class="lab-fig-legend"><span><span class="lab-swatch lab-swatch-pos"></span> $\sigma(u)$</span> <span><span class="lab-swatch lab-swatch-neg lab-dashed"></span> $\sigma'(u)$</span></div>
+                        <div class="lab-fig-text">
+                            <p data-activation="relu">$\sigma(u) = \max(0, u)$ et $\sigma'(u) = \mathbf{1}\{u > 0\}$ (on choisit $0$ en $u = 0$). Peu coûteuse, non bornée, de dérivée $1$ sur les unités actives : elle ne réduit pas le gradient. Une unité négative sur toutes les données ne reçoit aucun gradient : elle est morte.</p>
+                            <p data-activation="sigmoid" hidden>$\sigma(u) = 1/(1 + e^{-u})$ et $\sigma' = \sigma(1 - \sigma) \le 1/4$. À travers $L$ couches, la passe arrière multiplie par $L$ tels facteurs : le gradient des premières couches peut devenir minuscule. Elle sature pour $|u|$ grand, où $\sigma' \approx 0$.</p>
+                            <p data-activation="tanh" hidden>$\sigma(u) = \tanh u = 2\,\mathrm{sigmoïde}(2u) - 1$ et $\sigma' = 1 - \tanh^2 \le 1$, avec égalité en $0$. Impaire et centrée ; elle sature comme la sigmoïde.</p>
+                            <p data-activation="identity" hidden>$\sigma(u) = u$ et $\sigma' = 1$ : chaque couche est affine, et le réseau aussi, quelle que soit sa profondeur. Dans le terrain de jeu, la frontière est alors toujours une droite.</p>
+                        </div>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- ==================== 4 ==================== -->
+            <section class="lab-section" id="retropropagation">
+                <h2>4. Calculer le gradient : la rétropropagation</h2>
+                <div class="lab-prose">
+                    <p>Entraîner un réseau, c'est minimiser le risque empirique régularisé $F(\theta) = \frac1n\sum_i \ell(f_\theta(x_i), y_i) + \Omega(\theta)$. Il n'existe pas de formule pour le minimiseur : on utilise des algorithmes qui résolvent ce problème de manière approchée, pas à pas. Le plus simple est la <strong>descente de gradient</strong>, $\theta_t = \theta_{t-1} - \gamma\, \nabla F(\theta_{t-1})$ : un petit pas, de taille $\gamma$ (le <em>pas</em>, ou <em>learning rate</em>), dans la direction où $F$ décroît le plus vite. En pratique, on utilise sa version <strong>stochastique</strong> (SGD) : à chaque itération, le gradient est calculé sur un petit <em>lot</em> d'exemples tirés au hasard plutôt que sur les $n$ exemples, et un passage complet sur les données s'appelle une <em>époque</em> (<a href="#B.3" data-experiment="B.3">expérience B.3</a>). Ces algorithmes ne trouvent pas forcément le minimum global : sur une fonction non convexe comme celle d'un réseau, ils s'approchent au mieux d'un minimum local, et plus généralement d'un point où le gradient s'annule (un <em>point critique</em>). Lequel dépend du point de départ (<a href="#B.4" data-experiment="B.4">expérience B.4</a>). Le <a href="optimisation-sgd.html">cours-TD d'optimisation</a>, qui suit, les étudie en détail.</p>
+                    <p>Tous ont besoin, à chaque pas, du gradient de la perte d'un exemple par rapport à <em>tous</em> les paramètres. Avec $P$ de l'ordre du million, il faut une méthode qui coûte à peu près autant qu'un calcul de $f_\theta(x)$, et non $P$ fois plus. C'est la règle de dérivation des fonctions composées, organisée dans le bon ordre.</p>
+                    <p>Prenons un nœud $N = N(\text{entrée}, \text{paramètres})$ du réseau, et écrivons la perte comme une fonction $\ell(N)$ de sa sortie, tout ce qui suit le nœud compris. Alors</p>
+                    $$\frac{\partial \ell}{\partial\, \text{paramètres}} = \frac{\partial \ell}{\partial N}\, \frac{\partial N}{\partial\, \text{paramètres}} \quad (\ast) \qquad \text{et} \qquad \frac{\partial \ell}{\partial\, \text{entrée}} = \frac{\partial \ell}{\partial N}\, \frac{\partial N}{\partial\, \text{entrée}} \quad (\ast\ast).$$
+                    <p>Les deux ont besoin de $\partial\ell/\partial N$, la dérivée de la perte par rapport à la sortie du nœud. C'est elle qui remonte : $(\ast\ast)$ la transforme en la même dérivée pour le nœud précédent, et $(\ast)$ lit au passage le gradient des paramètres du nœud. Pour une couche affine $a = Wh + b$, cela donne</p>
+                    $$\frac{\partial\ell}{\partial W} = \frac{\partial \ell}{\partial a}\, h^\top, \qquad \frac{\partial\ell}{\partial b} = \frac{\partial\ell}{\partial a}, \qquad \frac{\partial\ell}{\partial h} = W^\top\frac{\partial \ell}{\partial a},$$
+                    <p>et pour l'activation $h = \sigma(a)$, coordonnée par coordonnée, $\partial\ell/\partial a = \sigma'(a) \odot \partial\ell/\partial h$. Une <strong>passe avant</strong> calcule et garde toutes les activations ; une <strong>passe arrière</strong> donne toutes les dérivées partielles.</p>
+                    <p>La figure le fait pas à pas sur un réseau d'entrée $x \in \mathbb{R}^2$, à deux unités cachées et une sortie, sur un seul exemple avec la perte quadratique. Avancez avec <em>Suivant</em>, et suivez quelle identité sert à chaque étape ; à la fin, vérifiez les gradients par différences finies.</p>
+                </div>
+                <figure class="lab-fig nn-fig-backprop">
+                    <div class="nn-bp-top">
+                        <span class="lab-pills" data-pills="activation">
+                            <button type="button" class="demo-button" data-value="relu" aria-pressed="true">σ = ReLU</button>
+                            <button type="button" class="demo-button" data-value="tanh" aria-pressed="false">tanh</button>
+                            <button type="button" class="demo-button" data-value="sigmoid" aria-pressed="false">sigmoïde</button>
+                        </span>
+                        <span class="nn-bp-stage" data-out="step"></span>
+                    </div>
+                    <div class="nn-bp-graph">
+                        <div class="nn-bp-node" data-node="0">
+                            <span class="nn-bp-name">entrée $x$</span>
+                            <span class="nn-bp-value" data-v="x"></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="1 9">
+                            <span class="nn-bp-name">$W_1 \cdot + \, b_1$</span>
+                            <span class="nn-bp-param">$W_1$ <span data-v="W1"></span></span>
+                            <span class="nn-bp-param">$b_1$ <span data-v="b1"></span></span>
+                            <span class="nn-bp-grad" data-from="9">$\partial \ell / \partial W_1$ <span data-v="dW1"></span></span>
+                            <span class="nn-bp-grad" data-from="9">$\partial \ell / \partial b_1$ <span data-v="db1"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="1 8">
+                            <span class="nn-bp-name">$a_1$</span>
+                            <span class="nn-bp-value" data-v="a1"></span>
+                            <span class="nn-bp-grad" data-from="8">$\partial \ell / \partial a_1$ <span data-v="da1"></span></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="2 8">
+                            <span class="nn-bp-name">$\sigma$, coordonnée par coordonnée</span>
+                            <span class="nn-bp-grad" data-from="8">$\sigma'(a_1)$ <span data-v="s1"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="2 7">
+                            <span class="nn-bp-name">$h_1$</span>
+                            <span class="nn-bp-value" data-v="h1"></span>
+                            <span class="nn-bp-grad" data-from="7">$\partial \ell / \partial h_1$ <span data-v="dh1"></span></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="3 6 7">
+                            <span class="nn-bp-name">$W_2 \cdot + \, b_2$</span>
+                            <span class="nn-bp-param">$W_2$ <span data-v="W2"></span></span>
+                            <span class="nn-bp-param">$b_2$ <span data-v="b2"></span></span>
+                            <span class="nn-bp-grad" data-from="6">$\partial \ell / \partial W_2$ <span data-v="dW2"></span></span>
+                            <span class="nn-bp-grad" data-from="6">$\partial \ell / \partial b_2$ <span data-v="db2"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="3 5">
+                            <span class="nn-bp-name">$a_2 = f_\theta(x)$</span>
+                            <span class="nn-bp-value" data-v="a2"></span>
+                            <span class="nn-bp-grad" data-from="5">$\partial \ell / \partial a_2$ <span data-v="da2"></span></span>
+                        </div>
+                        <div class="nn-bp-op" data-node="4 5">
+                            <span class="nn-bp-name">$(\cdot - y)^2$</span>
+                            <span class="nn-bp-param">$y$ <span data-v="y"></span></span>
+                        </div>
+                        <div class="nn-bp-node" data-node="4">
+                            <span class="nn-bp-name">perte $\ell$</span>
+                            <span class="nn-bp-value" data-v="loss"></span>
+                        </div>
+                    </div>
+
+                    <div class="nn-bp-explain">
+                        <p data-step="0"><strong>Départ.</strong> L'entrée est $x = (1\,;\,0{,}5)$, la cible $y = 1$, et les paramètres $\theta = (W_1, b_1, W_2, b_2)$ sont $P = 9$ nombres. Appuyez sur <em>Suivant</em> pour la passe avant.</p>
+                        <p data-step="1" hidden><strong>Aller 1.</strong> $a_1 = W_1 x + b_1$ = <span data-v="a1"></span>.</p>
+                        <p data-step="2" hidden><strong>Aller 2.</strong> $h_1 = \sigma(a_1)$, coordonnée par coordonnée : <span data-v="h1"></span>.</p>
+                        <p data-step="3" hidden><strong>Aller 3.</strong> $a_2 = W_2 h_1 + b_2 = f_\theta(x)$ = <span data-v="a2"></span>.</p>
+                        <p data-step="4" hidden><strong>Aller 4.</strong> $\ell = (a_2 - y)^2$ = <span data-v="loss"></span>. La passe avant est finie. Toutes les activations sont gardées pour la passe arrière : c'est ce qui limite la mémoire en pratique.</p>
+                        <p data-step="5" hidden><strong>Retour 1.</strong> On part de la perte : $\partial \ell / \partial a_2 = 2 (a_2 - y)$ = <span data-v="da2"></span>. C'est cette dérivée de la perte par rapport à la sortie d'un nœud qui remonte.</p>
+                        <p data-step="6" hidden><strong>Retour 2, identité (∗).</strong> Au nœud $W_2 \cdot + \, b_2$, on lit le gradient de ses paramètres : $\partial \ell / \partial W_2 = (\partial \ell / \partial a_2)\, h_1^\top$ = <span data-v="dW2"></span> et $\partial \ell / \partial b_2 = \partial \ell / \partial a_2$ = <span data-v="db2"></span>.</p>
+                        <p data-step="7" hidden><strong>Retour 3, identité (∗∗).</strong> On passe la dérivée à l'entrée du nœud : $\partial \ell / \partial h_1 = W_2^\top (\partial \ell / \partial a_2)$ = <span data-v="dh1"></span>. La passe arrière à travers une couche affine est une multiplication par la transposée de sa matrice.</p>
+                        <p data-step="8" hidden><strong>Retour 4, identité (∗∗) à travers $\sigma$.</strong> Le nœud $\sigma$ n'a pas de paramètre, et sa jacobienne est diagonale : $\partial \ell / \partial a_1 = \sigma'(a_1) \odot \partial \ell / \partial h_1$, avec $\sigma'(a_1)$ = <span data-v="s1"></span>, ce qui donne <span data-v="da1"></span>. <span data-sigma="relu">Pour ReLU, $\sigma'(u) = \mathbf{1}\{u > 0\}$ : une unité éteinte ne laisse passer aucun gradient.</span><span data-sigma="tanh" hidden>Pour tanh, $\sigma' = 1 - \tanh^2$.</span><span data-sigma="sigmoid" hidden>Pour la sigmoïde, $\sigma' = \sigma (1 - \sigma) \le 1/4$ : la dérivée est divisée par au moins 4 au passage.</span></p>
+                        <p data-step="9" hidden><strong>Retour 5, identité (∗).</strong> $\partial \ell / \partial W_1 = (\partial \ell / \partial a_1)\, x^\top$ = <span data-v="dW1"></span> et $\partial \ell / \partial b_1 = \partial \ell / \partial a_1$ = <span data-v="db1"></span>. Fini : une passe avant et une passe arrière ont donné les 9 dérivées partielles. Faites un pas de gradient, ou vérifiez ces nombres par différences finies.</p>
+                    </div>
+
+                    <div class="nn-bp-controls">
+                        <button type="button" class="demo-button" data-action="back">◀ Précédent</button>
+                        <button type="button" class="demo-button lab-play" data-action="next">Suivant ▶</button>
+                        <button type="button" class="demo-button" data-action="all">Toutes les étapes</button>
+                        <button type="button" class="demo-button" data-action="restart">↻ Recommencer</button>
+                        <span class="nn-bp-sep"></span>
+                        <button type="button" class="demo-button" data-action="descend">Pas de gradient, $\gamma = 0{,}03$</button>
+                        <button type="button" class="demo-button" data-action="check">Vérifier par différences finies</button>
+                        <span class="nn-bp-losses">perte : <span data-out="losses"></span></span>
+                    </div>
+
+                    <div class="nn-bp-check" hidden>
+                        <table>
+                            <thead><tr><th>paramètre</th><th>rétropropagation</th><th>différences finies, $\epsilon = 10^{-5}$</th><th>écart</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <p>Les différences finies $\big(\ell(\theta + \epsilon e_k) - \ell(\theta - \epsilon e_k)\big) / 2\epsilon$ ont demandé $2P = 18$ passes avant, deux par paramètre ; la rétropropagation, une passe avant et une passe arrière. Avec $P$ de l'ordre du million, toute la différence est là.</p>
+                    </div>
+                </figure>
+
+                <div class="exo" id="exo-4-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 4.1 · La rétropropagation, à la main</span><span class="exo-tag">✎ à la main</span></div>
+                    <p>Un réseau scalaire à une unité cachée : $f(x) = v\,\mathrm{ReLU}(wx + b) + c$, avec $w = 0{,}5$, $b = -0{,}5$, $v = 2$, $c = 0$, l'exemple $(x, y) = (2, 0)$ et la perte $\ell = (f(x) - y)^2$.</p>
+                    <ol>
+                        <li>Passe avant : calculer $a = wx + b$, $h = \mathrm{ReLU}(a)$, $f(x)$ : <span class="exo-check" data-answer="1" data-tol="1e-6"></span> et $\ell$.</li>
+                        <li>Passe arrière : calculer $\partial\ell/\partial f$, puis $\partial \ell/\partial v$ et $\partial\ell/\partial c$, puis $\partial\ell/\partial h$, $\partial\ell/\partial a$, et enfin $\partial \ell/\partial w$ : <span class="exo-check" data-answer="8" data-tol="1e-6"></span> et $\partial\ell/\partial b$ : <span class="exo-check" data-answer="4" data-tol="1e-6"></span></li>
+                        <li>Vérifier $\partial\ell/\partial w$ en développant $\ell$ quand $w$ devient $0{,}5 + \epsilon$.</li>
+                        <li>Que deviennent $\partial\ell/\partial w$ et $\partial\ell/\partial b$ si $b = -1{,}5$ ? Pourquoi ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $a = 0{,}5$, $h = 0{,}5$, $f = 1$, $\ell = 1$.</p>
+                        <p>2. $\partial\ell/\partial f = 2(f - y) = 2$ ; identité (∗) à la sortie : $\partial\ell/\partial v = 2h = 1$, $\partial\ell/\partial c = 2$ ; identité (∗∗) : $\partial\ell/\partial h = 2v = 4$ ; à travers ReLU, $a > 0$ donc $\partial\ell/\partial a = 4$ ; identité (∗) : $\partial\ell/\partial w = 4x = 8$ et $\partial\ell/\partial b = 4$.</p>
+                        <p>3. $a = 0{,}5 + 2\epsilon$, $f = 1 + 4\epsilon$, $\ell = (1 + 4\epsilon)^2 = 1 + 8\epsilon + O(\epsilon^2)$.</p>
+                        <p>4. $a = -0{,}5 &lt; 0$ : l'unité est éteinte, $h = 0$, et $\mathrm{ReLU}'(a) = 0$ bloque le gradient : $\partial\ell/\partial w = \partial\ell/\partial b = 0$. Si c'est le cas sur <em>tous</em> les exemples, l'unité est morte et ne bougera plus.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Gradients évanescents</h3>
+                        <p>La passe arrière multiplie la dérivée, couche après couche, par $W_l^\top$ et par $\sigma'(a_l)$. Avec la sigmoïde, $\sigma' \le 1/4$ : à travers $k$ couches cachées, ces facteurs seuls font au plus $4^{-k}$. La figure calcule, à l'initialisation, la norme du gradient de $F$ par rapport aux poids de chaque couche, sur les données des cercles du terrain de jeu, pour un réseau de $k$ couches cachées de 8 unités. Comparez sigmoïde, tanh et ReLU quand la profondeur augmente : avec la sigmoïde, les premières couches ne reçoivent presque rien et n'apprennent pas (<a href="#B.6" data-experiment="B.6">expérience B.6</a>).</p>
+                    </div>
+                    <figure class="lab-fig nn-fig-vanishing">
+                        <div class="lab-pills" data-pills="activation">
+                            <button type="button" class="demo-button" data-value="sigmoid" aria-pressed="true">sigmoïde</button>
+                            <button type="button" class="demo-button" data-value="tanh" aria-pressed="false">tanh</button>
+                            <button type="button" class="demo-button" data-value="relu" aria-pressed="false">ReLU</button>
+                        </div>
+                        <label class="demo-control">Couches cachées : <output data-out="depth"></output><input type="range" data-input="depth" min="1" max="10" step="1" value="5"></label>
+                        <button type="button" class="demo-button lab-small" data-action="reseed">Nouvelle initialisation</button>
+                        <canvas role="img" aria-label="Norme du gradient par couche, à l'initialisation"></canvas>
+                        <div class="lab-fig-readout">première couche : <span data-out="first"></span> · dernière : <span data-out="last"></span> · rapport : <span data-out="ratio"></span> · borne $4^{-k}$ des facteurs $\sigma'$ de la sigmoïde : <span data-out="bound"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-4-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 4.2 · Ce que coûte un gradient</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Par différences finies centrées, combien de passes avant faut-il pour le gradient d'un réseau à $P = 10^6$ paramètres ? <span class="exo-check" data-answer="2e6" data-rel="0.001"></span> Et par rétropropagation ?</li>
+                        <li>Avec la sigmoïde, majorer le produit des facteurs $\sigma'$ rencontrés à travers $10$ couches : <span class="exo-check" data-answer="9.5367e-7" data-rel="0.001"></span></li>
+                        <li>Pourquoi la rétropropagation demande-t-elle plus de mémoire qu'une simple prédiction ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $2P = 2 \times 10^6$ passes, contre une passe avant et une passe arrière (qui coûte un petit multiple d'une passe avant) : un facteur de l'ordre du million.</p>
+                        <p>2. $(1/4)^{10} = 4^{-10} \approx 9{,}5 \times 10^{-7}$. Avec tanh, $\sigma'(0) = 1$, et avec ReLU $\sigma' = 1$ sur les unités actives : c'est l'une des raisons du succès de ReLU.</p>
+                        <p>3. La passe arrière a besoin des activations $h_l$ et $a_l$ de toutes les couches (identité (∗) et $\sigma'(a_l)$) : il faut toutes les garder, pour chaque exemple du lot. C'est la mémoire, plus que le temps de calcul, qui limite la taille des lots et des modèles.</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (un réseau en 30 lignes, sans bibliothèque)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+rng = np.random.default_rng(0)
+# Deux lunes, 200 points, étiquettes 0 et 1
+n = 200
+t = np.pi * rng.uniform(size=n)
+y = np.arange(n) % 2
+X = np.where(y[:, None] == 0, np.c_[np.cos(t), np.sin(t)], np.c_[1 - np.cos(t), 0.5 - np.sin(t)])
+X = X + 0.1 * rng.normal(size=(n, 2))
+
+# Réseau 2 → 16 → 2 : W1, b1, W2, b2 (initialisation aléatoire, pas nulle !)
+W1, b1 = rng.normal(size=(16, 2)) * np.sqrt(2 / 2), np.zeros(16)
+W2, b2 = rng.normal(size=(2, 16)) * np.sqrt(1 / 16), np.zeros(2)
+
+def forward(X):
+    A1 = X @ W1.T + b1                          # pré-activations, (lot, 16)
+    H1 = np.maximum(0, A1)                      # ReLU
+    Z = H1 @ W2.T + b2                          # logits, (lot, 2)
+    P = np.exp(Z - Z.max(axis=1, keepdims=True))
+    return A1, H1, P / P.sum(axis=1, keepdims=True)
+
+gamma, batch = 0.1, 16
+for epoch in range(200):
+    order = rng.permutation(n)
+    for k in range(0, n, batch):
+        i = order[k:k + batch]
+        A1, H1, P = forward(X[i])
+        dZ = (P - np.eye(2)[y[i]]) / len(i)     # gradient de l'entropie croisée : sm(z) − e_y
+        dW2, db2 = dZ.T @ H1, dZ.sum(axis=0)    # identité (∗) : gradient des paramètres
+        dA1 = (dZ @ W2) * (A1 &gt; 0)              # identité (∗∗) : on remonte, puis ReLU'
+        dW1, db1 = dA1.T @ X[i], dA1.sum(axis=0)
+        W1, b1, W2, b2 = W1 - gamma * dW1, b1 - gamma * db1, W2 - gamma * dW2, b2 - gamma * db2
+    if epoch % 50 == 49:
+        P = forward(X)[2]
+        print(f"époque {epoch + 1}: risque {-np.log(P[np.arange(n), y]).mean():.4f}, "
+              f"erreur d'entraînement {(P.argmax(axis=1) != y).mean():.3f}")</code></pre>
+                </div>
+                <div class="lab-prose">
+                    <p>Il affiche une erreur d'entraînement de $0{,}005$ après 200 époques. Les bibliothèques (PyTorch, JAX) font exactement cela, mais calculent la passe arrière toute seule à partir de la passe avant : c'est la <em>différentiation automatique</em>.</p>
+                </div>
+            </section>
+
+            <!-- ==================== 5 ==================== -->
+            <section class="lab-section" id="entrainer">
+                <p class="lab-session">Séance 2 · parties 5 à 8</p>
+                <h2>5. Entraîner un réseau</h2>
+                <div class="lab-prose">
+                    <p>On entraîne par SGD (partie 4), ou par ses variantes momentum et Adam, présentées dans le cours suivant. $F$ n'est pas convexe dès qu'il y a une couche cachée : on ne peut garantir, au mieux, qu'un gradient qui devient petit, pas un minimum global. Le terrain de jeu montre ce que cela change.</p>
+                    <ul>
+                        <li><strong>Le pas.</strong> Trop petit, rien ne bouge ; trop grand, le réseau peut tomber en un point où toutes ses unités sont mortes, un point critique dont il ne sort plus (<a href="#B.2" data-experiment="B.2">expérience B.2</a>).</li>
+                        <li><strong>La taille de lot.</strong> Les petits lots coûtent moins par itération et avancent bien plus par passage sur les données (<a href="#B.3" data-experiment="B.3">expérience B.3</a>).</li>
+                        <li><strong>L'initialisation.</strong> Des départs différents mènent à des minimiseurs différents, qui ne généralisent pas aussi bien (<a href="#B.4" data-experiment="B.4">expérience B.4</a>), et des poids tous égaux ne peuvent jamais se différencier (<a href="#B.1" data-experiment="B.1">expérience B.1</a>, exercice 5.1).</li>
+                        <li><strong>Les symétries.</strong> Permuter les unités d'une couche ne change pas la fonction (<a href="#B.5" data-experiment="B.5">expérience B.5</a>) : les minimiseurs ne sont jamais uniques.</li>
+                    </ul>
+                </div>
+
+                <div class="exo" id="exo-5-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 5.1 · Pourquoi on n'initialise pas à zéro</span><span class="exo-tag">démonstration guidée</span><span class="exo-tag">expérience B.1</span></div>
+                    <p>Une couche cachée de deux unités, $h_1 = \sigma(w_1^\top x + b_1)$ et $h_2 = \sigma(w_2^\top x + b_2)$, suivie de $f = v_1 h_1 + v_2 h_2 + c$. On suppose qu'à l'initialisation $w_1 = w_2$, $b_1 = b_2$ et $v_1 = v_2$.</p>
+                    <ol>
+                        <li>Montrer que $h_1 = h_2$ pour toute entrée, puis que $\partial\ell/\partial v_1 = \partial\ell/\partial v_2$, $\partial\ell/\partial w_1 = \partial\ell/\partial w_2$ et $\partial\ell/\partial b_1 = \partial\ell/\partial b_2$.</li>
+                        <li>En déduire que les deux unités restent identiques après n'importe quel nombre de pas de SGD. Que vaut alors, en pratique, la largeur du réseau ?</li>
+                        <li>Avec $w = 0$, $b = 0$, $v = 0$ et ReLU ou tanh, montrer que les gradients de $w$ et $v$ sont nuls : seul $c$ bouge.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. Mêmes paramètres, même fonction : $h_1 = h_2$. Par (∗), $\partial\ell/\partial v_k = (\partial\ell/\partial f)\,h_k$, égaux. Par (∗∗), $\partial\ell/\partial h_k = (\partial\ell/\partial f)\,v_k$, puis $\partial\ell/\partial a_k = \sigma'(a_k)\,\partial\ell/\partial h_k$, égaux puisque $a_1 = a_2$ et $v_1 = v_2$ ; d'où des gradients égaux pour $w_k$ et $b_k$. Moyenner sur un lot conserve l'égalité.</p>
+                        <p>2. Par récurrence : si les paramètres des deux unités sont égaux avant un pas, leurs gradients le sont, donc ils le restent après. Le réseau se comporte comme s'il n'avait qu'une unité. C'est ce que montre l'expérience B.1 : 8 unités identiques, et une frontière droite. L'initialisation aléatoire sert à <em>briser la symétrie</em>.</p>
+                        <p>3. $h = \sigma(0) = 0$ pour ReLU et tanh, donc $\partial\ell/\partial v = (\partial\ell/\partial f)\,h = 0$ ; et $\partial\ell/\partial h = (\partial\ell/\partial f)\,v = 0$, donc $\partial\ell/\partial w = 0$. Seul $c$ reçoit un gradient : le réseau reste constant.</p>
+                    </div></details>
+                </div>
+
+                <div class="exo" id="exo-5-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 5.2 · Les symétries par permutation</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">expérience B.5</span></div>
+                    <ol>
+                        <li>On échange les unités $j$ et $k$ d'une couche cachée $l$ : lignes $j$ et $k$ de $W_l$ et de $b_l$, et colonnes $j$ et $k$ de $W_{l+1}$. Montrer que $f_\theta$ ne change pas.</li>
+                        <li>Pour deux couches cachées de 8 unités, combien de permutations des unités cachées laissent $f_\theta$ inchangée ? <span class="exo-check" data-answer="1625702400" data-rel="1e-6"></span></li>
+                        <li>Pourquoi cela empêche-t-il $F$ d'être strictement convexe ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $h_l$ voit ses coordonnées $j$ et $k$ échangées, et $W_{l+1}h_l$ ne change pas, puisque ses colonnes sont échangées de la même façon.</p>
+                        <p>2. Toutes les permutations de chaque couche : $8! \times 8! = 40\,320^2 = 1\,625\,702\,400$. Et ce n'est qu'une partie des symétries : avec ReLU, multiplier les poids entrants et le biais d'une unité par $\alpha > 0$ et ses poids sortants par $1/\alpha$ ne change pas non plus la fonction, ce qui donne une infinité de paramètres pour une même $f_\theta$.</p>
+                        <p>3. Une fonction strictement convexe a au plus un minimiseur. Ici, si $\theta^\star$ est un minimiseur, ses permutations aussi ; et le milieu de deux d'entre elles n'est en général pas un minimiseur, ce qu'interdirait la convexité.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-recap">
+                    <span class="lab-recap-title">Une recette qui marche souvent</span>
+                    <p>Standardiser les variables d'entrée ; activation ReLU ; initialisation aléatoire à l'échelle $\sqrt{2/d_{\text{entrée}}}$ (He) ; Adam avec $\gamma \approx 10^{-3}$ ou SGD avec momentum, des lots de 32 à 256 exemples ; un pas qui décroît au cours de l'entraînement ; surveiller le risque sur un jeu de validation et garder le meilleur modèle (arrêt précoce, partie 7). Et toujours comparer à une référence simple, régression régularisée ou GBDT (cours 2) : sur des données tabulaires de taille modérée, ce sont souvent elles qui gagnent.</p>
+                </div>
+            </section>
+
+            <!-- ==================== 6 ==================== -->
+            <section class="lab-section" id="approximation">
+                <h2>6. Ce qu'un réseau sait représenter</h2>
+                <div class="lab-prose">
+                    <p>Le cours 4 a énoncé le théorème d'approximation universelle de Cybenko : les réseaux à une couche cachée sont denses dans les fonctions continues. Voici sa version la plus simple, avec une démonstration complète et visible.</p>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Théorème.</span> Soit $g$ continue sur $[a, b]$ et $\epsilon > 0$. Il existe un réseau à une couche cachée d'un nombre fini d'unités ReLU, $f(x) = \sum_{j \le m}\eta_j\,(w_j x + b_j)_+$, tel que $\sup_{x \in [a, b]}|g(x) - f(x)| \le \epsilon$.</p>
+                </div>
+                <div class="lab-prose">
+                    <p>La démonstration a deux étapes, toutes deux visibles sur la figure. D'abord, $g$ est uniformément continue sur le compact $[a, b]$ (théorème de Heine) : il existe $\eta > 0$ tel que $|x - x'| \le \eta$ implique $|g(x) - g(x')| \le \epsilon$. On prend des nœuds $a = x_1 &lt; \dots &lt; x_N = b$ espacés d'au plus $\eta$, et $g_\eta$ l'interpolation affine par morceaux de $g$ en ces nœuds : sur $[x_k, x_{k+1}]$, $g_\eta(x)$ est une moyenne de $g(x_k)$ et $g(x_{k+1})$, toutes deux à moins de $\epsilon$ de $g(x)$, donc $\sup|g - g_\eta| \le \epsilon$. Ensuite, $g_\eta$ est <em>exactement</em> un réseau à une couche cachée, avec une unité par nœud :</p>
+                    $$g_\eta(x) = \sum_{i \ge 0}(S_i - S_{i-1})(x - x_i)_+ \quad \text{sur } [a, b],$$
+                    <p>où $S_i$ est la pente de $g_\eta$ sur $[x_i, x_{i+1}]$, et le nœud supplémentaire $x_0 = a - 1$, avec $S_{-1} = 0$ et $S_0 = g(a)$, produit la valeur en $a$. <strong>Les unités sont les coudes, et leurs coefficients sont les sauts de pente.</strong> Déplacez « Unités ajoutées » pour construire la somme unité par unité ; à droite, l'erreur uniforme en fonction du nombre d'unités $N$. Pour une cible $G$-lipschitzienne, la démonstration garantit $G(b - a)/(N - 1)$ (tirets). Choisissez « Dessiner » pour tracer votre propre $g$. Dans le terrain de jeu, un réseau entraîné par SGD place lui-même ses coudes (<a href="#C.1" data-experiment="C.1">expérience C.1</a>).</p>
+                </div>
+                <figure class="lab-fig nn-fig-ua">
+                    <div class="nn-ua-controls">
+                        <span class="lab-pills" data-pills="target">
+                            <button type="button" class="demo-button" data-value="sine" aria-pressed="true">$0{,}8 \sin 5x$</button>
+                            <button type="button" class="demo-button" data-value="bump" aria-pressed="false">Bosse</button>
+                            <button type="button" class="demo-button" data-value="sqrt" aria-pressed="false">$\sqrt{|x|}$</button>
+                            <button type="button" class="demo-button" data-value="draw" aria-pressed="false">Dessiner</button>
+                        </span>
+                        <label class="demo-control">Nœuds, et unités, $N$ = <output data-out="knots"></output><input type="range" data-input="knots" min="2" max="64" step="1" value="8"></label>
+                        <label class="demo-control">Unités ajoutées : <output data-out="units"></output><input type="range" data-input="units" min="1" max="8" step="1" value="8"></label>
+                        <label class="lab-check"><input type="checkbox" data-input="terms" checked> Montrer chaque terme $(S_i - S_{i-1})(x - x_i)_+$</label>
+                    </div>
+                    <div class="nn-ua-plots">
+                        <div class="nn-ua-main"><canvas role="img" aria-label="La cible, son interpolation et les unités ReLU qui la calculent"></canvas></div>
+                        <div class="nn-ua-errors"><canvas role="img" aria-label="Erreur uniforme en fonction du nombre d'unités"></canvas></div>
+                    </div>
+                    <div class="lab-fig-legend">
+                        <span><span class="lab-swatch lab-swatch-faint"></span> cible $g$</span>
+                        <span><span class="lab-swatch lab-swatch-ink"></span> réseau (la somme partielle)</span>
+                        <span><span class="lab-swatch lab-swatch-pos"></span><span class="lab-swatch lab-swatch-neg"></span> un terme par unité</span>
+                        <span>à droite : <span class="lab-swatch lab-swatch-ink"></span> $\sup |g - g_\eta|$, <span class="lab-swatch lab-swatch-neg lab-dashed"></span> garantie $G\eta$</span>
+                    </div>
+                    <div class="lab-fig-readout">erreur uniforme sur $[a, b]$ = <span data-out="error"></span> · espacement $\eta$ = <span data-out="spacing"></span> · garantie $G \eta$ = <span data-out="bound"></span></div>
+                </figure>
+
+                <div class="exo" id="exo-6-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 6.1 · Fabriquer des fonctions avec des ReLU</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Écrire $|x|$ avec deux unités ReLU.</li>
+                        <li>Soit $\Lambda(x) = \mathrm{ReLU}(x + 1) - 2\,\mathrm{ReLU}(x) + \mathrm{ReLU}(x - 1)$. Calculer $\Lambda(-0{,}5)$ : <span class="exo-check" data-answer="0.5" data-tol="1e-6"></span> et $\Lambda(1{,}5)$ : <span class="exo-check" data-answer="0" data-tol="1e-6"></span> Tracer $\Lambda$ : c'est un « chapeau ».</li>
+                        <li>Avec des chapeaux translatés et dilatés, retrouver l'interpolation affine par morceaux de la démonstration.</li>
+                        <li>Pour approcher $0{,}8\sin 5x$ (qui est $4$-lipschitzienne) à $\epsilon = 0{,}01$ près sur $[-1, 1]$, combien d'unités la démonstration demande-t-elle, à une près ? <span class="exo-check" data-answer="800" data-tol="1.5"></span> Comparer avec la figure, qui fait bien mieux.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $|x| = \mathrm{ReLU}(x) + \mathrm{ReLU}(-x)$.</p>
+                        <p>2. $\Lambda$ vaut $0$ hors de $[-1, 1]$, monte linéairement jusqu'à $1$ en $0$, puis redescend : $\Lambda(-0{,}5) = 0{,}5$, $\Lambda(1{,}5) = 2{,}5 - 3 + 0{,}5 = 0$.</p>
+                        <p>3. Avec des nœuds équidistants d'espacement $h$, $g_\eta(x) = \sum_k g(x_k)\,\Lambda\big((x - x_k)/h\big)$ : chaque chapeau vaut $1$ en son nœud et $0$ aux autres. Trois unités par chapeau, mais les unités de nœuds voisins se regroupent.</p>
+                        <p>4. Il faut $\eta = \epsilon/G = 0{,}0025$, soit $(b - a)/\eta = 800$ intervalles, donc environ $800$ unités. Sur la figure, l'erreur réelle est bien plus petite que la garantie : la démonstration n'utilise que la continuité, pas la régularité de $g$. Mais en dimension $d$, la même construction demande de l'ordre de $\epsilon^{-d}$ unités (cours 4) : c'est le fléau de la dimension.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-prose">
+                    <p>C'est un théorème d'<em>existence</em> : il dit qu'une bonne fonction est dans la classe, ce qui rend petite l'erreur d'approximation, mais ni que SGD la trouve, ni que $n$ exemples suffisent à l'identifier. Dans le terrain de jeu : <a href="#C.1" data-experiment="C.1">C.1</a> (une unité, un coude), <a href="#C.2" data-experiment="C.2">C.2</a> (SGD rate un réseau qui existe) et <a href="#C.3" data-experiment="C.3">C.3</a> (deux spirales, où la profondeur aide).</p>
+                </div>
+            </section>
+
+            <!-- ==================== 7 ==================== -->
+            <section class="lab-section" id="generalisation">
+                <h2>7. Généralisation et double descente</h2>
+                <div class="lab-prose">
+                    <p>Un réseau d'architecture fixée est une classe paramétrique à $P$ paramètres, et les outils du cours 4 s'appliquent : à profondeur fixée, la VC-dimension d'un réseau ReLU est de l'ordre de $P\log P$, et l'écart entre risque et risque empirique est majoré, uniformément sur la classe, par une quantité de l'ordre de $\sqrt{P/n}$, à des facteurs logarithmiques près. Ces bornes sont vraies, mais <em>vides</em> pour les réseaux qu'on utilise : la borne dépasse $1$ dès que $P$ dépasse $n$, alors que ces réseaux généralisent souvent très bien.</p>
+                </div>
+
+                <div class="exo" id="exo-7-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 7.1 · Une borne vide</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">expérience D.1</span></div>
+                    <ol>
+                        <li>Le réseau de l'expérience D.1 a une entrée, deux couches cachées de 32 unités et une sortie. Vérifier que $P = 1153$, puis calculer $\sqrt{P/n}$ pour $n = 20$ : <span class="exo-check" data-answer="7.593" data-tol="0.005"></span></li>
+                        <li>Les risques observés dans l'expérience sont de l'ordre de $0{,}05$ à $0{,}2$. Pour quel $n$ aurait-on $\sqrt{P/n} \le 0{,}05$ ? Que conclure ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $1 \times 32 + 32 = 64$, $32 \times 32 + 32 = 1056$, $32 + 1 = 33$ : $P = 1153$, et $\sqrt{1153/20} \approx 7{,}59$.</p>
+                        <p>2. $n \ge P/0{,}05^2 \approx 461\,000$, alors que le réseau généralise déjà bien pour $n = 100$. Compter les paramètres dit qu'une grande classe <em>peut</em> surapprendre, pas ce que fait le réseau effectivement entraîné.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-prose">
+                    <h3>Surapprentissage, arrêt précoce, pénalité</h3>
+                    <p>Le surapprentissage existe bien : avec 20 points bruités et $1153$ paramètres, le risque d'entraînement passe sous le niveau du bruit pendant que le risque de test remonte (<a href="#D.1" data-experiment="D.1">expérience D.1</a>). Trois remèdes classiques :</p>
+                    <ul>
+                        <li><strong>plus de données</strong>, quand on peut (variante « n = 100 » de l'expérience D.1) ;</li>
+                        <li><strong>l'arrêt précoce</strong> : garder les poids au minimum du risque sur un jeu de validation (cours 2), ici vers l'itération 600 de l'expérience D.1 ;</li>
+                        <li><strong>la pénalité</strong> $\lambda\sum_l\|W_l\|_F^2$ du terrain de jeu (<em>weight decay</em>), qui est la ridge appliquée aux poids du réseau (exercice 7.2 ; variante « λ = 0,01 » de l'<a href="#D.1" data-experiment="D.1">expérience D.1</a>).</li>
+                    </ul>
+                    <p>Mais un réseau peut aussi <em>mémoriser</em> des étiquettes tirées au hasard, puis généraliser parfaitement sur les vraies (<a href="#D.2" data-experiment="D.2">expérience D.2</a>, l'expérience de Zhang et al. vue aux cours 1 et 4) : la capacité de la classe n'explique pas la généralisation.</p>
+                </div>
+
+                <div class="exo" id="exo-7-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 7.2 · Weight decay et ridge</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Écrire un pas de SGD de pas $\gamma$ sur $F(\theta) + \frac\lambda2\|\theta\|^2$ (le terrain de jeu pénalise $\lambda\|\theta\|^2$, sans le $\frac12$ : remplacer $\lambda$ par $2\lambda$). Montrer qu'il revient à multiplier $\theta$ par un facteur fixe, puis à faire le pas de SGD sur $F$. Que vaut ce facteur pour $\gamma = 0{,}1$ et $\lambda = 0{,}01$ ? <span class="exo-check" data-answer="0.999" data-tol="1e-9"></span></li>
+                        <li>Pour un réseau sans couche cachée et la perte quadratique, quel estimateur du cours 1 retrouve-t-on à l'optimum ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $\theta \leftarrow \theta - \gamma(g + \lambda\theta) = (1 - \gamma\lambda)\theta - \gamma g$ : les poids sont « déclinés » d'un facteur $1 - \gamma\lambda = 0{,}999$ à chaque pas, d'où le nom.</p>
+                        <p>2. Un réseau sans couche cachée est linéaire : on minimise $\frac1n\|Xw - y\|^2 + \frac\lambda2\|w\|^2$, c'est la régression ridge (biais exclu de la pénalité).</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>La double descente, en vrai</h3>
+                        <p>Les cours 1 et 4 ont montré le schéma de la double descente. La figure le calcule. On prend $n = 40$ points $x_i \in \mathbb{R}^{10}$, une cible $y = \mathrm{ReLU}(v^\top x) + 0{,}3\, v^\top x + $ bruit, et un réseau à une couche cachée de $p$ unités ReLU dont la première couche est <strong>tirée au hasard puis gelée</strong> : seule la dernière couche est apprise, par moindres carrés. C'est le modèle des <em>caractéristiques aléatoires</em>, l'approximation de noyau du cours 3 (random features).</p>
+                        <p>Pour $p &lt; n$, les moindres carrés ont une solution unique, qui n'interpole pas. Pour $p = n$, la matrice des caractéristiques $\Phi$ est carrée et (presque sûrement) inversible : une seule solution, qui interpole. Pour $p > n$, une infinité de solutions interpolent les données, et l'on prend celle de <strong>norme minimale</strong>, $a = \Phi^\top(\Phi\Phi^\top)^{-1}y$ : c'est vers elle que converge la descente de gradient partie de $0$. Observez la courbe de test : un U pour $p &lt; n$, un pic à $p = n$, où la seule solution qui interpole doit suivre le bruit avec une norme énorme (à droite), puis une seconde descente, <em>sous</em> le minimum du U. Ajoutez une pénalité ridge $\lambda$ : le pic disparaît.</p>
+                    </div>
+                    <figure class="lab-fig nn-fig-double-descent">
+                        <label class="demo-control">Bruit sur $y$ : <output data-out="noise"></output><input type="range" data-input="noise" min="0" max="0.5" step="0.05" value="0.2"></label>
+                        <div class="lab-fig-line"><span class="lab-label">Pénalité ridge $\lambda$</span>
+                            <span class="lab-pills" data-pills="ridge">
+                                <button type="button" class="demo-button" data-value="0" aria-pressed="true">0 (norme minimale)</button>
+                                <button type="button" class="demo-button" data-value="1" aria-pressed="false">10⁻³</button>
+                                <button type="button" class="demo-button" data-value="2" aria-pressed="false">10⁻²</button>
+                                <button type="button" class="demo-button" data-value="3" aria-pressed="false">10⁻¹</button>
+                            </span>
+                            <button type="button" class="demo-button lab-small" data-action="reseed">Nouveau tirage</button>
+                        </div>
+                        <div class="lab-two"><canvas role="img" aria-label="Erreurs de test et d'entraînement en fonction de la largeur"></canvas><canvas role="img" aria-label="Norme de la dernière couche en fonction de la largeur"></canvas></div>
+                        <div class="lab-fig-readout">médianes sur 9 tirages de la première couche · meilleure erreur de test pour $p &lt; n$ : <span data-out="best"></span> · en $p = n = 40$ : <span data-out="peak"></span> · en $p = 500$ : <span data-out="wide"></span></div>
+                    </figure>
+                </div>
+
+                <div class="lab-prose">
+                    <p>Ce qui compte n'est donc pas le nombre de paramètres, mais <em>laquelle</em> des solutions l'algorithme choisit. La descente de gradient a une préférence cachée pour les solutions de petite norme : c'est la <strong>régularisation implicite</strong>. Pour les réseaux complets, entraînés dans toutes leurs couches, on sait que dans la limite d'une largeur infinie l'entraînement se comporte comme une régression à noyau sans pénalité, qui interpole avec une norme minimale, pour le <em>noyau tangent neuronal</em> (cours 3) ; au-delà, pourquoi les réseaux profonds généralisent reste en grande partie une question ouverte.</p>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (la double descente)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+rng = np.random.default_rng(0)
+n, d = 40, 10
+sphere = lambda m: (lambda Z: Z / np.linalg.norm(Z, axis=1, keepdims=True) * np.sqrt(d))(rng.normal(size=(m, d)))
+v = rng.normal(size=d); v /= np.linalg.norm(v)
+teacher = lambda X: np.maximum(0, X @ v) + 0.3 * (X @ v)
+X, Xt = sphere(n), sphere(1000)
+y, yt = teacher(X) + 0.2 * rng.normal(size=n), teacher(Xt)
+
+for p in [5, 10, 20, 30, 38, 40, 42, 50, 100, 300, 1000]:
+    errors = []
+    for draw in range(20):
+        W = rng.normal(size=(d, p)) / np.sqrt(d)          # première couche, tirée au hasard puis gelée
+        phi = lambda Z: np.maximum(0, Z @ W) / np.sqrt(p)  # p unités ReLU
+        a = np.linalg.pinv(phi(X)) @ y                     # dernière couche : moindres carrés de norme minimale
+        errors.append(np.mean((phi(Xt) @ a - yt) ** 2))
+    print(f"p = {p:4d} : erreur de test (médiane sur 20 tirages) = {np.median(errors):.3f}")</code></pre>
+                </div>
+                <div class="lab-prose">
+                    <p>Ce script affiche une erreur de test de $0{,}45$ au mieux pour $p &lt; n$ (vers $p = 20$), environ $25$ en $p = n = 40$, puis $0{,}18$ pour $p = 100$ et $0{,}08$ pour $p = 1000$ : le réseau le plus large, qui interpole les données bruitées, est le meilleur.</p>
+                </div>
+            </section>
+
+            <!-- ==================== 8 ==================== -->
+            <section class="lab-section" id="retenir">
+                <h2>8. Ce qu'il faut retenir</h2>
+                <div class="lab-recap">
+                    <span class="lab-recap-title">En six phrases</span>
+                    <ol>
+                        <li>Un neurone est une fonction affine suivie d'une activation : une rampe (ReLU) ou une marche (sigmoïde, tanh) à travers un hyperplan ; un seul neurone sigmoïde, c'est la régression logistique.</li>
+                        <li>Un réseau compose des couches de neurones ; sans non-linéarité, il reste affine, quelle que soit sa profondeur. Un réseau de classification est une régression logistique sur des caractéristiques apprises.</li>
+                        <li>Le gradient se calcule par rétropropagation : une passe avant qui garde les activations, une passe arrière qui applique deux identités de la règle de la chaîne, pour le coût de quelques prédictions (la passe arrière coûte environ deux passes avant).</li>
+                        <li>On entraîne par SGD, momentum ou Adam, sur une fonction non convexe : initialisation aléatoire (pour briser la symétrie), pas, taille de lot et activation conditionnent le résultat, et les minimiseurs ne sont jamais uniques.</li>
+                        <li>Une couche cachée suffit à approcher toute fonction continue (une unité ReLU par coude), mais c'est un résultat d'existence, et le nombre d'unités nécessaires explose avec la dimension.</li>
+                        <li>Les bornes de capacité sont vides pour les grands réseaux ; le surapprentissage se combat par les données, l'arrêt précoce et la pénalité, et au-delà du seuil d'interpolation la régularisation implicite de l'algorithme fait redescendre l'erreur (double descente).</li>
+                    </ol>
+                </div>
+                <div class="lab-prose">
+                    <h3>Pour aller plus loin</h3>
+                    <ul>
+                        <li>S. J. D. Prince, <a href="https://udlbook.github.io/udlbook/" target="_blank" rel="noopener noreferrer"><em>Understanding Deep Learning</em></a>, MIT Press, 2023 : très clair, gratuit en ligne, avec des carnets Python.</li>
+                        <li>S. Scardapane, <a href="https://arxiv.org/abs/2404.17625" target="_blank" rel="noopener noreferrer"><em>Alice's Adventures in a Differentiable Wonderland</em></a>, 2024 : une introduction accessible, de la différentiation automatique aux transformers.</li>
+                        <li>I. Goodfellow, Y. Bengio, A. Courville, <a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener noreferrer"><em>Deep Learning</em></a>, 2016, chapitres 6 à 8.</li>
+                        <li>F. Bach, <a href="https://www.di.ens.fr/~fbach/ltfp_book.pdf" target="_blank" rel="noopener noreferrer"><em>Learning Theory from First Principles</em></a>, 2024, chapitre 9 : la théorie des réseaux à une couche cachée.</li>
+                        <li>M. Belkin, D. Hsu, S. Ma, S. Mandal, <a href="https://arxiv.org/abs/1812.11118" target="_blank" rel="noopener noreferrer"><em>Reconciling modern machine learning practice and the bias-variance trade-off</em></a>, PNAS, 2019 : la double descente.</li>
+                        <li>La <a href="../2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html" target="_blank" rel="noopener noreferrer">version anglaise de ce terrain de jeu</a>, avec quelques compléments sur la généralisation.</li>
+                    </ul>
+                    <p>Le cours suivant : <a href="optimisation-sgd.html">optimisation pour l'apprentissage, de la descente de gradient à SGD</a>, qui explique en détail les algorithmes qui entraînent ces réseaux.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../../js/lab-kit.js"></script>
+    <script src="../../js/nn-engine.js"></script>
+    <script src="../../js/nn-experiments-fr.js"></script>
+    <script src="../../js/nn-playground.js"></script>
+    <script src="../../js/nn-figures.js"></script>
+</body>
+</html>

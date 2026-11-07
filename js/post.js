@@ -13,7 +13,7 @@
 //
 // Code boxes: the Copy button of a <div class="codebox"> (a BibTeX entry, a
 // script) copies its text, or, if the browser refuses, selects it to be copied
-// by hand.
+// by hand. The button says Copied (Copié on a page in French) for a moment.
 //
 // Folded proofs (<details class="fold">): a link to something inside one, such
 // as a lemma stated within a proof, opens it.
@@ -43,9 +43,10 @@ window.MathJax = {
     const button = event.target.closest('.codebox-copy');
     if (!button) return;
     const pre = button.closest('.codebox').querySelector('pre');
+    const label = button.dataset.label || (button.dataset.label = button.textContent);
     Promise.resolve().then(() => navigator.clipboard.writeText(pre.textContent)).then(() => {
-      button.textContent = 'Copied';
-      setTimeout(() => { button.textContent = 'Copy'; }, 1500);
+      button.textContent = /^fr/.test(document.documentElement.lang) ? 'Copié' : 'Copied';
+      setTimeout(() => { button.textContent = label; }, 1500);
     }, () => {
       const range = document.createRange();
       range.selectNodeContents(pre);

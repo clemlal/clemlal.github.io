@@ -30,6 +30,17 @@ drafts/<name>/             Blog drafts, local only: ignored by git (.gitignore),
 js/post.js                 Loaded by every blog post: LaTeX rendering (MathJax) and the "Draft" label
 js/blog.js                 Local preview of the blog drafts on the home page (index.html?drafts)
 js/round-table.js          Figures of the post on toasts around a round table
+js/lab-kit.js              Shared toolkit of the interactive course pages (window.Lab): see "Interactive course pages"
+js/nn-engine.js            Neural networks, backpropagation and SGD, by hand (window.NN)
+js/nn-playground.js        The neural network playground (English or French, from <html lang>)
+js/nn-figures.js           Figures on neural networks (activation, softmax, backprop, universal approximation, ...)
+js/nn-experiments.js       Guided experiments of the neural network playground, in English (MAPI3 page)
+js/nn-experiments-fr.js    The same, in French (SID page)
+js/opt-engine.js           Objectives of two parameters and the GD, SGD, momentum and Adam updates (window.OPT)
+js/opt-playground.js       The optimization playground; it writes its own interface
+js/opt-figures.js          Figures on optimization (parabola, descent lemma, mini-batches, noise floor, bias-variance trade-off of the step, ...)
+js/opt-experiments-fr.js   Guided experiments of the optimization playground, in French
+js/quiz.js                 Self-assessment quizzes (M2RI page)
 vendor/mathjax/            Copy of MathJax 3.2.2 (tex-svg.js, Apache 2.0), so that no file comes from another site
 ```
 
@@ -259,6 +270,17 @@ window.siteDrafts = [
   <li><strong>Lecture 8</strong> <!-- <a href="….pdf" target="_blank" rel="noopener noreferrer">…</a> --></li>
   ```
   To release one, put the file in the course folder and remove the `<!--` and `-->`.
+
+### Interactive course pages
+
+Lectures that run in the browser: `teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html` (English), and the two cours-TD of `teaching/2026_2027_SID_Advanced_Statistical_Learning/`, `optimisation-sgd.html` and `reseaux-de-neurones.html` (French). They load `css/styles.css`, `js/themes.js` and `js/post.js` (MathJax) in their `<head>`, then `js/lab-kit.js` first at the end of their `<body>`, then their own scripts.
+
+- **Layout.** `<main class="main lab-page">`, prose in `<div class="lab-prose">`, parts in `<section class="lab-section">` (an `<h2>` each), a figure with its text in `<div class="lab-fig-row">`, figures in `<figure class="lab-fig …">`, a table of contents in `<nav class="lab-toc">` (for a page taught over several class sessions, one column per session: `<div class="lab-toc-sessions">`, each `<div>` holding a `.lab-toc-session` heading and an `<ol start="…">`; mark where a session starts with `<p class="lab-session">Séance 2 · …</p>` above that section's `<h2>`), what to remember in `<div class="lab-recap">`. Theorems and proofs use the blog's `.statement`, `.proof` and `<details class="fold">`.
+- **Exercises.** `<div class="exo">` with an `.exo-head` (`.exo-title`, and `.exo-tag` labels, `.exo-tag.is-further` for ★), the questions in an `<ol>`, then `<details class="exo-hint">` and `<details class="exo-sol">` (summary, then a `<div>`): no script needed. A numerical answer is checked in the browser with `<span class="exo-check" data-answer="-0.008" data-tol="1e-6"></span>` (or `data-rel` for a relative tolerance); students may type expressions such as `(-0.2)^3` or `1/4`, with a point or a comma. A typed number is judged at its own precision: it is right if it is the answer rounded or truncated to its last digit (0.38, 0.377 or 0.3775 for 0.37754; but 104 is wrong for 105), with at least two significant digits; an expression is compared with the tolerance.
+- **Python boxes.** The blog's `<div class="codebox">`, labelled "À refaire chez vous · Python", with a Copier button. Every number a box prints is quoted in the page: rerun the box after changing it.
+- **Figures.** A figure's markup holds its text and controls (`data-input`, `data-out`, `data-action`, `data-pills`), and its script builds it in every element with its class, through `Lab.figure`. Words drawn on canvases come from the script's `Lab.strings({ en, fr })`, picked by `<html lang>`.
+- **Playgrounds.** `<section class="lab-panel nn-playground">` (markup written in the page, see the two existing ones) or `<div class="lab-panel opt-playground"></div>` (empty: the script writes the interface). Guided experiments are data (`js/nn-experiments*.js`, `js/opt-experiments-fr.js`), shown by `Lab.experiments`; any link `<a data-experiment="II.3">` selects one and scrolls to the playground. Runs are seeded: **every number quoted in an experiment's explanation was computed by replaying it** with the engine in Node; after changing an engine or a setup, replay and update the texts.
+- **Shared names.** `lab-` classes and `Lab.*` functions are shared by all these pages; `nn-` and `opt-` ones belong to one playground or figure. Before renaming a `lab-` class, search every page and script.
 
 ### New academic year
 

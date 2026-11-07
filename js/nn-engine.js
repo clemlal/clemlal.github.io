@@ -16,30 +16,14 @@
 // biases are not penalized).
 //
 // Everything random (data, initialization, batches) comes from seeded
-// generators, so that a guided experiment of the page always gives the run
-// described in its text.
+// generators (Lab.random, js/lab-kit.js, loaded before this file), so that a
+// guided experiment of the page always gives the run described in its text.
 
 (function () {
   // ---- Random numbers ----
 
-  // Mulberry32: a small seeded generator of uniform numbers in [0, 1), with a
-  // Gaussian sampler (Box and Muller) on top.
-  function random(seed) {
-    let s = seed >>> 0;
-    const next = () => {
-      s = (s + 0x6d2b79f5) | 0;
-      let t = Math.imul(s ^ (s >>> 15), 1 | s);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-    next.normal = () => {
-      let u = 0;
-      while (u === 0) u = next();
-      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * next());
-    };
-    next.uniform = (a, b) => a + (b - a) * next();
-    return next;
-  }
+  // The seeded generator of js/lab-kit.js (loaded before this file).
+  const random = window.Lab.random;
 
   // ---- Activation functions ----
 
@@ -169,16 +153,19 @@
   // through a uniform random point of the data square, so that the units start
   // spread over the data (in one dimension: the kinks of the ReLU units are
   // spread over [-1, 1]). The other biases start at zero.
-  function createNetwork({ sizes, activation, task, seed }) {
+  // With init: 'same', every weight of a layer starts at the same value (the
+  // scale above) and every bias at zero: the hidden units of a layer are then
+  // identical, and stay so under gradient descent (the symmetry experiment).
+  function createNetwork({ sizes, activation, task, seed, init = 'random' }) {
     const rand = random(seed);
     const L = sizes.length - 1;
     const layers = [];
     for (let l = 0; l < L; l++) {
       const nIn = sizes[l], nOut = sizes[l + 1], last = l === L - 1;
       const scale = last ? 0.5 / Math.sqrt(nIn) : activation === 'relu' ? Math.sqrt(2 / nIn) : Math.sqrt(2 / (nIn + nOut));
-      const W = Float64Array.from({ length: nIn * nOut }, () => scale * rand.normal());
+      const W = init === 'same' ? new Float64Array(nIn * nOut).fill(scale) : Float64Array.from({ length: nIn * nOut }, () => scale * rand.normal());
       const b = new Float64Array(nOut);
-      if (l === 0 && !last) {
+      if (l === 0 && !last && init !== 'same') {
         for (let j = 0; j < nOut; j++) {
           let s = 0;
           for (let i = 0; i < nIn; i++) s -= W[j * nIn + i] * rand.uniform(-1, 1);
@@ -188,7 +175,7 @@
       layers.push({ nIn, nOut, W, b, gW: new Float64Array(nIn * nOut), gb: new Float64Array(nOut) });
     }
     return {
-      sizes: sizes.slice(), activation, task, layers,
+      sizes: sizes.slice(), activation, task, init, layers,
       Z: sizes.map(d => new Float64Array(d)),  // pre-activations (Z[0] unused)
       A: sizes.map(d => new Float64Array(d)),  // activations, A[0] = x, A[L] = logits or prediction
       D: sizes.map(d => new Float64Array(d)),  // ∂loss/∂Z, filled by the backward pass

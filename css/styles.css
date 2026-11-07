@@ -2284,63 +2284,79 @@ body {
   }
 }
 
-/* ---- Neural networks, hands-on ----
-   teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html:
-   the playground (js/nn-playground.js) and the figures (js/nn-figures.js). Made for computer screens: the playground needs about
-   1100 pixels of width. */
+/* ---- Interactive course pages ----
+   Pages built on js/lab-kit.js: the playgrounds and figures of
+   teaching/2026_2027_MAPI3_Machine_Learning/neural-networks-playground.html
+   (js/nn-playground.js, js/nn-figures.js) and of the two interactive lectures of
+   teaching/2026_2027_SID_Advanced_Statistical_Learning (the js/opt- and js/nn- scripts).
+   The lab- classes are shared by every such page (prose, sections, figures,
+   pill buttons, the playground panel and its guided experiments); nn- and opt-
+   rules only add what a playground or a figure needs. Made for computer
+   screens: the playgrounds need about 1100 pixels of width. */
 
-.main.nn-page {
+.main.lab-page {
   padding-bottom: 60px;
 }
 
-.nn-page .post-header,
-.nn-prose {
+.lab-page .post-header,
+.lab-prose {
   max-width: 52rem;
 }
 
-.nn-prose {
+.lab-prose {
   font-size: 1.04em;
   line-height: 1.65;
 }
 
-.nn-prose p {
+.lab-prose p {
   margin: 0 0 0.9em;
 }
 
-.nn-prose ul {
+.lab-prose ul {
   padding-left: 1.3em;
 }
 
-.nn-prose li {
+.lab-prose li {
   margin: 0.35em 0;
 }
 
-.nn-prose li::marker {
+.lab-prose li::marker {
   color: var(--faint);
 }
 
-.nn-page a {
+.lab-page a {
   color: var(--link);
   text-decoration: none;
 }
 
-.nn-page a:hover {
+.lab-page a:hover {
   text-decoration: underline;
 }
 
-.nn-page mjx-container[display="true"] {
+.lab-page mjx-container[display="true"] {
   overflow-x: auto;
   overflow-y: hidden;
 }
 
-.nn-section {
+.lab-section {
   margin-top: 56px;
   padding-top: 32px;
   border-top: 1px solid var(--border);
   scroll-margin-top: 64px;
 }
 
-.nn-section h2 {
+/* "Séance 2" label above the heading of the section where a page's next
+   class session starts. */
+.lab-session {
+  margin: 0 0 8px;
+  color: var(--data-a);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lab-section h2 {
   margin: 0 0 18px;
   color: var(--accent);
   font-size: 1.6rem;
@@ -2349,7 +2365,7 @@ body {
   line-height: 1.2;
 }
 
-.nn-section h2::after {
+.lab-section h2::after {
   content: "";
   display: block;
   width: 28px;
@@ -2359,7 +2375,7 @@ body {
   background-color: var(--data-a);
 }
 
-.nn-page h3 {
+.lab-page h3 {
   margin: 1.6em 0 0.5em;
   color: var(--accent);
   font-size: 1.15rem;
@@ -2368,17 +2384,17 @@ body {
   scroll-margin-top: 64px;
 }
 
-.nn-fig-row .nn-prose h3 {
+.lab-fig-row .lab-prose h3 {
   margin-top: 0;
 }
 
-.nn-label,
-.nn-muted {
+.lab-label,
+.lab-muted {
   color: var(--muted);
   font-size: 0.85em;
 }
 
-.nn-swatch {
+.lab-swatch {
   display: inline-block;
   width: 16px;
   height: 4px;
@@ -2387,34 +2403,35 @@ body {
   vertical-align: middle;
 }
 
-.nn-swatch-pos { background-color: var(--data-a); }
-.nn-swatch-neg { background-color: var(--highlight); }
-.nn-swatch-ink { background-color: var(--text); }
-.nn-swatch-faint { background-color: var(--faint); height: 7px; }
+.lab-swatch-pos { background-color: var(--data-a); }
+.lab-swatch-neg { background-color: var(--highlight); }
+.lab-swatch-ink { background-color: var(--text); }
+.lab-swatch-faint { background-color: var(--faint); height: 7px; }
+.lab-swatch-third { background-color: var(--lab-third, var(--muted)); }
 
-.nn-swatch.nn-dashed {
+.lab-swatch.lab-dashed {
   background: repeating-linear-gradient(90deg, var(--highlight) 0 5px, transparent 5px 8px);
 }
 
-.nn-pills {
+.lab-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   margin: 6px 0 10px;
 }
 
-.nn-pills .demo-button,
-.demo-button.nn-small {
+.lab-pills .demo-button,
+.demo-button.lab-small {
   padding: 4px 10px;
   font-size: 0.85em;
 }
 
-.demo-button.nn-play {
+.demo-button.lab-play {
   background-color: var(--data-a);
   color: var(--bg);
 }
 
-.demo-button.nn-play:not([aria-pressed="true"]):hover {
+.demo-button.lab-play:not([aria-pressed="true"]):hover {
   background-color: var(--link-strong);
 }
 
@@ -2423,7 +2440,7 @@ body {
   cursor: default;
 }
 
-.nn-check {
+.lab-check {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -2432,18 +2449,18 @@ body {
   cursor: pointer;
 }
 
-.nn-check input {
+.lab-check input {
   accent-color: var(--data-a);
 }
 
-.nn-check.is-disabled {
+.lab-check.is-disabled {
   opacity: 0.45;
   cursor: default;
 }
 
 /* The playground: a toolbar, three columns (settings, network, output), and
    the experiments below. */
-.nn-lab {
+.lab-panel {
   margin: 32px 0 0;
   padding: 20px 22px 24px;
   border: 1px solid var(--border);
@@ -2454,7 +2471,7 @@ body {
   scroll-margin-top: 60px;
 }
 
-.nn-toolbar {
+.lab-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2462,21 +2479,21 @@ body {
   margin-bottom: 18px;
 }
 
-.nn-counter {
+.lab-counter {
   margin-left: 10px;
   color: var(--muted);
   font-size: 0.9em;
   font-variant-numeric: tabular-nums;
 }
 
-.nn-speed {
+.lab-speed {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-left: auto;
 }
 
-.nn-speed .nn-pills {
+.lab-speed .lab-pills {
   margin: 0;
 }
 
@@ -2487,11 +2504,11 @@ body {
   align-items: start;
 }
 
-.nn-settings {
+.lab-settings {
   font-size: 0.92em;
 }
 
-.nn-settings h3 {
+.lab-settings h3 {
   margin: 0 0 6px;
   padding-top: 14px;
   border-top: 1px solid var(--border);
@@ -2502,16 +2519,16 @@ body {
   text-transform: uppercase;
 }
 
-.nn-settings h3:first-child {
+.lab-settings h3:first-child {
   padding-top: 0;
   border-top: none;
 }
 
-.nn-settings .demo-control {
+.lab-settings .demo-control {
   margin: 10px 0;
 }
 
-.nn-settings .nn-small {
+.lab-settings .lab-small {
   margin: 6px 0 16px;
 }
 
@@ -2522,7 +2539,7 @@ body {
   margin: 8px 0 16px;
 }
 
-.nn-round,
+.lab-round,
 .nn-layer-detail button {
   width: 22px;
   height: 22px;
@@ -2537,7 +2554,7 @@ body {
   cursor: pointer;
 }
 
-.nn-round:hover,
+.lab-round:hover,
 .nn-layer-detail button:hover {
   background-color: var(--border);
 }
@@ -2591,21 +2608,21 @@ body {
 }
 
 .nn-diagram canvas,
-.nn-plot canvas,
-.nn-chart canvas,
-.nn-fig canvas {
+.lab-plot canvas,
+.lab-chart canvas,
+.lab-fig canvas {
   display: block;
   width: 100%;
 }
 
-.nn-caption {
+.lab-caption {
   margin: 10px 0 0;
   color: var(--muted);
   font-size: 0.82em;
   line-height: 1.45;
 }
 
-.nn-tooltip {
+.lab-tooltip {
   position: absolute;
   z-index: 5;
   max-width: 280px;
@@ -2621,17 +2638,17 @@ body {
   pointer-events: none;
 }
 
-.nn-tooltip canvas {
+.lab-tooltip canvas {
   margin-bottom: 6px;
   border-radius: 6px;
   box-shadow: 0 0 0 1px var(--border);
 }
 
-.nn-tooltip-scale {
+.lab-tooltip-scale {
   color: var(--muted);
 }
 
-.nn-plot {
+.lab-plot {
   position: relative;
   border-radius: 14px;
   overflow: hidden;
@@ -2639,12 +2656,12 @@ body {
   background-color: var(--bg);
 }
 
-.nn-plot canvas {
+.lab-plot canvas {
   cursor: crosshair;
 }
 
 /* Why the training stopped (end of an experiment, divergence), under the plot. */
-.nn-message {
+.lab-message {
   margin-top: 10px;
   padding: 8px 12px;
   border-left: 3px solid var(--highlight);
@@ -2655,7 +2672,7 @@ body {
   line-height: 1.4;
 }
 
-.nn-chart-legend {
+.lab-chart-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
@@ -2663,21 +2680,21 @@ body {
   font-size: 0.8em;
 }
 
-.nn-readouts {
+.lab-readouts {
   width: 100%;
   margin-top: 10px;
   border-collapse: collapse;
   font-size: 0.85em;
 }
 
-.nn-readouts th {
+.lab-readouts th {
   padding: 4px 8px 4px 0;
   color: var(--muted);
   font-weight: normal;
   text-align: left;
 }
 
-.nn-readouts td {
+.lab-readouts td {
   padding: 4px 0;
   color: var(--text);
   text-align: right;
@@ -2685,12 +2702,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.nn-readouts tr + tr {
+.lab-readouts tr + tr {
   border-top: 1px solid var(--border);
 }
 
 /* Guided experiments: the list by part, and the selected experiment. */
-.nn-experiments {
+.lab-experiments {
   display: grid;
   grid-template-columns: 270px minmax(0, 1fr);
   gap: 28px;
@@ -2699,7 +2716,7 @@ body {
   border-top: 1px solid var(--border);
 }
 
-.nn-exp-part {
+.lab-exp-part {
   margin: 14px 0 4px;
   color: var(--muted);
   font-size: 0.72rem;
@@ -2708,11 +2725,11 @@ body {
   text-transform: uppercase;
 }
 
-.nn-exp-part:first-child {
+.lab-exp-part:first-child {
   margin-top: 0;
 }
 
-.nn-exp-item {
+.lab-exp-item {
   display: block;
   width: 100%;
   margin: 1px 0;
@@ -2727,37 +2744,37 @@ body {
   cursor: pointer;
 }
 
-.nn-exp-item:hover {
+.lab-exp-item:hover {
   background-color: var(--accent-soft);
 }
 
-.nn-exp-item[aria-pressed="true"] {
+.lab-exp-item[aria-pressed="true"] {
   background-color: var(--accent);
   color: var(--bg);
 }
 
-.nn-exp-id {
+.lab-exp-id {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.nn-exp-detail {
+.lab-exp-detail {
   max-width: 50rem;
   font-size: 1.02em;
   line-height: 1.6;
 }
 
-.nn-exp-head {
+.lab-exp-head {
   color: var(--muted);
   font-size: 0.85em;
 }
 
-.nn-exp-detail h3 {
+.lab-exp-detail h3 {
   margin: 2px 0 12px;
   font-size: 1.3rem;
 }
 
-.nn-exp-question {
+.lab-exp-question {
   padding: 12px 16px;
   border-left: 3px solid var(--data-a);
   border-radius: 0 12px 12px 0;
@@ -2765,44 +2782,44 @@ body {
   color: var(--text);
 }
 
-.nn-exp-label {
+.lab-exp-label {
   color: var(--accent);
   font-weight: 600;
 }
 
-.nn-exp-variants {
+.lab-exp-variants {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin: 14px 0;
 }
 
-.nn-exp-watch {
+.lab-exp-watch {
   margin: 0 0 12px;
 }
 
-.nn-exp-explanation > summary {
+.lab-exp-explanation > summary {
   color: var(--link);
   font-weight: 600;
   cursor: pointer;
 }
 
-.nn-exp-explanation[open] > summary {
+.lab-exp-explanation[open] > summary {
   margin-bottom: 8px;
 }
 
-.nn-exp-explanation p {
+.lab-exp-explanation p {
   margin: 0 0 0.8em;
 }
 
-.nn-exp-explanation .nn-table {
+.lab-exp-explanation .lab-table {
   margin: 0 0 0.9em;
   font-size: 0.9em;
 }
 
 /* Figures: text on the left, figure on the right, or the
    figure on the whole width. */
-.nn-fig-row {
+.lab-fig-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 40px;
@@ -2810,7 +2827,7 @@ body {
   margin: 36px 0;
 }
 
-.nn-fig {
+.lab-fig {
   margin: 18px 0;
   padding: 16px 18px;
   border: 1px solid var(--border);
@@ -2820,11 +2837,11 @@ body {
   font-size: 0.92em;
 }
 
-.nn-fig-row .nn-fig {
+.lab-fig-row .lab-fig {
   margin: 0;
 }
 
-.nn-fig-legend {
+.lab-fig-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;
@@ -2832,12 +2849,12 @@ body {
   font-size: 0.88em;
 }
 
-.nn-fig-text p {
+.lab-fig-text p {
   margin: 8px 0 0;
   line-height: 1.55;
 }
 
-.nn-fig-line {
+.lab-fig-line {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2845,11 +2862,11 @@ body {
   margin: 6px 0 10px;
 }
 
-.nn-fig-line .nn-pills {
+.lab-fig-line .lab-pills {
   margin: 0;
 }
 
-.nn-fig-readout {
+.lab-fig-readout {
   margin-top: 10px;
   font-variant-numeric: tabular-nums;
 }
@@ -3003,22 +3020,22 @@ body {
 }
 
 .nn-bp-check table,
-.nn-table {
+.lab-table {
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
 }
 
 .nn-bp-check th,
 .nn-bp-check td,
-.nn-table th,
-.nn-table td {
+.lab-table th,
+.lab-table td {
   padding: 5px 14px 5px 0;
   border-bottom: 1px solid var(--border);
   text-align: left;
 }
 
 .nn-bp-check th,
-.nn-table th {
+.lab-table th {
   color: var(--muted);
   font-weight: normal;
 }
@@ -3028,12 +3045,12 @@ body {
   margin: 10px 0 0;
 }
 
-.nn-table-wrap {
+.lab-table-wrap {
   margin: 4px 0 20px;
   overflow-x: auto;
 }
 
-.nn-table {
+.lab-table {
   font-size: 0.95em;
 }
 
@@ -3046,7 +3063,7 @@ body {
   align-items: center;
 }
 
-.nn-ua-controls .nn-pills,
+.nn-ua-controls .lab-pills,
 .nn-ua-controls .demo-control {
   margin: 0;
 }
@@ -3060,6 +3077,350 @@ body {
 
 .nn-fig-ua.is-drawing .nn-ua-main canvas {
   cursor: crosshair;
+}
+
+/* The optimization playground (js/opt-playground.js): settings, the map of
+   the level sets, the curve and the readouts, and the experiments below. */
+.opt-columns {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr) 330px;
+  gap: 26px;
+  align-items: start;
+}
+
+.opt-map {
+  position: relative;
+}
+
+.opt-map canvas {
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: crosshair;
+}
+
+.opt-side .lab-pills {
+  margin: 4px 0 6px;
+}
+
+.opt-side .lab-readouts td {
+  padding-left: 10px;
+}
+
+.opt-note {
+  margin: 4px 0 10px;
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.45;
+}
+
+.opt-run h3 .lab-swatch {
+  width: 12px;
+  height: 12px;
+  margin: 0 4px 0 0;
+  border-radius: 50%;
+}
+
+.opt-run-body[hidden] {
+  display: none;
+}
+
+/* The weights of the XOR figure (js/nn-figures.js), typed in a grid. */
+.nn-xor-weights {
+  display: grid;
+  grid-template-columns: auto repeat(3, minmax(0, 1fr));
+  gap: 6px 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nn-xor-weights label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.nn-xor-weights input {
+  width: 4.5em;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Two canvases side by side in a figure. */
+.lab-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+/* ---- Lectures with exercises (cours-TD) ----
+   The table of contents, the exercises with their hints and solutions
+   opened on demand, the self-checking answers (js/lab-kit.js turns
+   <span class="exo-check" data-answer="…"> into a box and a Check button), and
+   the boxes of what to remember. */
+.lab-toc {
+  max-width: 52rem;
+  margin: 18px 0 8px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background-color: var(--surface);
+  font-size: 0.95em;
+}
+
+.lab-toc ol {
+  margin: 6px 0 0;
+  padding-left: 1.4em;
+  columns: 2;
+  column-gap: 32px;
+}
+
+/* A table of contents split by class session: one column per session,
+   each under a .lab-toc-session heading. */
+.lab-toc-sessions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 32px;
+  margin-top: 8px;
+}
+
+.lab-toc-sessions ol {
+  margin-top: 4px;
+  columns: 1;
+}
+
+.lab-toc-session {
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.lab-toc li {
+  margin: 0.25em 0;
+  break-inside: avoid;
+}
+
+.lab-toc li::marker {
+  color: var(--faint);
+}
+
+.lab-toc-title {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.exo {
+  max-width: 52rem;
+  margin: 1.6em 0;
+  padding: 16px 20px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background-color: var(--bg);
+  font-size: 1.02em;
+  line-height: 1.6;
+  scroll-margin-top: 64px;
+}
+
+.exo-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 8px;
+}
+
+.exo-title {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.exo-tag {
+  padding: 1px 9px;
+  border-radius: 999px;
+  background-color: var(--accent-soft);
+  color: var(--muted);
+  font-size: 0.78em;
+}
+
+.exo-tag.is-further {
+  background-color: color-mix(in srgb, var(--highlight) 14%, transparent);
+  color: var(--text-soft);
+}
+
+.exo > p,
+.exo li {
+  margin: 0.4em 0;
+}
+
+.exo ol {
+  margin: 0.4em 0;
+  padding-left: 1.5em;
+}
+
+.exo li::marker {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.exo details {
+  margin-top: 10px;
+}
+
+.exo details > summary {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background-color: var(--accent-soft);
+  color: var(--text-soft);
+  font-size: 0.88em;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+
+.exo details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.exo details > summary:hover {
+  background-color: var(--border);
+}
+
+.exo details[open] > summary {
+  background-color: var(--accent);
+  color: var(--bg);
+}
+
+.exo-hint > div,
+.exo-sol > div {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--faint);
+  border-radius: 0 10px 10px 0;
+  background-color: var(--surface);
+}
+
+.exo-sol > div {
+  border-left-color: var(--data-a);
+  background-color: color-mix(in srgb, var(--data-a) 6%, transparent);
+}
+
+.exo-hint > div > :first-child,
+.exo-sol > div > :first-child {
+  margin-top: 0;
+}
+
+.exo-hint > div > :last-child,
+.exo-sol > div > :last-child {
+  margin-bottom: 0;
+}
+
+.exo-check {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+  vertical-align: middle;
+}
+
+.exo-check input {
+  width: 9em;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.exo-check input:focus {
+  outline: 2px solid var(--data-a);
+  outline-offset: 1px;
+}
+
+.exo-check .demo-button {
+  padding: 4px 12px;
+  font-size: 0.85em;
+}
+
+.exo-check-result {
+  font-size: 0.88em;
+}
+
+.exo-check-result[data-result="right"] {
+  color: var(--data-a);
+  font-weight: 600;
+}
+
+.exo-check-result[data-result="wrong"] {
+  color: var(--highlight);
+}
+
+/* What to remember, at the end of a part. */
+.lab-recap {
+  max-width: 52rem;
+  margin: 1.6em 0;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background-color: var(--surface);
+}
+
+.lab-recap > :first-child {
+  margin-top: 0;
+}
+
+.lab-recap > :last-child {
+  margin-bottom: 0;
+}
+
+.lab-recap-title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lab-page .codebox {
+  max-width: 52rem;
+}
+
+.lab-page .statement,
+.lab-page .proof,
+.lab-page .fold {
+  max-width: 52rem;
+}
+
+@media (max-width: 1100px) {
+  .opt-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lab-fig-row,
+  .lab-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lab-toc ol {
+    columns: 1;
+  }
+
+  .lab-toc-sessions {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ---- Self-assessment quizzes ----

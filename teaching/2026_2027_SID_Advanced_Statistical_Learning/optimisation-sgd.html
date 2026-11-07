@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimisation pour l'apprentissage : de la descente de gradient à SGD - Clément Lalanne</title>
+    <meta name="description" content="Cours-TD interactif (M2 SID) : descente de gradient, conditionnement, gradient stochastique et plancher de bruit, momentum et Adam, avec un terrain de jeu, des figures animées, des exercices corrigés et des scripts Python.">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <script src="../../js/themes.js"></script>
+    <script src="../../js/post.js"></script>
+</head>
+<body>
+    <!-- Top navigation, the same on every page (../../ paths on course pages) -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="../../index.html#news">News</a></li>
+                <li><a href="../../index.html#publications">Publications</a></li>
+                <li><a href="../../index.html#blog">Blog</a></li>
+                <li><a href="../../index.html#teaching">Teaching</a></li>
+                <li><a href="../../index.html#curriculum">Curriculum</a></li>
+            </ul>
+            <ul class="nav-links nav-external">
+                <li><a href="https://scholar.google.com/citations?user=uGRMC34AAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+                <li><a href="https://www.linkedin.com/in/clement-lalanne-cs-maths/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                <li><a href="https://github.com/clemlal" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="main lab-page">
+            <header class="post-header">
+                <p class="post-kicker">Cours-TD interactif · M2 SID · Apprentissage statistique avancé · <a href="index.html">page du cours</a></p>
+                <h1 class="post-title">Optimisation pour l'apprentissage : de la descente de gradient à SGD</h1>
+            </header>
+
+            <div class="lab-prose">
+                <p>Tout ce que vous avez entraîné jusqu'ici, régression logistique, SVM, boosting, réseaux de neurones, s'obtient en minimisant un risque empirique. Pour les moindres carrés, la ridge ou la ridge à noyau (cours 3), il existe une formule fermée. Presque partout ailleurs, il n'y en a pas : on lance un <em>algorithme</em> qui s'approche du minimiseur, pas à pas. Ce cours explique les deux algorithmes qui font tourner l'apprentissage automatique : la <strong>descente de gradient</strong>, et surtout sa version bon marché, le <strong>gradient stochastique</strong> (SGD), avec ses variantes momentum et Adam.</p>
+                <p><strong>Mode d'emploi.</strong> Ce cours-TD occupe deux séances : les parties 0 à 2, puis les parties 3 à 5. Chaque résultat est démontré ou illustré, puis <em>vérifié sur des nombres</em> :</p>
+                <ul>
+                    <li>les <strong>exercices</strong> sont à chercher avant d'ouvrir l'<em>indication</em>, puis la <em>solution</em> ; les cases « Votre réponse » vérifient vos applications numériques (tapez un nombre, une fraction comme <code>1/4</code> ou une expression comme <code>(-0.2)^3</code>) ; ★ marque les approfondissements ;</li>
+                    <li>les <strong>figures</strong> s'animent : bougez les curseurs, et retrouvez sur elles ce que dit le théorème d'à côté ;</li>
+                    <li>le <strong>terrain de jeu</strong> ci-dessous fait tourner les algorithmes sous vos yeux ; ses <em>expériences guidées</em> commencent par une question : répondez avant de lancer ;</li>
+                    <li>les encadrés <strong>À refaire chez vous</strong> donnent quelques lignes de Python (numpy) qui recalculent les nombres de la page.</li>
+                </ul>
+                <p><strong>Prérequis.</strong> Risque, risque empirique et régularisation (cours 1 à 4), régression linéaire et logistique, dérivées partielles. <strong>Notations.</strong> Le paramètre est $\theta \in \mathbb{R}^d$, la perte $\ell$, et la fonction à minimiser $F$. Attention : la lettre $L$ désigne ici une constante de régularité de $F$, pas la perte.</p>
+            </div>
+
+            <nav class="lab-toc" aria-label="Sommaire">
+                <span class="lab-toc-title">Sommaire</span>
+                <div class="lab-toc-sessions">
+                    <div>
+                        <span class="lab-toc-session">Séance 1 · la descente de gradient</span>
+                        <ol start="0">
+                            <li><a href="#pourquoi">Pourquoi optimiser ?</a></li>
+                            <li><a href="#rappels">Rappels : gradient, hessienne, convexité</a></li>
+                            <li><a href="#gd">La descente de gradient</a></li>
+                        </ol>
+                    </div>
+                    <div>
+                        <span class="lab-toc-session">Séance 2 · SGD, momentum et Adam</span>
+                        <ol start="3">
+                            <li><a href="#sgd">Le gradient stochastique</a></li>
+                            <li><a href="#momentum-adam">Momentum et Adam</a></li>
+                            <li><a href="#retenir">Ce qu'il faut retenir</a></li>
+                        </ol>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- ==================== The playground (js/opt-playground.js, on js/lab-kit.js) ==================== -->
+            <section class="lab-section" id="terrain">
+                <h2>Le terrain de jeu</h2>
+                <div class="lab-prose">
+                    <p>Choisissez une fonction $F$ de deux paramètres et un algorithme ; la carte montre les lignes de niveau de $F$ et les itérés $\theta_0, \theta_1, \dots$, la courbe à droite la distance au minimum $F(\theta_t) - F^\star$ en échelle logarithmique (une droite y signifie une convergence exponentielle). Cochez « Comparer » pour faire courir un second algorithme, et cliquez sur la carte pour changer le point de départ. Les expériences guidées, sous le terrain, sont appelées tout au long du cours.</p>
+                </div>
+                <div class="lab-panel opt-playground" id="playground" role="region" aria-label="Terrain de jeu d'optimisation"></div>
+            </section>
+
+            <!-- ==================== 0 ==================== -->
+            <section class="lab-section" id="pourquoi">
+                <h2>0. Pourquoi optimiser ?</h2>
+                <div class="lab-prose">
+                    <p>Un modèle $f_\theta$ est entraîné en minimisant le risque empirique régularisé (cours 1),</p>
+                    $$F(\theta) = \frac{1}{n} \sum_{i=1}^n \ell\big(f_\theta(x_i), y_i\big) + \Omega(\theta) = \frac1n \sum_{i=1}^n \ell_i(\theta) + \Omega(\theta), \qquad \hat\theta \in \operatorname*{argmin}_{\theta \in \mathbb{R}^d} F(\theta).$$
+                    <p>Trois cas, trois situations :</p>
+                    <ul>
+                        <li><strong>Moindres carrés.</strong> $F(\theta) = \frac{1}{2n}\|X\theta - y\|^2$ a pour minimiseur $\hat\theta = (X^\top X)^{-1} X^\top y$, et la ridge à noyau du cours 3 a $\alpha = (K_n + \lambda I)^{-1} y$. Une formule, mais qui coûte de l'ordre de $nd^2 + d^3$ opérations (ou $n^3$ pour le noyau) : impossible pour $d = 10^6$ variables ou $n = 10^7$ exemples.</li>
+                        <li><strong>Régression logistique.</strong> Annuler le gradient donne $\sum_i y_i x_i \,\sigma(-y_i \theta^\top x_i) = 0$, avec $\sigma(u) = 1/(1 + e^{-u})$ (exercice 1.2) : $d$ équations non linéaires en $\theta$, sans formule.</li>
+                        <li><strong>Réseaux de neurones.</strong> Même chose, avec en plus une fonction $F$ non convexe, qui a de nombreux points critiques.</li>
+                    </ul>
+                    <p>Dans tous les cas, on calcule une suite $\theta_0, \theta_1, \theta_2, \dots$ qui s'approche d'un minimiseur, et on s'arrête quand c'est <em>assez bon</em>. Assez bon pour quoi ? L'exercice suivant, déjà vu en TD, répond : pour le risque, une erreur d'optimisation $\delta$ s'ajoute simplement aux autres.</p>
+                </div>
+
+                <div class="exo" id="exo-0-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 0.1 · L'erreur d'optimisation s'ajoute</span><span class="exo-tag">rappel du TD, exercice 8</span></div>
+                    <p>On note $R$ le risque, $R_n$ le risque empirique, $f^\star$ la règle de Bayes, $\mathcal{F}$ la classe de modèles. Un algorithme renvoie $\tilde f \in \mathcal F$ avec $R_n(\tilde f) \le \inf_{\mathcal F} R_n + \delta$. Pour $\epsilon > 0$, soit $f_\epsilon \in \mathcal F$ avec $R(f_\epsilon) \le \inf_{\mathcal F} R + \epsilon$.</p>
+                    <ol>
+                        <li>Montrer que $R(\tilde f) - R(f^\star) \le 2 \sup_{f \in \mathcal F} |R(f) - R_n(f)| + \delta + \big(R(f_\epsilon) - R(f^\star)\big)$.</li>
+                        <li>Le premier terme est de l'ordre de $1/\sqrt n$ (cours 4). Quelle précision $\delta$ est-il raisonnable de demander à l'optimisation ?</li>
+                    </ol>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>Écrire $R(\tilde f) - R(f_\epsilon)$ comme la somme de $R(\tilde f) - R_n(\tilde f)$, $R_n(\tilde f) - R_n(f_\epsilon)$ et $R_n(f_\epsilon) - R(f_\epsilon)$.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. Les termes extrêmes de l'indication sont chacun majorés par $\sup_{\mathcal F} |R - R_n|$, et celui du milieu par $\delta$, puisque $R_n(\tilde f) \le \inf_{\mathcal F} R_n + \delta \le R_n(f_\epsilon) + \delta$. On ajoute $R(f_\epsilon) - R(f^\star)$ des deux côtés.</p>
+                        <p>2. Les erreurs <em>s'ajoutent</em>. Rendre $\delta$ beaucoup plus petit que $1/\sqrt n$ ne change pas l'ordre de grandeur de la somme : il suffit de $\delta \approx 1/\sqrt n$. C'est l'argument qui fera gagner SGD en partie 3 : on n'a pas besoin d'optimiser à la précision de la machine.</p>
+                    </div></details>
+                </div>
+            </section>
+
+            <!-- ==================== 1 ==================== -->
+            <section class="lab-section" id="rappels">
+                <h2>1. Rappels : gradient, hessienne, convexité</h2>
+                <div class="lab-prose">
+                    <p>Pour $F : \mathbb{R}^d \to \mathbb{R}$ différentiable, le <strong>gradient</strong> $\nabla F(\theta) \in \mathbb{R}^d$ est le vecteur des dérivées partielles $\partial F/\partial\theta_j$, et la <strong>hessienne</strong> $\nabla^2 F(\theta)$ la matrice symétrique $d \times d$ des dérivées secondes. Ils donnent les développements de Taylor à l'ordre 1 et 2 :</p>
+                    $$F(\theta + h) = F(\theta) + \langle \nabla F(\theta), h \rangle + o(\|h\|), \qquad F(\theta + h) = F(\theta) + \langle \nabla F(\theta), h \rangle + \tfrac12 h^\top \nabla^2 F(\theta)\, h + o(\|h\|^2).$$
+                    <p>Toute la suite repose sur une idée : <em>près du point courant, remplacer $F$ par son développement de Taylor, et faire le pas qu'il suggère</em>.</p>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Définitions.</span> $F$ est <strong>convexe</strong> si $F(\lambda\theta + (1-\lambda)\eta) \le \lambda F(\theta) + (1-\lambda) F(\eta)$ pour tous $\theta, \eta$ et $\lambda \in [0, 1]$. Pour $F$ deux fois dérivable, c'est équivalent à : $\nabla^2 F(\theta)$ a toutes ses valeurs propres $\ge 0$, pour tout $\theta$. On dit de plus que :</p>
+                    <ul>
+                        <li>$F$ est <strong>$\mu$-fortement convexe</strong> ($\mu > 0$) si les valeurs propres de $\nabla^2 F(\theta)$ sont toutes $\ge \mu$ ;</li>
+                        <li>$F$ est <strong>$L$-régulière</strong> ($L$-smooth) si celles-ci sont toutes dans $[-L, L]$, c'est-à-dire si $\|\nabla F(\theta) - \nabla F(\eta)\| \le L \|\theta - \eta\|$ pour tous $\theta, \eta$.</li>
+                    </ul>
+                    <p>Quand $F$ est $\mu$-fortement convexe et $L$-régulière, $\kappa = L/\mu \ge 1$ est son <strong>conditionnement</strong>. Pour une quadratique $F(\theta) = \frac12 \theta^\top A \theta - b^\top \theta$ avec $A$ symétrique définie positive, $\nabla^2 F = A$ : $L$ et $\mu$ sont la plus grande et la plus petite valeur propre de $A$.</p>
+                </div>
+                <div class="lab-prose">
+                    <p>Pourquoi la convexité compte : si $F$ est convexe et $\nabla F(\theta^\star) = 0$, alors $\theta^\star$ est un minimiseur <em>global</em>. Sans convexité, un point où le gradient s'annule (un <em>point critique</em>) peut être un minimum local, un maximum ou un point selle : voyez les deux puits de l'<a href="#I.4" data-experiment="I.4">expérience I.4</a>.</p>
+                </div>
+
+                <div class="exo" id="exo-1-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 1.1 · Moindres carrés</span><span class="exo-tag">✎ à la main</span></div>
+                    <p>Soit $F(\theta) = \frac{1}{2n} \|X\theta - y\|^2$, avec $X \in \mathbb{R}^{n \times d}$ (une ligne par individu) et $y \in \mathbb{R}^n$.</p>
+                    <ol>
+                        <li>Calculer $\nabla F(\theta)$ et $\nabla^2 F(\theta)$. En déduire que $F$ est convexe, et qu'elle est fortement convexe si et seulement si $X^\top X$ est inversible.</li>
+                        <li>Régression $y \approx w x + b$, donc $\theta = (w, b)$ et la ligne $i$ de $X$ est $(x_i, 1)$. Avec les trois points $x = 1, 2, 3$, écrire $\nabla^2 F$ et calculer $L$ : <span class="exo-check" data-answer="5.5465" data-tol="0.002"></span>, puis $\kappa$ : <span class="exo-check" data-answer="46.14" data-tol="0.05"></span></li>
+                        <li>Même question après avoir centré les $x_i$ (donc $x = -1, 0, 1$). Que vaut $\kappa$ ? <span class="exo-check" data-answer="1.5" data-tol="0.001"></span></li>
+                    </ol>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>$F(\theta) = \frac{1}{2n}(X\theta - y)^\top (X\theta - y)$. Pour une matrice symétrique $2 \times 2$ de trace $s$ et de déterminant $p$, les valeurs propres sont les racines de $\lambda^2 - s\lambda + p$.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $\nabla F(\theta) = \frac1n X^\top (X\theta - y)$ et $\nabla^2 F(\theta) = \frac1n X^\top X$, constante. Pour tout $h$, $h^\top X^\top X h = \|Xh\|^2 \ge 0$ : $F$ est convexe. Les valeurs propres de $X^\top X$ sont toutes $> 0$ exactement quand $X^\top X$ est inversible, et alors $\mu = \lambda_{\min}(X^\top X/n) > 0$.</p>
+                        <p>2. $\nabla^2 F = \frac13 \begin{pmatrix} \sum x_i^2 & \sum x_i \\ \sum x_i & 3 \end{pmatrix} = \begin{pmatrix} 14/3 & 2 \\ 2 & 1 \end{pmatrix}$, de trace $17/3$ et de déterminant $14/3 - 4 = 2/3$. Les valeurs propres sont $L \approx 5{,}546$ et $\mu \approx 0{,}120$, d'où $\kappa \approx 46{,}1$.</p>
+                        <p>3. Centrés, $\sum x_i = 0$ : $\nabla^2 F = \operatorname{diag}(2/3, 1)$, $L = 1$, $\mu = 2/3$, $\kappa = 1{,}5$. La pente et l'ordonnée à l'origine ne se compensent plus. On verra en partie 2 que le nombre d'itérations de la descente de gradient est proportionnel à $\kappa$ : centrer les données le divise ici par 30. C'est l'<a href="#I.3" data-experiment="I.3">expérience I.3</a>, sur 100 points.</p>
+                    </div></details>
+                </div>
+
+                <div class="exo" id="exo-1-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 1.2 · Régression logistique</span><span class="exo-tag">✎ à la main</span></div>
+                    <p>Avec $y_i \in \{-1, 1\}$, la perte logistique est $\ell_i(\theta) = \log\big(1 + e^{-y_i \theta^\top x_i}\big)$. On note $\sigma(u) = 1/(1 + e^{-u})$.</p>
+                    <ol>
+                        <li>Vérifier que $\sigma'(u) = \sigma(u)\sigma(-u)$, puis que $\nabla \ell_i(\theta) = -y_i\, \sigma(-y_i \theta^\top x_i)\, x_i$.</li>
+                        <li>Montrer que $\nabla^2 \ell_i(\theta) = \sigma(\theta^\top x_i)\sigma(-\theta^\top x_i)\, x_i x_i^\top$. En déduire que $F = \frac1n\sum_i \ell_i$ est convexe.</li>
+                        <li>Que vaut $\max_u \sigma(u)\sigma(-u)$ ? <span class="exo-check" data-answer="0.25" data-tol="1e-6"></span> En déduire que $F$ est $L$-régulière avec $L = \lambda_{\max}(X^\top X)/(4n)$.</li>
+                        <li>★ Si les données sont séparables (il existe $\theta_0$ avec $y_i \theta_0^\top x_i > 0$ pour tout $i$), montrer que $F(t\theta_0) \to 0$ quand $t \to \infty$, et que $F$ n'a pas de minimiseur.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $\sigma'(u) = e^{-u}/(1+e^{-u})^2 = \sigma(u) \cdot \frac{e^{-u}}{1 + e^{-u}} = \sigma(u)\sigma(-u)$. Avec $u = y_i\theta^\top x_i$, $\frac{d}{du}\log(1 + e^{-u}) = -\sigma(-u)$, et $\nabla_\theta u = y_i x_i$.</p>
+                        <p>2. On dérive $-y_i\sigma(-y_i\theta^\top x_i) x_i$ : $\nabla^2\ell_i = y_i^2 \sigma'(-y_i\theta^\top x_i) x_i x_i^\top$, et $y_i^2 = 1$, $\sigma'$ est paire. C'est un réel positif fois $x_i x_i^\top$, qui est semi-définie positive ; une somme de telles matrices aussi.</p>
+                        <p>3. $\sigma(u)\sigma(-u) = \sigma(u)(1 - \sigma(u)) \le 1/4$, avec égalité en $u = 0$. Donc $\nabla^2 F \preceq \frac{1}{4n}\sum_i x_i x_i^\top = \frac{1}{4n} X^\top X$.</p>
+                        <p>4. Chaque terme $\log(1 + e^{-t y_i\theta_0^\top x_i}) \to 0$. Comme $F > 0$ partout, l'infimum $0$ n'est pas atteint. La descente de gradient fait alors grandir $\|\theta_t\|$ indéfiniment ; une pénalité ridge $\frac\lambda2\|\theta\|^2$ règle le problème (exercice 1.3). Le terrain de jeu utilise des données non séparables.</p>
+                    </div></details>
+                </div>
+
+                <div class="exo" id="exo-1-3">
+                    <div class="exo-head"><span class="exo-title">Exercice 1.3 · La pénalité ridge rend fortement convexe</span><span class="exo-tag is-further">★</span></div>
+                    <p>Soit $G$ convexe deux fois dérivable et $F(\theta) = G(\theta) + \frac\lambda2\|\theta\|^2$, $\lambda > 0$. Montrer que $F$ est $\lambda$-fortement convexe. Si $G$ est $L_G$-régulière, quel est le conditionnement de $F$, au pire ?</p>
+                    <details class="exo-sol"><summary>Solution</summary><div><p>$\nabla^2 F = \nabla^2 G + \lambda I$ : chaque valeur propre est augmentée de $\lambda$, donc $\ge \lambda$, et $\le L_G + \lambda$. D'où $\kappa \le (L_G + \lambda)/\lambda = 1 + L_G/\lambda$. La régularisation améliore aussi l'optimisation, et d'autant plus que $\lambda$ est grand.</p></div></details>
+                </div>
+            </section>
+
+            <!-- ==================== 2 ==================== -->
+            <section class="lab-section" id="gd">
+                <h2>2. La descente de gradient</h2>
+                <div class="lab-prose">
+                    <h3>La direction de plus forte pente</h3>
+                    <p>À l'ordre 1, $F(\theta + h) \approx F(\theta) + \langle \nabla F(\theta), h\rangle$. Parmi les directions $u$ de norme $1$, l'inégalité de Cauchy-Schwarz donne $\langle \nabla F(\theta), u\rangle \ge -\|\nabla F(\theta)\|$, avec égalité pour $u = -\nabla F(\theta)/\|\nabla F(\theta)\|$ : moins le gradient est la direction de plus forte descente. D'où l'algorithme.</p>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Descente de gradient (GD).</span> Partant de $\theta_0 \in \mathbb{R}^d$, pour $t = 1, 2, \dots$ :</p>
+                    $$\theta_t = \theta_{t-1} - \gamma\, \nabla F(\theta_{t-1}).$$
+                    <p>Le réel $\gamma > 0$ est le <strong>pas</strong> (<em>learning rate</em>). On peut le faire dépendre de $t$, et on le notera alors $\gamma_t$.</p>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Le cas d'une parabole</h3>
+                        <p>Sur $F(\theta) = \frac a2 \theta^2$, avec $a > 0$, $F'(\theta) = a\theta$ et la récurrence s'écrit $\theta_t = (1 - \gamma a)\,\theta_{t-1}$. Tout est explicite : $\theta_t = (1 - \gamma a)^t \theta_0$. La figure prend $a = 4$ et $\theta_0 = 1$. Faites varier $\gamma$ et observez les quatre régimes :</p>
+                        <ul>
+                            <li>$\gamma a &lt; 1$ : les itérés décroissent sans changer de signe ;</li>
+                            <li>$\gamma a = 1$ : le minimum est atteint en un pas ;</li>
+                            <li>$1 &lt; \gamma a &lt; 2$ : ils alternent de signe, en convergeant (zigzag) ;</li>
+                            <li>$\gamma a &gt; 2$ : $|1 - \gamma a| &gt; 1$, ils divergent.</li>
+                        </ul>
+                        <p>Ici $a$ est la dérivée seconde de $F$ : le pas maximal, $2/a$, est fixé par la <em>courbure</em>. C'est ce que dit, en général, le lemme de descente qui suit.</p>
+                    </div>
+                    <figure class="lab-fig opt-fig-gd1d" data-a="4">
+                        <div class="lab-fig-line">
+                            <button type="button" class="demo-button lab-play lab-small" data-action="play">▶</button>
+                            <button type="button" class="demo-button lab-small" data-action="step">Un pas</button>
+                            <button type="button" class="demo-button lab-small" data-action="reset">↻</button>
+                            <span class="lab-muted">t = <span data-out="t"></span>, θ_t = <span data-out="theta"></span></span>
+                        </div>
+                        <label class="demo-control">Pas $\gamma$ = <output data-out="gamma"></output>, donc $\gamma a$ = <output data-out="ga"></output> et $1 - \gamma a$ = <output data-out="factor"></output>
+                            <input type="range" data-input="gamma" min="0" max="0.6" step="0.01" value="0.3"></label>
+                        <div class="lab-two"><canvas role="img" aria-label="La parabole et les itérés"></canvas><canvas role="img" aria-label="Les itérés en fonction de t"></canvas></div>
+                        <div class="lab-table-wrap"><table class="lab-table" data-out="table"></table></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-2-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 2.1 · La parabole, à la main</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">avec la figure</span></div>
+                    <p>$F(\theta) = 2\theta^2$ (donc $a = 4$), $\theta_0 = 1$.</p>
+                    <ol>
+                        <li>Pour $\gamma = 0{,}3$, calculer $\theta_3$ : <span class="exo-check" data-answer="-0.008" data-tol="1e-6"></span></li>
+                        <li>Pour $\gamma = 0{,}4$, calculer $\theta_5$ : <span class="exo-check" data-answer="-0.07776" data-tol="1e-6"></span></li>
+                        <li>Quel pas atteint le minimum en un pas ? <span class="exo-check" data-answer="0.25" data-tol="1e-6"></span> Au-delà de quel pas la suite diverge-t-elle ? <span class="exo-check" data-answer="0.5" data-tol="1e-6"></span></li>
+                        <li>Pour $\gamma = 0{,}1$ et $\gamma = 0{,}4$, les facteurs $1 - \gamma a$ valent $0{,}6$ et $-0{,}6$. Comparer les deux suites. Laquelle « converge le plus vite » ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $1 - \gamma a = -0{,}2$, $\theta_3 = (-0{,}2)^3 = -0{,}008$. 2. $1 - \gamma a = -0{,}6$, $\theta_5 = (-0{,}6)^5 = -0{,}07776$. 3. $\gamma = 1/a = 0{,}25$ ; divergence dès que $|1 - 4\gamma| > 1$, soit $\gamma > 2/a = 0{,}5$.</p>
+                        <p>4. $|\theta_t| = 0{,}6^t$ dans les deux cas : même vitesse, mais avec $\gamma = 0{,}4$ le signe alterne (zigzag). La vitesse est donnée par $|1 - \gamma a|$, minimale (nulle) en $\gamma = 1/a$.</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+# Descente de gradient sur F(θ) = (a/2) θ², avec a = 4 et θ0 = 1
+a, theta0 = 4.0, 1.0
+for gamma in [0.1, 0.25, 0.3, 0.4, 0.55]:
+    theta, iterates = theta0, [theta0]
+    for t in range(5):
+        theta = theta - gamma * a * theta      # θ_t = θ_{t-1} - γ F'(θ_{t-1})
+        iterates.append(theta)
+    print(f"γ = {gamma:4}:", np.round(iterates, 4))</code></pre>
+                </div>
+
+                <div class="lab-prose">
+                    <h3>Régularité et lemme de descente</h3>
+                    <p>En dimension quelconque, la courbure de $F$ varie d'un point et d'une direction à l'autre ; la constante $L$ en est un majorant global. Elle donne une majoration quadratique de $F$, valable partout et pas seulement près du point courant.</p>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Lemme (majoration quadratique).</span> Si $F$ est $L$-régulière, pour tous $\theta, \eta \in \mathbb{R}^d$,</p>
+                    $$F(\eta) \le F(\theta) + \langle \nabla F(\theta), \eta - \theta \rangle + \frac L2 \|\eta - \theta\|^2.$$
+                    <p><span class="statement-title">Proposition (lemme de descente).</span> Si $F$ est $L$-régulière, un pas de descente de gradient $\theta^+ = \theta - \gamma\nabla F(\theta)$ vérifie</p>
+                    $$F(\theta^+) \le F(\theta) - \gamma\Big(1 - \frac{L\gamma}{2}\Big) \|\nabla F(\theta)\|^2.$$
+                    <p>En particulier, pour $0 &lt; \gamma &lt; 2/L$, $F$ décroît strictement tant que $\nabla F(\theta) \ne 0$, et pour $\gamma = 1/L$, $F(\theta^+) \le F(\theta) - \frac{1}{2L}\|\nabla F(\theta)\|^2$.</p>
+                </div>
+                <details class="fold">
+                    <summary>Démontrer le lemme</summary>
+                    <div class="proof">
+                        <p>Posons $\varphi(s) = F(\theta + s(\eta - \theta))$ pour $s \in [0, 1]$, de dérivée $\varphi'(s) = \langle \nabla F(\theta + s(\eta - \theta)), \eta - \theta\rangle$. Alors</p>
+                        $$F(\eta) - F(\theta) - \langle \nabla F(\theta), \eta - \theta\rangle = \int_0^1 \big\langle \nabla F(\theta + s(\eta-\theta)) - \nabla F(\theta), \eta - \theta \big\rangle\, ds \le \int_0^1 L s \|\eta - \theta\|^2 ds = \frac L2 \|\eta - \theta\|^2,$$
+                        <p>par Cauchy-Schwarz et la régularité, $\|\nabla F(\theta + s(\eta - \theta)) - \nabla F(\theta)\| \le L s\|\eta - \theta\|$.</p>
+                    </div>
+                </details>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <p>La figure trace $F(\theta) = \theta^2/4 + \sin(2\theta)/2$, qui n'est pas convexe : $F''(\theta) = \frac12 - 2\sin(2\theta)$ varie entre $-\frac32$ et $\frac52$, donc $L = 5/2$. Au point $\theta$, la tangente (pointillés) et les deux paraboles $F(\theta) + F'(\theta)(\eta - \theta) \pm \frac L2 (\eta - \theta)^2$ encadrent $F$ partout.</p>
+                        <p>Le pas $\theta^+ = \theta - \gamma F'(\theta)$ (flèche) mène à la valeur $F(\theta^+)$ (point coloré), qui est toujours sous la valeur promise par le lemme (petit point sur la parabole supérieure). Pour $\gamma = 1/L$, $\theta^+$ est exactement le <em>minimum de la parabole supérieure</em> : la descente de gradient minimise, à chaque pas, la majoration quadratique de $F$. Au-delà de $\gamma = 2/L$, la parabole ne garantit plus rien.</p>
+                    </div>
+                    <figure class="lab-fig opt-fig-descent">
+                        <label class="demo-control">Point $\theta$ = <output data-out="theta"></output><input type="range" data-input="theta" min="-3" max="3" step="0.01" value="-2"></label>
+                        <label class="demo-control">Pas $\gamma$ = <output data-out="gamma"></output>, $\gamma L$ = <output data-out="gl"></output><input type="range" data-input="gamma" min="0" max="1" step="0.004" value="0.4"></label>
+                        <div class="lab-fig-line">
+                            <button type="button" class="demo-button lab-small" data-gamma="0.5">γ = 1/(2L)</button>
+                            <button type="button" class="demo-button lab-small" data-gamma="1">γ = 1/L</button>
+                            <button type="button" class="demo-button lab-small" data-gamma="1.9">γ = 1,9/L</button>
+                            <button type="button" class="demo-button lab-small" data-gamma="2.3">γ = 2,3/L</button>
+                        </div>
+                        <canvas role="img" aria-label="La fonction, sa tangente, les deux paraboles et le pas de gradient"></canvas>
+                        <div class="lab-fig-legend"><span><span class="lab-swatch lab-swatch-ink"></span> $F$</span> <span><span class="lab-swatch lab-swatch-pos"></span> parabole supérieure</span> <span><span class="lab-swatch lab-swatch-neg"></span> le pas</span></div>
+                        <div class="lab-fig-readout">$F(\theta)$ = <span data-out="f"></span>, $F'(\theta)$ = <span data-out="df"></span><br>$F(\theta^+)$ = <span data-out="fplus"></span> ≤ borne $F(\theta) - \gamma(1 - L\gamma/2)F'(\theta)^2$ = <span data-out="bound"></span> <span data-out="verdict"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-2-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 2.2 · Le lemme de descente</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">avec la figure</span></div>
+                    <ol>
+                        <li>Déduire le lemme de descente de la majoration quadratique, appliquée en $\eta = \theta - \gamma \nabla F(\theta)$.</li>
+                        <li>Pour quel $\gamma$ la garantie $\gamma(1 - L\gamma/2)$ est-elle la plus grande ? Que vaut-elle alors ?</li>
+                        <li>Avec la fonction de la figure, $L = 5/2$, $\theta = -2$ et $\gamma = 0{,}4$ : calculer $F'(-2) = -1 + \cos 4$, puis $\theta^+$ : <span class="exo-check" data-answer="-1.3385" data-tol="0.0005"></span> et la borne du lemme : <span class="exo-check" data-answer="0.8315" data-tol="0.0005"></span> Vérifier sur la figure que $F(\theta^+) \approx 0{,}224$ est bien en dessous.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. Avec $\eta - \theta = -\gamma\nabla F(\theta)$ : $F(\theta^+) \le F(\theta) - \gamma\|\nabla F(\theta)\|^2 + \frac{L\gamma^2}{2}\|\nabla F(\theta)\|^2$.</p>
+                        <p>2. $\gamma \mapsto \gamma - L\gamma^2/2$ est une parabole maximale en $\gamma = 1/L$, de valeur $1/(2L)$.</p>
+                        <p>3. $F'(-2) = -1 + \cos 4 \approx -1{,}6536$, $\theta^+ = -2 + 0{,}4 \times 1{,}6536 \approx -1{,}3385$. $F(-2) = 1 - \sin(4)/2 \approx 1{,}3784$, et $\gamma(1 - L\gamma/2) = 0{,}4 \times 0{,}5 = 0{,}2$, d'où la borne $1{,}3784 - 0{,}2 \times 2{,}7345 \approx 0{,}8315$. La vraie valeur, $0{,}224$, est bien plus basse : le lemme est une garantie de pire cas.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-prose">
+                    <h3>Trois théorèmes de convergence</h3>
+                    <p>Le lemme de descente dit que chaque pas fait baisser $F$ d'au moins $\|\nabla F\|^2/(2L)$. Selon ce qu'on sait de plus sur $F$, on en tire trois garanties, de la plus faible à la plus forte. On note $F^\star = \inf F$, supposé fini, et on prend $\gamma = 1/L$.</p>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Théorème (cas non convexe).</span> Si $F$ est $L$-régulière, $\displaystyle \min_{0 \le s &lt; t} \|\nabla F(\theta_s)\|^2 \le \frac{2L\,(F(\theta_0) - F^\star)}{t}$.</p>
+                    <p><span class="statement-title">Théorème (cas convexe).</span> Si de plus $F$ est convexe et atteint son minimum en $\theta^\star$, $\displaystyle F(\theta_t) - F^\star \le \frac{L\,\|\theta_0 - \theta^\star\|^2}{2t}$.</p>
+                    <p><span class="statement-title">Théorème (cas fortement convexe).</span> Si $F$ est $L$-régulière et $\mu$-fortement convexe, $\displaystyle F(\theta_t) - F^\star \le \Big(1 - \frac{\mu}{L}\Big)^t \big(F(\theta_0) - F^\star\big) \le e^{-t/\kappa}\big(F(\theta_0) - F^\star\big)$.</p>
+                </div>
+                <div class="lab-prose">
+                    <p>Le premier ne dit rien de $F(\theta_t)$ : seulement que le gradient devient petit, ce qui arrive aussi près d'un point selle (<a href="#I.4" data-experiment="I.4">expérience I.4</a> ; on verra dans l'<a href="#II.5" data-experiment="II.5">expérience II.5</a> que le bruit de SGD aide à en sortir). C'est pourtant le type de garantie que l'on peut espérer pour les réseaux de neurones (et encore : leur $F$ n'est en général pas exactement $L$-régulière). Le troisième donne une convergence <em>exponentielle</em> (dite linéaire) : une droite sur la courbe du terrain de jeu, de pente fixée par $\kappa$.</p>
+                </div>
+
+                <div class="exo" id="exo-2-3">
+                    <div class="exo-head"><span class="exo-title">Exercice 2.3 · Démontrer le cas non convexe et le cas fortement convexe</span><span class="exo-tag">démonstration guidée</span></div>
+                    <ol>
+                        <li>Sommer le lemme de descente (avec $\gamma = 1/L$) pour les pas $1$ à $t$, et en déduire le théorème non convexe. Combien d'itérations garantissent un point où $\|\nabla F\| \le \epsilon$ ?</li>
+                        <li>On suppose $F$ $\mu$-fortement convexe : $F(\eta) \ge F(\theta) + \langle \nabla F(\theta), \eta - \theta\rangle + \frac\mu2\|\eta - \theta\|^2$ pour tous $\theta, \eta$. En minimisant les deux membres en $\eta$, montrer l'inégalité de <strong>Polyak-Łojasiewicz</strong> : $\|\nabla F(\theta)\|^2 \ge 2\mu\,(F(\theta) - F^\star)$.</li>
+                        <li>La reporter dans le lemme de descente et en déduire le théorème fortement convexe. Pourquoi $(1 - 1/\kappa)^t \le e^{-t/\kappa}$ ?</li>
+                    </ol>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>1. La somme est télescopique : $\sum_{s=1}^t (F(\theta_{s-1}) - F(\theta_s)) = F(\theta_0) - F(\theta_t) \le F(\theta_0) - F^\star$. Un minimum est plus petit qu'une moyenne. 2. Le membre de droite est un polynôme de degré 2 en $\eta$, minimal en $\eta = \theta - \nabla F(\theta)/\mu$.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $\frac{1}{2L}\sum_{s=0}^{t-1}\|\nabla F(\theta_s)\|^2 \le F(\theta_0) - F^\star$, donc $\min_{s &lt; t}\|\nabla F(\theta_s)\|^2 \le \frac1t\sum_s \|\nabla F(\theta_s)\|^2 \le 2L(F(\theta_0) - F^\star)/t$. Pour $\|\nabla F\| \le \epsilon$, il suffit de $t \ge 2L(F(\theta_0) - F^\star)/\epsilon^2$ itérations.</p>
+                        <p>2. Le minimum en $\eta$ du membre de gauche est $F^\star$ ; celui du membre de droite, atteint en $\eta = \theta - \nabla F(\theta)/\mu$, vaut $F(\theta) - \frac{1}{2\mu}\|\nabla F(\theta)\|^2$. D'où $F^\star \ge F(\theta) - \frac{1}{2\mu}\|\nabla F(\theta)\|^2$.</p>
+                        <p>3. $F(\theta_t) - F^\star \le F(\theta_{t-1}) - F^\star - \frac{1}{2L}\|\nabla F(\theta_{t-1})\|^2 \le \big(1 - \frac\mu L\big)(F(\theta_{t-1}) - F^\star)$, puis récurrence. Et $1 - u \le e^{-u}$ par convexité de l'exponentielle.</p>
+                    </div></details>
+                </div>
+
+                <details class="fold">
+                    <summary>★ Démontrer le cas convexe</summary>
+                    <div class="proof">
+                        <p>Notons $g = \nabla F(\theta_k)$ et $D_k = \|\theta_k - \theta^\star\|^2$. Comme $\theta_{k+1} = \theta_k - g/L$, en développant le carré, $\frac L2 (D_k - D_{k+1}) = \langle g, \theta_k - \theta^\star\rangle - \frac{1}{2L}\|g\|^2$. Par convexité, $F(\theta_k) \le F^\star + \langle g, \theta_k - \theta^\star\rangle$, et par le lemme de descente $F(\theta_{k+1}) \le F(\theta_k) - \frac{1}{2L}\|g\|^2$. Ensemble : $F(\theta_{k+1}) - F^\star \le \frac L2(D_k - D_{k+1})$.</p>
+                        <p>En sommant de $k = 0$ à $t - 1$ (somme télescopique) : $\sum_{k=1}^t (F(\theta_k) - F^\star) \le \frac L2 D_0$. La suite $F(\theta_k)$ décroît, donc le membre de gauche est au moins $t\,(F(\theta_t) - F^\star)$.</p>
+                    </div>
+                </details>
+
+                <div class="lab-prose">
+                    <h3>Le conditionnement</h3>
+                    <p>Sur la quadratique $F(\theta) = \frac12(\mu\theta_1^2 + L\theta_2^2)$, les deux coordonnées évoluent séparément, comme sur deux paraboles : $\theta_{t,1} = (1 - \gamma\mu)^t\theta_{0,1}$ et $\theta_{t,2} = (1 - \gamma L)^t\theta_{0,2}$. La direction raide impose $\gamma &lt; 2/L$, et avec $\gamma = 1/L$ la direction plate avance au rythme $1 - \mu/L = 1 - 1/\kappa$ par pas. Toute fonction fortement convexe ressemble à cela près de son minimum, avec pour axes les vecteurs propres de la hessienne. Lancez les expériences <a href="#I.1" data-experiment="I.1">I.1</a> (le pas), <a href="#I.2" data-experiment="I.2">I.2</a> (le conditionnement) et <a href="#I.3" data-experiment="I.3">I.3</a> (centrer les données : dans l'exercice 1.1, $\kappa$ passe de $46$ à $1{,}5$).</p>
+                </div>
+
+                <div class="exo" id="exo-2-4">
+                    <div class="exo-head"><span class="exo-title">Exercice 2.4 · Ce que coûte le conditionnement</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Avec $\kappa = 100$ et $\gamma = 1/L$, combien d'itérations faut-il pour diviser $|\theta_{t,1}|$ par $10^6$ ? <span class="exo-check" data-answer="1375" data-tol="0.5"></span> Comparer à l'approximation $\kappa \ln(10^6)$.</li>
+                        <li>$F(\theta_t) - F^\star = \frac\mu2 \theta_{t,1}^2$ dès $t \ge 1$. Combien d'itérations pour diviser $F(\theta_t) - F^\star$ par $10^6$ ? <span class="exo-check" data-answer="688" data-tol="0.5"></span> Comparer au résultat de l'<a href="#I.2" data-experiment="I.2">expérience I.2</a> (574 itérations pour passer de $F(\theta_0) - F^\star \approx 4{,}6$ à $10^{-6}$).</li>
+                        <li><strong>Unités.</strong> Une régression linéaire sans ordonnée à l'origine utilise deux variables décorrélées, centrées, de variance $1$ : $\nabla^2 F = I$. On exprime la seconde, une distance, en kilomètres plutôt qu'en mètres. Que devient $\kappa$ ? <span class="exo-check" data-answer="1e6" data-rel="0.001"></span></li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $0{,}99^t \le 10^{-6} \iff t \ge \ln(10^6)/(-\ln 0{,}99) \approx 1374{,}6$, donc $1375$ itérations ; $\kappa\ln(10^6) \approx 1382$, car $-\ln(1 - 1/\kappa) \approx 1/\kappa$.</p>
+                        <p>2. $F - F^\star$ est un carré : $0{,}99^{2t} \le 10^{-6}$ demande $t \ge 688$. Dans l'expérience, le premier pas annule la coordonnée raide, et il reste $F(\theta_t) - F^\star = \frac{\mu}{2}\theta_{0,1}^2\, 0{,}99^{2t} \approx 0{,}101 \times 0{,}99^{2t}$ : il suffit de diviser par $10^5$ environ, d'où $\ln(1{,}01 \cdot 10^5)/(-2\ln 0{,}99) \approx 574$ itérations.</p>
+                        <p>3. La seconde variable est divisée par $1000$, sa variance par $10^6$ : $\nabla^2 F = \operatorname{diag}(1, 10^{-6})$, $\kappa = 10^6$. Le modèle et ses prédictions sont les mêmes, mais la descente de gradient devient un million de fois plus lente. Standardiser les variables n'est pas cosmétique.</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (retrouve l'expérience I.2)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+# F(θ) = ½ (μ θ1² + L θ2²), L = 1, μ = 1/κ : descente de gradient avec γ = 1/L
+def iterations(kappa, gamma=1.0, eps=1e-6):
+    A = np.diag([1 / kappa, 1.0])
+    F = lambda th: 0.5 * th @ A @ th
+    theta, t = np.array([-4.5, 3.0]), 0
+    while F(theta) &gt;= eps:
+        theta = theta - gamma * (A @ theta)  # ∇F(θ) = A θ
+        t += 1
+    return t
+
+for kappa in [1, 10, 100]:
+    print(f"κ = {kappa:3}: {iterations(kappa)} itérations pour F(θ_t) − F* &lt; 1e-6")</code></pre>
+                </div>
+
+                <div class="lab-recap">
+                    <span class="lab-recap-title">À retenir</span>
+                    <p>La descente de gradient minimise, à chaque pas, une majoration quadratique de $F$. Le pas doit rester sous $2/L$, fixé par la plus forte courbure. Le nombre d'itérations est en $1/\epsilon^2$ (non convexe, sur le gradient), $1/\epsilon$ (convexe) ou $\kappa\log(1/\epsilon)$ (fortement convexe). Le conditionnement $\kappa$ dépend de la façon dont on écrit le problème : centrer et réduire les variables le change.</p>
+                </div>
+            </section>
+
+            <!-- ==================== 3 ==================== -->
+            <section class="lab-section" id="sgd">
+                <p class="lab-session">Séance 2 · parties 3 à 5</p>
+                <h2>3. Le gradient stochastique</h2>
+                <div class="lab-prose">
+                    <h3>Le coût d'un gradient</h3>
+                    <p>Pour un risque empirique, $\nabla F(\theta) = \frac1n\sum_{i=1}^n \nabla\ell_i(\theta)$ : chaque itération de la descente de gradient parcourt <em>toutes</em> les données. Avec $n = 10^6$ images, un seul pas demande un million de passages dans le réseau. L'idée du gradient stochastique : remplacer la moyenne sur les $n$ exemples par une moyenne sur quelques exemples tirés au hasard.</p>
+                    <p><strong>Le fil rouge de cette partie est le compromis biais-variance du cours 1.</strong> Il apparaît deux fois. D'abord, le gradient calculé sur quelques exemples est un <em>estimateur</em> du vrai gradient : sans biais, mais de variance non nulle. Ensuite, l'itéré $\theta_t$ de SGD est lui-même un estimateur de $\theta^\star$, et son erreur se décompose en un <strong>biais</strong>, ce qui reste du point de départ $\theta_0$, et une <strong>variance</strong>, le bruit des gradients accumulé au fil des pas. Le pas $\gamma$ règle le compromis entre les deux, comme $k$ dans les $k$ plus proches voisins.</p>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Gradient sur un mini-lot.</span> On tire au hasard, uniformément, $b$ indices de $\{1, \dots, n\}$ (un <strong>lot</strong>, <em>batch</em>), avec ou sans remise, et on pose $\displaystyle g = \frac1b\sum_{i \in B}\nabla\ell_i(\theta)$. Dans cette partie, $\Omega = 0$ (sinon, on ajoute son gradient exact $\nabla\Omega(\theta)$ à $g$).</p>
+                    <p><span class="statement-title">Gradient stochastique (SGD).</span> Partant de $\theta_0$, pour $t = 1, 2, \dots$, tirer un lot $B_t$ indépendamment du passé et poser $\theta_t = \theta_{t-1} - \gamma_t\, g_t$, avec $g_t$ le gradient sur $B_t$ en $\theta_{t-1}$.</p>
+                    <p>Une itération coûte $b$ gradients au lieu de $n$. Un passage complet sur les données (une <strong>époque</strong>) contient $n/b$ itérations.</p>
+                </div>
+                <div class="lab-prose">
+                    <p>En pratique, on mélange les données au début de chaque époque et on les parcourt par lots successifs, sans remise. Dans le terrain de jeu aussi.</p>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Un estimateur sans biais, de variance (au plus) $\sigma^2/b$</h3>
+                        <p>Le gradient sur un mini-lot est faux à chaque tirage, mais juste <em>en moyenne</em>. Sa dispersion autour de $\nabla F(\theta)$ se mesure par</p>
+                        $$\sigma^2(\theta) = \frac1n\sum_{i=1}^n \big\|\nabla\ell_i(\theta) - \nabla F(\theta)\big\|^2,$$
+                        <p>la variance d'un gradient tiré au hasard, et moyenner $b$ gradients la divise par $b$ avec remise, un peu plus sans remise (exercice 3.1). Dans le langage du cours 1 : l'erreur quadratique moyenne de l'estimateur $g$ vaut $\text{biais}^2 + \text{variance} = 0 + \sigma^2(\theta)/b$. C'est une moyenne de $b$ observations, et la taille de lot joue le rôle de la taille d'échantillon. La figure tire 300 lots sur les moindres carrés du terrain de jeu (100 points, $x_i$ centrés) : chaque point est un $g$, la flèche est $\nabla F(\theta)$, et le cercle a pour rayon l'écart-type théorique. Augmentez $b$ : le nuage se resserre en $1/\sqrt b$.</p>
+                        <p>Placez-vous enfin <em>au minimum</em> $\theta^\star$ : le vrai gradient est nul, mais les gradients stochastiques ne le sont pas. SGD ne peut donc pas s'arrêter en $\theta^\star$ : il en repart à chaque pas. C'est l'origine du plancher de bruit.</p>
+                    </div>
+                    <figure class="lab-fig opt-fig-cloud">
+                        <div class="lab-fig-line"><span class="lab-label">Point $\theta$</span>
+                            <span class="lab-pills" data-pills="point">
+                                <button type="button" class="demo-button" data-value="far" aria-pressed="true">loin du minimum</button>
+                                <button type="button" class="demo-button" data-value="near" aria-pressed="false">près</button>
+                                <button type="button" class="demo-button" data-value="star" aria-pressed="false">au minimum θ*</button>
+                            </span>
+                        </div>
+                        <label class="demo-control">Taille de lot $b$ = <output data-out="b"></output><input type="range" data-input="batch" min="0" max="6" step="1" value="0"></label>
+                        <div class="lab-fig-line">
+                            <label class="lab-check"><input type="checkbox" data-input="replace" checked> tirage avec remise</label>
+                            <button type="button" class="demo-button lab-small" data-action="resample">Nouveaux tirages</button>
+                        </div>
+                        <canvas role="img" aria-label="Les gradients sur mini-lots autour du vrai gradient"></canvas>
+                        <div class="lab-fig-legend"><span><span class="lab-swatch lab-swatch-ink"></span> $\nabla F(\theta)$</span> <span><span class="lab-swatch lab-swatch-pos"></span> 300 tirages de $g$</span> <span><span class="lab-swatch lab-swatch-neg lab-dashed"></span> rayon $\sqrt{\text{variance théorique}}$, ● moyenne des tirages</span></div>
+                        <div class="lab-fig-readout">$\nabla F(\theta)$ = <span data-out="grad"></span>, moyenne des tirages = <span data-out="mean"></span><br>$\sigma^2(\theta)$ = <span data-out="sigma2"></span> ; variance des tirages = <span data-out="variance"></span>, théorie = <span data-out="theory"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-3-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.1 · Espérance et variance d'un gradient sur un mini-lot</span><span class="exo-tag">démonstration guidée</span></div>
+                    <p>On tire $I_1, \dots, I_b$ indépendants et uniformes sur $\{1, \dots, n\}$ (tirage avec remise), et $g = \frac1b\sum_{k=1}^b \nabla\ell_{I_k}(\theta)$.</p>
+                    <ol>
+                        <li>Montrer que $\mathbb{E}[\nabla\ell_{I_1}(\theta)] = \nabla F(\theta)$ (ici $\Omega = 0$), puis que $\mathbb{E}[g] = \nabla F(\theta)$.</li>
+                        <li>Montrer que $\mathbb{E}\|g - \nabla F(\theta)\|^2 = \sigma^2(\theta)/b$.</li>
+                        <li>Montrer l'identité « biais-variance » $\mathbb{E}\|g\|^2 = \|\nabla F(\theta)\|^2 + \mathbb{E}\|g - \nabla F(\theta)\|^2$, qui servira plus bas.</li>
+                        <li>★ Sans remise (un sous-ensemble uniforme de taille $b$), la variance devient $\frac{\sigma^2}{b}\cdot\frac{n - b}{n - 1}$. Que vaut-elle pour $b = n$ ? Vérifier avec la case de la figure.</li>
+                    </ol>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>2. Les vecteurs $Z_k = \nabla\ell_{I_k}(\theta) - \nabla F(\theta)$ sont indépendants, centrés, avec $\mathbb{E}\|Z_k\|^2 = \sigma^2(\theta)$. Développer $\|\frac1b\sum_k Z_k\|^2$ : les produits croisés sont d'espérance nulle. C'est le même calcul que la variance d'une moyenne empirique.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $\mathbb{E}[\nabla\ell_{I_1}(\theta)] = \sum_{i=1}^n \frac1n \nabla\ell_i(\theta) = \nabla F(\theta)$, et l'espérance est linéaire.</p>
+                        <p>2. $\mathbb{E}\|\frac1b\sum_k Z_k\|^2 = \frac1{b^2}\sum_{k, k'}\mathbb{E}\langle Z_k, Z_{k'}\rangle = \frac{1}{b^2}\sum_k\mathbb{E}\|Z_k\|^2 = \frac{\sigma^2(\theta)}{b}$, car $\mathbb{E}\langle Z_k, Z_{k'}\rangle = \langle \mathbb{E}Z_k, \mathbb{E}Z_{k'}\rangle = 0$ pour $k \ne k'$.</p>
+                        <p>3. $\|g\|^2 = \|\nabla F + (g - \nabla F)\|^2 = \|\nabla F\|^2 + 2\langle \nabla F, g - \nabla F\rangle + \|g - \nabla F\|^2$, et le terme du milieu est d'espérance nulle.</p>
+                        <p>4. Pour $b = n$, le lot contient toutes les données : $g = \nabla F(\theta)$ et la variance est nulle, ce que donne bien le facteur $(n - b)/(n - 1)$.</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (la variance en σ²/b)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+rng = np.random.default_rng(0)
+# Moindres carrés pour y ≈ w x + b, x centrés : 100 points
+n = 100
+x = np.linspace(-2, 2, n)
+y = 1.5 * x + 2.5 + 0.8 * rng.normal(size=n)
+theta = np.array([0.0, 4.0])                       # un point (w, b) quelconque
+
+r = theta[0] * x + theta[1] - y
+per_point = np.stack([r * x, r], axis=1)           # ∇ℓ_i(θ), une ligne par point
+grad = per_point.mean(axis=0)                      # ∇F(θ)
+sigma2 = ((per_point - grad) ** 2).sum(axis=1).mean()
+
+for b in [1, 10, 50]:
+    draws = np.array([per_point[rng.choice(n, size=b, replace=True)].mean(axis=0) for _ in range(20000)])
+    print(f"b = {b:2}: moyenne des tirages {draws.mean(axis=0).round(3)} (∇F = {grad.round(3)}), "
+          f"variance {((draws - grad) ** 2).sum(axis=1).mean():.4f} contre σ²/b = {sigma2 / b:.4f}")</code></pre>
+                </div>
+
+                <div class="lab-prose">
+                    <h3>Le lemme de descente, en moyenne</h3>
+                    <p>On note $\mathbb{E}_{t-1}$ l'espérance sachant tout le passé jusqu'à $\theta_{t-1}$ (seul le lot $B_t$ est aléatoire). Deux hypothèses suffisent :</p>
+                    <ul>
+                        <li><strong>(H1) sans biais :</strong> $\mathbb{E}_{t-1}[g_t] = \nabla F(\theta_{t-1})$ ;</li>
+                        <li><strong>(H2) variance bornée :</strong> $\mathbb{E}_{t-1}\|g_t - \nabla F(\theta_{t-1})\|^2 \le \sigma^2$.</li>
+                    </ul>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Proposition (descente en moyenne).</span> Si $F$ est $L$-régulière et sous (H1) et (H2), un pas de SGD de taille $\gamma$ vérifie</p>
+                    $$\mathbb{E}_{t-1}\big[F(\theta_t)\big] \le F(\theta_{t-1}) - \gamma\Big(1 - \frac{L\gamma}2\Big)\|\nabla F(\theta_{t-1})\|^2 + \frac{L\gamma^2\sigma^2}{2}.$$
+                </div>
+                <div class="lab-prose">
+                    <p>C'est le lemme de descente, plus un terme de <em>bruit</em> $L\gamma^2\sigma^2/2$ qui ne dépend pas de $\theta$. Loin du minimum, le gradient est grand et le premier terme l'emporte : SGD descend presque comme la descente de gradient. Près du minimum, le gradient s'annule et le bruit l'emporte : SGD ne descend plus.</p>
+                </div>
+
+                <div class="statement">
+                    <p><span class="statement-title">Théorème (plancher de bruit).</span> Si $F$ est $L$-régulière et $\mu$-fortement convexe, sous (H1) et (H2), SGD à pas constant $\gamma \le 1/L$ vérifie</p>
+                    $$\mathbb{E}\big[F(\theta_t)\big] - F^\star \le \underbrace{\big(1 - \gamma\mu\big)^t\big(F(\theta_0) - F^\star\big)}_{\text{biais : la trace de } \theta_0} + \underbrace{\frac{L\gamma\sigma^2}{2\mu}}_{\text{variance : le bruit accumulé}}.$$
+                </div>
+                <div class="lab-prose">
+                    <p>Les deux termes sont ceux d'une décomposition biais-variance. Le <strong>biais</strong> mesure ce qui reste du point de départ : il décroît exponentiellement, comme pour la descente de gradient, et d'autant plus vite que $\gamma$ est grand. La <strong>variance</strong> vient du bruit des gradients : elle ne tend pas vers $0$, et elle est proportionnelle à $\gamma$. Pour une fonction quadratique, ce n'est pas qu'une image : $\mathbb{E}[\theta_t]$ suit exactement la descente de gradient, et $\mathbb{E}[\theta_t] - \theta^\star$ est le biais de l'estimateur $\theta_t$ (exercice 3.3).</p>
+                    <p><strong>À pas constant, SGD ne converge donc pas</strong> : il atteint un voisinage du minimum où $F - F^\star$ est de l'ordre de $\gamma\sigma^2$ (et la distance à $\theta^\star$ de l'ordre de $\sqrt\gamma$), puis y tourne indéfiniment. Un grand pas oublie vite $\theta_0$ mais plafonne haut ; un petit pas plafonne bas mais met longtemps à oublier $\theta_0$. Voyez l'<a href="#II.2" data-experiment="II.2">expérience II.2</a> : chaque courbe a une phase de biais, où elle descend, puis une phase de variance, où elle plafonne.</p>
+                </div>
+
+                <div class="exo" id="exo-3-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.2 · Démontrer le plancher de bruit</span><span class="exo-tag">démonstration guidée</span></div>
+                    <ol>
+                        <li>Démontrer la descente en moyenne : partir de la majoration quadratique en $\eta = \theta_t = \theta_{t-1} - \gamma g_t$, prendre $\mathbb{E}_{t-1}$, et utiliser (H1), puis l'identité de l'exercice 3.1 et (H2).</li>
+                        <li>On note $h_t = \mathbb{E}[F(\theta_t)] - F^\star$. Avec $\gamma \le 1/L$ et l'inégalité de Polyak-Łojasiewicz (exercice 2.3), montrer que $h_t \le (1 - \gamma\mu)h_{t-1} + L\gamma^2\sigma^2/2$.</li>
+                        <li>En déduire le théorème, en majorant une somme géométrique.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $F(\theta_t) \le F(\theta_{t-1}) - \gamma\langle\nabla F(\theta_{t-1}), g_t\rangle + \frac{L\gamma^2}{2}\|g_t\|^2$. Sachant le passé, $\theta_{t-1}$ est fixé : $\mathbb{E}_{t-1}\langle \nabla F(\theta_{t-1}), g_t\rangle = \|\nabla F(\theta_{t-1})\|^2$ par (H1), et $\mathbb{E}_{t-1}\|g_t\|^2 \le \|\nabla F(\theta_{t-1})\|^2 + \sigma^2$.</p>
+                        <p>2. $\gamma \le 1/L$ donne $1 - L\gamma/2 \ge 1/2$, et Polyak-Łojasiewicz $-\frac\gamma2\|\nabla F\|^2 \le -\gamma\mu(F - F^\star)$. On prend ensuite l'espérance totale.</p>
+                        <p>3. Par récurrence, $h_t \le (1 - \gamma\mu)^t h_0 + \frac{L\gamma^2\sigma^2}{2}\sum_{k=0}^{t-1}(1 - \gamma\mu)^k$, et la somme est au plus $\frac{1}{\gamma\mu}$.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Biais et variance, calculés exactement</h3>
+                        <p>Le plus simple des problèmes d'apprentissage : prédire une variable $Y$ sans variable explicative (cours 1). Le risque quadratique $F(\theta) = \frac12\mathbb{E}[(\theta - Y)^2]$ est minimal en $\theta^\star = \mathbb{E}[Y]$, et $F(\theta) - F^\star = \frac12(\theta - \theta^\star)^2$. Chaque nouvel exemple $Y_t$ donne le gradient stochastique $g_t = \theta_{t-1} - Y_t$, sans biais et de variance $\sigma^2 = \operatorname{Var}(Y)$.</p>
+                        <p>L'itéré $\theta_t$ est un estimateur de $\theta^\star$, et son erreur se décompose exactement comme au cours 1 :</p>
+                        $$\mathbb{E}[F(\theta_t)] - F^\star = \tfrac12\,\mathbb{E}\big[(\theta_t - \theta^\star)^2\big] = \tfrac12\underbrace{\big(\mathbb{E}[\theta_t] - \theta^\star\big)^2}_{\text{biais}^2} + \tfrac12\underbrace{\operatorname{Var}(\theta_t)}_{\text{variance}}.$$
+                        <p>À pas constant, le biais vaut $(1 - \gamma)^t(\theta_0 - \theta^\star)$, et la variance tend vers $\gamma\sigma^2/(2 - \gamma) = \sigma^2/k$ avec $k = 2/\gamma - 1$ (exercice 3.3). SGD fait une moyenne pondérée des observations récentes, qui a la variance d'une moyenne de $k$ observations : c'est le $k$ des $k$ plus proches voisins, et $\gamma = 0{,}1$ donne $k = 19$. Avec $\gamma_t = 1/t$, le biais est nul dès le premier pas et la variance vaut $\sigma^2/t$ : SGD calcule la moyenne de <em>toutes</em> les observations.</p>
+                        <p>La figure fait tourner 500 exécutions indépendantes de SGD, avec $\theta_0 = 3$, $\theta^\star = 0$ et $Y$ gaussienne. À gauche, la loi de $\theta_t$ et sa densité exacte : le biais est l'écart entre le centre de la cloche et $\theta^\star$, la variance mesure sa largeur. À droite, en échelle log-log, $\mathbb{E}[F(\theta_t)] - F^\star$ et ses deux termes. À pas constant, le biais² s'effondre pendant que la variance monte, puis se pose sur le plancher $\gamma\sigma^2/(2(2-\gamma))$. Avec $\gamma_t = 1/t$, il ne reste que la variance, $\sigma^2/(2t)$, une droite de pente $-1$.</p>
+                    </div>
+                    <figure class="lab-fig opt-fig-floor">
+                        <div class="lab-fig-line">
+                            <button type="button" class="demo-button lab-play lab-small" data-action="play">▶</button>
+                            <button type="button" class="demo-button lab-small" data-action="reset">↻</button>
+                            <span class="lab-pills" data-pills="schedule">
+                                <button type="button" class="demo-button" data-value="constant" aria-pressed="true">pas constant</button>
+                                <button type="button" class="demo-button" data-value="inv" aria-pressed="false">γ/(1 + t/20)</button>
+                                <button type="button" class="demo-button" data-value="mean" aria-pressed="false">1/t</button>
+                            </span>
+                        </div>
+                        <label class="demo-control">Pas $\gamma$ = <output data-out="gamma"></output><input type="range" data-input="gamma" min="0.02" max="1.8" step="0.02" value="0.1"></label>
+                        <label class="demo-control">Bruit $\sigma$ = <output data-out="sigma"></output><input type="range" data-input="sigma" min="0.2" max="2" step="0.1" value="1"></label>
+                        <div class="lab-two"><canvas role="img" aria-label="Histogramme des itérés et densité exacte, avec le biais et l'écart-type"></canvas><canvas role="img" aria-label="Espérance de F en fonction de t, et ses termes de biais et de variance"></canvas></div>
+                        <div class="lab-fig-legend"><span><span class="lab-swatch lab-swatch-third"></span> biais ; ½ biais²</span> <span><span class="lab-swatch lab-swatch-ink"></span> ± un écart-type ; ½ variance</span> <span><span class="lab-swatch lab-swatch-pos"></span> 500 exécutions</span> <span><span class="lab-swatch lab-swatch-neg lab-dashed"></span> exact</span></div>
+                        <div class="lab-fig-readout">$t$ = <span data-out="t"></span>, $\gamma_t$ = <span data-out="gammaT"></span><br>biais $\mathbb{E}[\theta_t] - \theta^\star$ : <span data-out="biasEmp"></span> sur 500 exécutions, <span data-out="biasExact"></span> exact<br>variance $\operatorname{Var}(\theta_t)$ : <span data-out="varEmp"></span> sur 500 exécutions, <span data-out="varExact"></span> exact<br>$\mathbb{E}[F(\theta_t)] - F^\star = \frac12(\text{biais}^2 + \text{variance})$ : <span data-out="empirical"></span> sur 500 exécutions, <span data-out="exact"></span> exact · limite : <span data-out="formula"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-3-3">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.3 · SGD calcule une moyenne</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">avec la figure</span></div>
+                    <p>Avec les notations ci-dessus, $\theta_t = \theta_{t-1} - \gamma_t(\theta_{t-1} - Y_t)$, les $Y_t$ étant indépendants, de moyenne $\theta^\star$ et de variance $\sigma^2$.</p>
+                    <ol>
+                        <li>Avec $\gamma_t = 1/t$, montrer que $\theta_t = \frac1t(Y_1 + \dots + Y_t)$, quel que soit $\theta_0$. En déduire $\mathbb{E}[F(\theta_t)] - F^\star = \sigma^2/(2t)$.</li>
+                        <li>Avec un pas constant $\gamma \in (0, 2)$, montrer que le biais vaut $\mathbb{E}[\theta_t] - \theta^\star = (1 - \gamma)^t(\theta_0 - \theta^\star)$ et que la variance $v_t = \operatorname{Var}(\theta_t)$ vérifie $v_t = (1 - \gamma)^2 v_{t-1} + \gamma^2\sigma^2$.</li>
+                        <li>En déduire que $v_t \to \gamma\sigma^2/(2 - \gamma)$, puis, avec la décomposition $\mathbb{E}[(\theta_t - \theta^\star)^2] = \text{biais}^2 + \text{variance}$, que $\mathbb{E}[F(\theta_t)] - F^\star \to \gamma\sigma^2/(2(2 - \gamma))$. Application : $\gamma = 0{,}1$, $\sigma = 1$ : <span class="exo-check" data-answer="0.026316" data-tol="0.00005"></span> Vérifier avec la figure.</li>
+                        <li>Comparer au plancher du théorème, $L\gamma\sigma^2/(2\mu)$, ici avec $L = \mu = 1$.</li>
+                    </ol>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>1. Récurrence : $\theta_t = \frac{t-1}{t}\theta_{t-1} + \frac1t Y_t$ ; le premier pas, $\gamma_1 = 1$, efface $\theta_0$. 2. Écrire $\theta_t - \theta^\star = (1 - \gamma)(\theta_{t-1} - \theta^\star) - \gamma(Y_t - \theta^\star)$, avec $Y_t$ indépendant de $\theta_{t-1}$. 3. Point fixe $v = (1-\gamma)^2 v + \gamma^2\sigma^2$, et $\mathbb{E}[(\theta - \theta^\star)^2] = (\mathbb{E}\theta - \theta^\star)^2 + \operatorname{Var}\theta$.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. Par récurrence, si $\theta_{t-1}$ est la moyenne des $t - 1$ premiers $Y$, $\theta_t = \frac{(t-1)\theta_{t-1} + Y_t}{t}$ est celle des $t$ premiers. C'est la <strong>moyenne empirique</strong>, calculée en ligne : SGD avec $\gamma_t = 1/t$ retrouve la règle optimale du cours 1 (« prédire sans variable »). Sa variance est $\sigma^2/t$, d'où $\mathbb{E}[F(\theta_t)] - F^\star = \frac12\operatorname{Var}(\theta_t) = \sigma^2/(2t)$.</p>
+                        <p>2. On prend l'espérance de la relation de l'indication ; pour la variance, les deux termes sont indépendants.</p>
+                        <p>3. La suite $v_t - v$ est géométrique de raison $(1 - \gamma)^2 &lt; 1$, avec $v = \gamma^2\sigma^2/(1 - (1-\gamma)^2) = \gamma\sigma^2/(2 - \gamma)$. Le biais tend vers $0$, donc $\mathbb{E}[F(\theta_t)] - F^\star \to v/2 = \gamma\sigma^2/(2(2-\gamma)) \approx 0{,}0263$. Avec un pas constant, SGD calcule une moyenne <em>mobile exponentielle</em> des $Y_t$, $\theta_t = (1-\gamma)^t\theta_0 + \gamma\sum_{s \le t}(1-\gamma)^{t-s}Y_s$, dont la variance limite $\sigma^2/(2/\gamma - 1)$ est celle d'une moyenne de $2/\gamma - 1$ observations indépendantes.</p>
+                        <p>4. Le théorème donne $\gamma\sigma^2/2 = 0{,}05$, environ deux fois plus : c'est une majoration, de bon ordre de grandeur, proportionnelle à $\gamma$ comme le vrai plancher.</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (biais, variance et plancher)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+rng = np.random.default_rng(0)
+# SGD sur F(θ) = θ²/2 (θ* = 0) avec g_t = θ_{t-1} + σ ξ_t : 5000 exécutions indépendantes en parallèle
+runs, sigma, T, theta0 = 5000, 1.0, 2000, 3.0
+for name, step in [("γ = 0,1 constant", lambda t: 0.1), ("γ = 0,02 constant", lambda t: 0.02), ("γ_t = 1/t", lambda t: 1 / t)]:
+    theta = np.full(runs, theta0)
+    for t in range(1, T + 1):
+        theta = theta - step(t) * (theta + sigma * rng.normal(size=runs))
+    biais, variance = theta.mean(), theta.var()        # sur les 5000 exécutions
+    print(f"{name:18}: biais {biais:+.1e}, variance {variance:.5f}, "
+          f"E[F(θ_T)] ≈ (biais² + variance)/2 = {(biais ** 2 + variance) / 2:.5f}")
+print("variances exactes : γσ²/(2−γ) =", round(0.1 / 1.9, 5), "et", round(0.02 / 1.98, 5), "; σ²/T =", 1 / T)</code></pre>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Le pas règle le compromis biais-variance</h3>
+                        <p>Fixons un horizon : on s'arrête après $t$ pas. Quand $\gamma$ augmente, le biais² diminue (on oublie $\theta_0$ plus vite) et la variance augmente (on moyenne moins d'observations). Leur somme a la forme en U du cours 1, avec $\gamma$ à la place de la complexité du modèle : un grand pas, comme un petit $k$ pour les plus proches voisins, suit le bruit. La figure trace les deux termes exacts de l'exemple de la moyenne en fonction de $\gamma$ : déplacez $\gamma$ de part et d'autre du minimum.</p>
+                        <p>Le meilleur pas constant $\gamma^\star$ dépend de l'horizon $t$, de $|\theta_0 - \theta^\star|$ et de $\sigma$, que l'on ne connaît pas, et il décroît presque comme $1/t$ (exercice 3.4). Même bien réglé, il fait moins bien que $\gamma_t = 1/t$ (tirets) : avec les valeurs de départ de la figure, $2{,}3$ fois moins bien à $t = 100$ et $2{,}9$ fois à $t = 1000$. Un pas constant moyenne environ $2/\gamma$ observations récentes ; le pas $1/t$ les moyenne toutes. C'est la raison d'être des pas décroissants.</p>
+                    </div>
+                    <figure class="lab-fig opt-fig-tradeoff">
+                        <label class="demo-control">Horizon $t$ = <output data-out="t"></output><input type="range" data-input="horizon" min="1" max="4" step="0.25" value="2"></label>
+                        <label class="demo-control">Pas $\gamma$ = <output data-out="gamma"></output><input type="range" data-input="gamma" min="-4" max="0" step="0.05" value="-1"></label>
+                        <label class="demo-control">Départ $|\theta_0 - \theta^\star|$ = <output data-out="distance"></output><input type="range" data-input="distance" min="0.5" max="10" step="0.5" value="3"></label>
+                        <canvas role="img" aria-label="Biais au carré, variance et erreur totale en fonction du pas, à horizon fixé"></canvas>
+                        <div class="lab-fig-legend"><span><span class="lab-swatch lab-swatch-third"></span> ½ biais²</span> <span><span class="lab-swatch lab-swatch-ink"></span> ½ variance</span> <span><span class="lab-swatch lab-swatch-pos"></span> $\mathbb{E}[F(\theta_t)] - F^\star$, la somme</span> <span><span class="lab-swatch lab-swatch-neg lab-dashed"></span> avec $\gamma_s = 1/s$</span></div>
+                        <div class="lab-fig-readout">Au pas $\gamma$ : ½ biais² = <span data-out="bias2"></span>, ½ variance = <span data-out="variance"></span>, erreur = <span data-out="error"></span><br>meilleur pas constant $\gamma^\star$ = <span data-out="best"></span>, erreur = <span data-out="bestError"></span> ; avec $\gamma_s = 1/s$ : $\sigma^2/(2t)$ = <span data-out="mean"></span>, <span data-out="ratio"></span> fois moins ($\sigma = 1$)</div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-3-4">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.4 · Le meilleur pas constant</span><span class="exo-tag">✎ à la main</span><span class="exo-tag">avec la figure</span></div>
+                    <p>On reprend l'exemple de la moyenne avec un pas constant $\gamma$, et l'on note $D = |\theta_0 - \theta^\star|$. D'après l'exercice 3.3, après $t$ pas, $\mathbb{E}[F(\theta_t)] - F^\star = \frac12 D^2(1 - \gamma)^{2t} + \frac12\cdot\frac{\gamma\sigma^2}{2 - \gamma}\big(1 - (1 - \gamma)^{2t}\big)$.</p>
+                    <ol>
+                        <li>Lequel des deux termes est le biais², lequel la variance ? Lequel décroît quand $\gamma$ augmente ? Pour $\gamma$ petit et $\gamma t$ grand, justifier l'approximation $\mathbb{E}[F(\theta_t)] - F^\star \approx \frac12 D^2 e^{-2\gamma t} + \frac{\gamma\sigma^2}4$.</li>
+                        <li>Montrer que le pas qui minimise cette approximation est $\gamma^\star = \ln(4tD^2/\sigma^2)/(2t)$. Application : $t = 100$, $D = 3$, $\sigma = 1$. <span class="exo-check" data-answer="0.041" data-tol="0.0015"></span> Comparer au minimum exact donné par la figure.</li>
+                        <li>Montrer qu'au pas $\gamma^\star$, l'erreur vaut environ $\frac{\sigma^2}{8t}\big(1 + \ln(4tD^2/\sigma^2)\big)$. Combien de fois l'erreur $\sigma^2/(2t)$ du pas $\gamma_s = 1/s$, avec les mêmes valeurs ? <span class="exo-check" data-answer="2.3" data-tol="0.05"></span></li>
+                    </ol>
+                    <details class="exo-hint"><summary>Indication</summary><div><p>1. $(1 - \gamma)^{2t} = e^{2t\ln(1 - \gamma)} \approx e^{-2\gamma t}$, $\gamma/(2 - \gamma) \approx \gamma/2$, et $1 - (1 - \gamma)^{2t} \approx 1$ quand $\gamma t$ est grand. 2. Annuler la dérivée en $\gamma$. 3. Au minimum, $e^{-2\gamma^\star t} = \sigma^2/(4tD^2)$.</p></div></details>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. Le premier terme est $\frac12\text{biais}^2$ : il décroît quand $\gamma$ augmente. Le second est $\frac12\text{variance}$ : il croît avec $\gamma$. Les approximations de l'indication donnent la formule.</p>
+                        <p>2. La dérivée vaut $-tD^2e^{-2\gamma t} + \sigma^2/4$, nulle quand $e^{-2\gamma t} = \sigma^2/(4tD^2)$, c'est-à-dire en $\gamma^\star = \ln(4tD^2/\sigma^2)/(2t)$. Avec les valeurs proposées, $\ln(3600)/200 \approx 8{,}19/200 \approx 0{,}041$. Le minimum exact de la figure est en $0{,}040$ : l'approximation est bonne.</p>
+                        <p>3. En $\gamma^\star$, le biais² vaut $\frac12D^2e^{-2\gamma^\star t} = \sigma^2/(8t)$ et la variance $\gamma^\star\sigma^2/4 = \sigma^2\ln(4tD^2/\sigma^2)/(8t)$. Le rapport à $\sigma^2/(2t)$ est $(1 + \ln 3600)/4 \approx 2{,}3$, comme sur la figure. Il croît avec $t$, comme $\ln t$ : à horizon long, le meilleur pas constant perd de plus en plus contre $1/t$. Et pour le régler, il faudrait connaître $t$, $D$ et $\sigma$.</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (le meilleur pas constant)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+# Exemple de la moyenne : |θ_0 − θ*| = D, Var(Y) = σ², pas constant γ, arrêt après t pas
+D, sigma, t = 3.0, 1.0, 100
+gammas = np.logspace(-4, 0, 4001)
+q = (1 - gammas) ** (2 * t)
+biais2 = D ** 2 * q                                       # (E[θ_t] − θ*)²
+variance = gammas * sigma ** 2 / (2 - gammas) * (1 - q)   # Var(θ_t)
+erreur = (biais2 + variance) / 2                          # E[F(θ_t)] − F*
+k = erreur.argmin()
+print(f"meilleur pas constant : γ* = {gammas[k]:.4f}, erreur {erreur[k]:.5f}")
+print(f"approximation ln(4tD²/σ²)/(2t) = {np.log(4 * t * D ** 2 / sigma ** 2) / (2 * t):.4f}")
+print(f"pas γ_t = 1/t : σ²/(2t) = {sigma ** 2 / (2 * t):.5f}, soit {erreur[k] / (sigma ** 2 / (2 * t)):.2f} fois moins")</code></pre>
+                </div>
+
+                <div class="lab-prose">
+                    <h3>Faire converger SGD : réduire la variance</h3>
+                    <p>Le biais s'efface tout seul, exponentiellement vite ; c'est la variance qu'il faut faire baisser. Trois façons, toutes visibles dans le terrain de jeu :</p>
+                    <ul>
+                        <li><strong>Faire décroître le pas</strong> : grand au début, quand le biais domine et qu'il faut oublier $\theta_0$ ; petit à la fin, quand la variance domine. Il faut $\sum_t\gamma_t = \infty$ (pour que le biais s'efface : on peut aller n'importe où) et $\sum_t\gamma_t^2 &lt; \infty$ (pour que le bruit cumulé, donc la variance, reste fini) : ce sont les conditions de Robbins et Monro (1951), vérifiées par $\gamma_t \propto 1/t$. Dans le cas fortement convexe, un pas $\gamma_t \propto 1/t$ bien réglé donne $\mathbb{E}[F(\theta_t)] - F^\star = O(1/t)$, comme dans l'exercice 3.3. Dans le cas seulement convexe, $\gamma_t \propto 1/\sqrt t$ donne $O(\log t/\sqrt t)$ pour la moyenne des itérés, contre $O(1/t)$ pour la descente de gradient : le bruit coûte une racine carrée. <a href="#II.2" data-experiment="II.2">Expérience II.2</a>.</li>
+                        <li><strong>Moyenner les itérés</strong> (Polyak et Ruppert) : $\bar\theta_t = \frac1t\sum_{s \le t}\theta_s$ compense les fluctuations de $\theta_t$ autour de $\theta^\star$ ; comme toute moyenne, elle a une variance bien plus petite que chacun des $\theta_s$. À pas constant, cela suffit pour les moindres carrés (<a href="#II.4" data-experiment="II.4">expérience II.4</a>) ; en général, la moyenne reste à une distance de l'ordre de $\gamma$ de $\theta^\star$, et on la combine avec un pas décroissant.</li>
+                        <li><strong>Agrandir les lots</strong> : la variance de chaque gradient est divisée par $b$, le plancher aussi, sans changer le biais ; mais chaque pas coûte $b$ fois plus. <a href="#II.3" data-experiment="II.3">Expérience II.3</a>.</li>
+                    </ul>
+
+                    <h3>Pourquoi SGD gagne quand même</h3>
+                    <p>Comparons le <em>calcul total</em>, en gradients d'un seul exemple, pour atteindre une précision $\epsilon$ (ordres de grandeur, les constantes $L$, $\mu$, $\|\theta_0 - \theta^\star\|$, $\sigma$ valant $1$) :</p>
+                </div>
+                <div class="lab-table-wrap">
+                    <table class="lab-table">
+                        <thead><tr><th>méthode</th><th>itérations</th><th>coût d'une itération</th><th>coût total</th></tr></thead>
+                        <tbody>
+                            <tr><td>GD, $F$ convexe</td><td>$1/\epsilon$</td><td>$n$</td><td>$n/\epsilon$</td></tr>
+                            <tr><td>GD, $F$ fortement convexe</td><td>$\kappa\log(1/\epsilon)$</td><td>$n$</td><td>$n\kappa\log(1/\epsilon)$</td></tr>
+                            <tr><td>SGD ($b = 1$), $F$ convexe</td><td>$1/\epsilon^2$</td><td>$1$</td><td>$1/\epsilon^2$, <strong>sans $n$</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="lab-prose">
+                    <p>Avec des lots de taille $b$, la variance est divisée par $b$ et il faut environ $b$ fois moins d'itérations, chacune $b$ fois plus chère : le total ne change pas (exercice 3.5). Le coût de SGD ne dépend pas de $n$. Or, d'après l'exercice 0.1, la précision utile est $\epsilon \approx 1/\sqrt n$ : au-delà, l'erreur statistique domine. L'<a href="#II.1" data-experiment="II.1">expérience II.1</a> montre les deux temps : SGD prend une avance énorme, puis la descente de gradient le rattrape quand on demande une grande précision.</p>
+                    <p>L'exemple de la moyenne le dit avec des nombres exacts. Avec $n$ observations parcourues une seule fois et $\gamma_t = 1/t$, SGD renvoie exactement la moyenne empirique, c'est-à-dire le minimiseur du risque empirique. Sa variance, $\sigma^2/n$, est l'erreur statistique que l'on paie de toute façon avec $n$ données (cours 1) : la variance de l'optimisation n'a pas besoin de descendre plus bas que celle de l'estimation.</p>
+                    <p>Sur une fonction non convexe, le bruit a un autre avantage. Un point selle est instable : la moindre perturbation dans la bonne direction est amplifiée. La descente de gradient partie exactement de la crête converge vers la selle et y reste (expérience I.4) ; SGD, poussé hors de la crête par son bruit, finit dans un des puits (<a href="#II.5" data-experiment="II.5">expérience II.5</a>).</p>
+                </div>
+
+                <div class="exo" id="exo-3-5">
+                    <div class="exo-head"><span class="exo-title">Exercice 3.5 · Ordres de grandeur</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Avec $n = 10^6$ et $\epsilon = 1/\sqrt n$, que valent les coûts de GD (cas convexe) et de SGD avec $b = 1$ ? Quel est leur rapport ? <span class="exo-check" data-answer="1000" data-rel="0.001"></span></li>
+                        <li>Exprimer les deux coûts en fonction de $n$ seulement, quand $\epsilon = 1/\sqrt n$.</li>
+                        <li>★ <strong>Règle de mise à l'échelle linéaire.</strong> On compare $k$ pas de SGD avec des lots de taille $b$ et un pas $\gamma$, à un seul pas avec un lot de taille $kb$ et un pas $k\gamma$, en supposant $\nabla F$ constant sur ces $k$ pas. Montrer que les deux déplacements ont la même moyenne et la même variance.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. GD : $n/\epsilon = n^{3/2} = 10^9$ ; SGD : $1/\epsilon^2 = n = 10^6$. Rapport $1000$.</p>
+                        <p>2. $n^{3/2}$ contre $n$ : SGD est le seul des deux dont le coût est linéaire en la quantité de données, c'est-à-dire qui ne lit chaque exemple qu'un nombre borné de fois.</p>
+                        <p>3. Les $k$ petits pas déplacent de $-\gamma\sum_{j=1}^k g_j$, de moyenne $-k\gamma\nabla F$ et de variance $k\gamma^2\sigma^2/b$ (gradients indépendants). Le grand pas déplace de $-k\gamma g$, de moyenne $-k\gamma\nabla F$ et de variance $k^2\gamma^2\sigma^2/(kb) = k\gamma^2\sigma^2/b$. D'où la règle pratique : multiplier la taille de lot par $k$, c'est multiplier le pas par $k$, tant que $k\gamma$ reste sous $2/L$.</p>
+                    </div></details>
+                </div>
+
+                <div class="lab-recap">
+                    <span class="lab-recap-title">À retenir</span>
+                    <p>Le gradient sur un mini-lot est un estimateur sans biais, de variance (au plus) $\sigma^2/b$. L'erreur de SGD se décompose en un <strong>biais</strong>, la trace de $\theta_0$, qui s'efface exponentiellement, et une <strong>variance</strong>, le bruit accumulé, proportionnelle à $\gamma\sigma^2$ : le pas règle ce compromis biais-variance, comme $k$ pour les plus proches voisins, et à pas constant SGD plafonne. Pour réduire la variance : pas décroissant, moyenne des itérés, ou lots plus grands. Son coût total ne dépend pas de $n$, et c'est pour cela qu'il entraîne tous les grands modèles.</p>
+                </div>
+            </section>
+
+            <!-- ==================== 4 ==================== -->
+            <section class="lab-section" id="momentum-adam">
+                <h2>4. Momentum et Adam</h2>
+                <div class="lab-prose">
+                    <p>Les deux défauts de la descente de gradient sont le conditionnement (on rampe le long des directions plates) et l'échelle (un même pas pour des coordonnées de tailles très différentes). Les deux variantes les plus utilisées s'attaquent chacune à l'un d'eux.</p>
+                    <h3>Le momentum (boule pesante)</h3>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Momentum (Polyak, 1964).</span> Avec $m_0 = 0$ et $\beta \in [0, 1)$ (souvent $0{,}9$) : $\quad m_t = \beta m_{t-1} + g_t, \qquad \theta_t = \theta_{t-1} - \gamma m_t,$</p>
+                    <p>où $g_t$ est le gradient, exact ou stochastique, en $\theta_{t-1}$. Pour $\beta = 0$, c'est la descente de gradient.</p>
+                </div>
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <p>En déroulant la récurrence, $m_t = \sum_{s=1}^t \beta^{t-s} g_s$ : une somme des gradients passés, avec des poids qui décroissent géométriquement (figure). Dans une vallée étroite, les gradients dans la direction plate ont toujours le même signe et s'additionnent, tandis que ceux qui traversent la vallée changent de signe et se compensent. Avec un gradient stochastique, la somme moyenne aussi le bruit.</p>
+                        <p>Sur une quadratique de conditionnement $\kappa$, avec $\beta$ et $\gamma$ bien choisis, le facteur de contraction par pas passe de $1 - 1/\kappa$ à $(\sqrt\kappa - 1)/(\sqrt\kappa + 1)$ : le nombre d'itérations est en $\sqrt\kappa\log(1/\epsilon)$ au lieu de $\kappa\log(1/\epsilon)$ (démonstration omise). <a href="#III.1" data-experiment="III.1">Expérience III.1</a>. Dans une vallée courbe, dont la direction change en chemin, le momentum garde sa vitesse dans le virage (<a href="#III.4" data-experiment="III.4">expérience III.4</a>, la vallée de Rosenbrock).</p>
+                    </div>
+                    <figure class="lab-fig opt-fig-weights">
+                        <label class="demo-control">$\beta$ = <output data-out="beta"></output><input type="range" data-input="beta" min="0" max="0.98" step="0.01" value="0.9"></label>
+                        <canvas role="img" aria-label="Poids des gradients passés dans le momentum"></canvas>
+                        <div class="lab-fig-readout">somme des poids $\sum_k \beta^k = 1/(1-\beta)$ = <span data-out="sum"></span> · part des $\lceil 1/(1-\beta)\rceil$ derniers gradients (en couleur) : <span data-out="share"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-4-1">
+                    <div class="exo-head"><span class="exo-title">Exercice 4.1 · Ce que fait le momentum</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Montrer que $m_t = \sum_{s=1}^t\beta^{t-s}g_s$. Si le gradient est constant, $g_s = g$, que vaut $\lim m_t$ ? Par combien le pas effectif est-il multiplié pour $\beta = 0{,}9$ ? <span class="exo-check" data-answer="10" data-rel="0.001"></span></li>
+                        <li>Pour $\beta = 0{,}9$, quelle part du poids total $\sum_{k \ge 0}\beta^k$ portent les $10$ derniers gradients ? <span class="exo-check" data-answer="0.6513" data-tol="0.001"></span></li>
+                        <li>Avec $\kappa = 100$, combien d'itérations pour diviser l'erreur par $10^6$ au facteur $(\sqrt\kappa - 1)/(\sqrt\kappa + 1) = 9/11$ par pas ? <span class="exo-check" data-answer="69" data-tol="0.5"></span> Comparer aux $1375$ de l'exercice 2.4.</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. Récurrence. Avec $g_s = g$, $m_t = g(1 - \beta^t)/(1 - \beta) \to g/(1 - \beta)$ : le pas effectif est $\gamma/(1 - \beta)$, dix fois plus grand pour $\beta = 0{,}9$. C'est pourquoi, en passant de la descente de gradient au momentum, on divise souvent $\gamma$ par 10.</p>
+                        <p>2. $(1 - \beta)\sum_{k=0}^{9}\beta^k = 1 - \beta^{10} = 1 - 0{,}9^{10} \approx 0{,}651$ : le momentum « se souvient » d'environ $1/(1-\beta)$ gradients.</p>
+                        <p>3. $\ln(10^6)/\ln(11/9) \approx 68{,}8$, donc $69$ itérations, vingt fois moins.</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (retrouve l'expérience III.1)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+kappa = 100
+A = np.diag([1 / kappa, 1.0])                      # L = 1, μ = 1/κ
+F = lambda th: 0.5 * th @ A @ th
+
+def heavy_ball(gamma, beta, eps=1e-6):
+    theta, m, t = np.array([-4.5, 3.0]), np.zeros(2), 0
+    while F(theta) &gt;= eps:
+        m = beta * m + A @ theta                   # m_t = β m_{t-1} + ∇F(θ_{t-1})
+        theta = theta - gamma * m
+        t += 1
+    return t
+
+print("descente de gradient (β = 0, γ = 1) :", heavy_ball(1.0, 0.0), "itérations")
+print("momentum (β = 0,67, γ = 3,3)        :", heavy_ball(3.3, 0.67), "itérations")
+print("momentum (β = 0,9, γ = 1)           :", heavy_ball(1.0, 0.9), "itérations")</code></pre>
+                </div>
+
+                <div class="lab-prose">
+                    <h3>Adam</h3>
+                </div>
+                <div class="statement">
+                    <p><span class="statement-title">Adam (Kingma et Ba, 2015).</span> Avec $m_0 = v_0 = 0$, et toutes les opérations coordonnée par coordonnée :</p>
+                    $$m_t = \beta_1 m_{t-1} + (1 - \beta_1)g_t, \quad v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2, \quad \hat m_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat v_t = \frac{v_t}{1 - \beta_2^t}, \quad \theta_t = \theta_{t-1} - \gamma\frac{\hat m_t}{\sqrt{\hat v_t} + \delta},$$
+                    <p>avec par défaut $\beta_1 = 0{,}9$, $\beta_2 = 0{,}999$, $\delta = 10^{-8}$ et $\gamma = 10^{-3}$.</p>
+                </div>
+                <div class="lab-prose">
+                    <p>$m_t$ est un momentum (une moyenne des gradients), $v_t$ une moyenne de leurs carrés, et diviser par $\sqrt{\hat v_t}$ ramène chaque coordonnée du pas à une taille de l'ordre de $\gamma$, quelle que soit l'échelle du gradient dans cette coordonnée. Les divisions par $1 - \beta^t$ corrigent le démarrage à $0$ des deux moyennes (exercice 4.2).</p>
+                    <p>Adam aide quand le mauvais conditionnement vient de coordonnées d'échelles différentes, mais pas quand il est « tourné » (<a href="#III.2" data-experiment="III.2">expérience III.2</a>) : c'est une mise à l'échelle <em>diagonale</em>. Avec des gradients stochastiques, il a lui aussi un plancher de bruit (<a href="#III.3" data-experiment="III.3">expérience III.3</a>). Sur la vallée de Rosenbrock, comparez-le au momentum (<a href="#III.4" data-experiment="III.4">expérience III.4</a>).</p>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <p>Sans la correction, avec un gradient constant $g$, Adam ferait le pas $\gamma\, m_t/\sqrt{v_t} = \gamma\,\frac{1 - \beta_1^t}{\sqrt{1 - \beta_2^t}}\operatorname{signe}(g)$ au lieu de $\gamma\operatorname{signe}(g)$. La figure trace ce rapport : avec les valeurs par défaut, il vaut $3{,}16$ au premier pas, dépasse $6$ vers $t = 10$, et ne redescend vers $1$ qu'après quelques milliers d'itérations. Les premiers pas, ceux où le modèle est le plus fragile, seraient plusieurs fois trop grands.</p>
+                    </div>
+                    <figure class="lab-fig opt-fig-adam-bias">
+                        <label class="demo-control">$\beta_1$ = <output data-out="beta1"></output><input type="range" data-input="beta1" min="0" max="3" step="1" value="2"></label>
+                        <label class="demo-control">$\beta_2$ = <output data-out="beta2"></output><input type="range" data-input="beta2" min="0" max="3" step="1" value="2"></label>
+                        <canvas role="img" aria-label="Rapport entre le pas sans correction et le pas avec correction"></canvas>
+                        <div class="lab-fig-readout">pas sans correction ÷ pas corrigé : $t = 1$ : <span data-out="r1"></span>, $t = 10$ : <span data-out="r10"></span>, $t = 100$ : <span data-out="r100"></span></div>
+                    </figure>
+                </div>
+
+                <div class="exo" id="exo-4-2">
+                    <div class="exo-head"><span class="exo-title">Exercice 4.2 · Adam, à la main</span><span class="exo-tag">✎ à la main</span></div>
+                    <ol>
+                        <li>Gradient constant $g_t = g$ pour tout $t$. Montrer que $\hat m_t = g$ et $\hat v_t = g^2$ exactement, donc que (avec $\delta = 0$) $\theta_t - \theta_{t-1} = -\gamma\operatorname{signe}(g)$ coordonnée par coordonnée. Application : $\gamma = 10^{-3}$, $g = (100\,;\,0{,}01)$ : de combien bouge la seconde coordonnée ? <span class="exo-check" data-answer="-0.001" data-tol="1e-9"></span></li>
+                        <li>Sans correction, que vaut le pas au premier tour, $\gamma\,m_1/\sqrt{v_1}$, divisé par $\gamma\operatorname{signe}(g)$, pour $\beta_1 = 0{,}9$ et $\beta_2 = 0{,}999$ ? <span class="exo-check" data-answer="3.1623" data-tol="0.001"></span></li>
+                        <li>★ Montrer que multiplier $F$ par une constante $c > 0$ ne change pas les itérés d'Adam (avec $\delta = 0$), et qu'il multiplie par $c$ les pas de la descente de gradient. Pourquoi est-ce commode pour régler $\gamma$ ?</li>
+                    </ol>
+                    <details class="exo-sol"><summary>Solution</summary><div>
+                        <p>1. $m_t = (1 - \beta_1)\sum_{s \le t}\beta_1^{t-s} g = (1 - \beta_1^t)g$, donc $\hat m_t = g$ ; de même $\hat v_t = g^2$, et $\hat m_t/\sqrt{\hat v_t} = g/|g| = \operatorname{signe}(g)$. Les deux coordonnées bougent de $-10^{-3}$, alors que leurs gradients diffèrent d'un facteur $10^4$ : pour Adam, $\gamma$ est une <em>distance</em> par pas, pas un gain appliqué au gradient. C'est aussi pourquoi il lui faut un pas décroissant : rien dans la formule ne rapetisse près du minimum.</p>
+                        <p>2. $m_1 = (1 - \beta_1)g$ et $v_1 = (1-\beta_2)g^2$, d'où $(1 - \beta_1)/\sqrt{1 - \beta_2} = 0{,}1/\sqrt{0{,}001} \approx 3{,}16$.</p>
+                        <p>3. Les gradients sont multipliés par $c$, $m_t$ et $\hat m_t$ aussi, $v_t$ par $c^2$, et le rapport $\hat m_t/\sqrt{\hat v_t}$ ne change pas. Un même $\gamma$ convient donc à des problèmes d'échelles très différentes, d'où le $\gamma = 10^{-3}$ « par défaut ».</p>
+                    </div></details>
+                </div>
+
+                <div class="codebox">
+                    <div class="codebox-bar"><span>À refaire chez vous · Python (retrouve l'expérience III.2)</span><button type="button" class="demo-button codebox-copy">Copier</button></div>
+<pre><code>import numpy as np
+
+def quadratic(kappa, angle):
+    c, s = np.cos(np.radians(angle)), np.sin(np.radians(angle))
+    R = np.array([[c, -s], [s, c]])
+    return R @ np.diag([1 / kappa, 1.0]) @ R.T      # A = R diag(μ, L) Rᵀ
+
+def adam(A, start, gamma=0.1, b1=0.9, b2=0.999, delta=1e-8, eps=1e-6):
+    theta, m, v, t = np.array(start), np.zeros(2), np.zeros(2), 0
+    while 0.5 * theta @ A @ theta &gt;= eps:
+        t += 1
+        g = A @ theta
+        m = b1 * m + (1 - b1) * g
+        v = b2 * v + (1 - b2) * g * g
+        m_hat, v_hat = m / (1 - b1 ** t), v / (1 - b2 ** t)
+        theta = theta - gamma * m_hat / (np.sqrt(v_hat) + delta)
+    return t
+
+print("ellipse alignée sur les axes :", adam(quadratic(100, 0), [-4.5, 3.0]), "itérations")
+print("ellipse tournée de 45°       :", adam(quadratic(100, 45), [-4.2, -0.6]), "itérations")</code></pre>
+                </div>
+
+                <div class="lab-prose">
+                    <p><strong>Une remarque sur la régularisation.</strong> Ajouter $\frac\lambda2\|\theta\|^2$ à $F$ ajoute $\lambda\theta$ au gradient. Avec SGD, cela revient à multiplier $\theta$ par $1 - \gamma\lambda$ à chaque pas (<em>weight decay</em>). Avec Adam, ce terme serait divisé par $\sqrt{\hat v_t}$, différemment dans chaque coordonnée : ce n'est plus la pénalité voulue. AdamW (Loshchilov et Hutter, 2019) applique la décroissance $\theta \leftarrow \theta - \gamma\lambda\theta$ à part ; c'est la version utilisée pour entraîner les grands modèles.</p>
+                </div>
+
+                <div class="lab-fig-row">
+                    <div class="lab-prose">
+                        <h3>Choisir le pas, en pratique</h3>
+                        <p>La théorie dit $\gamma = 1/L$, mais $L$ est inconnu. En pratique :</p>
+                        <ul>
+                            <li>essayer quelques pas espacés d'un facteur 3 ou 10 ($10^{-4}, 3 \cdot 10^{-4}, 10^{-3}, \dots$), quelques centaines d'itérations chacun, et garder le plus grand pour lequel la perte descend, divisé par 2 ou 3 ;</li>
+                            <li>surveiller la <em>divergence</em> (la perte qui explose), qui se voit en quelques itérations, plutôt que la perte finale ;</li>
+                            <li>faire décroître le pas au cours de l'entraînement : par paliers (divisé par 10 à des époques fixées) ou en cosinus, $\gamma_t = \frac{\gamma_0}2(1 + \cos(\pi t/T))$, et cela vaut aussi pour Adam (<a href="#III.3" data-experiment="III.3">expérience III.3</a>) ;</li>
+                            <li>pour les réseaux profonds, commencer par un <em>échauffement</em> (<em>warmup</em>) : faire croître $\gamma$ de $0$ à $\gamma_0$ sur les premières itérations, quand la courbure est la plus forte.</li>
+                        </ul>
+                    </div>
+                    <figure class="lab-fig opt-fig-schedules">
+                        <label class="demo-control">Échauffement : <output data-out="warmup"></output> itérations sur 1000<input type="range" data-input="warmup" min="0" max="0.3" step="0.01" value="0.1"></label>
+                        <canvas role="img" aria-label="Évolution du pas au cours de l'entraînement"></canvas>
+                        <div class="lab-fig-legend">
+                            <span><span class="lab-swatch lab-swatch-faint"></span> constant</span>
+                            <span><span class="lab-swatch lab-swatch-third"></span> paliers ÷10</span>
+                            <span><span class="lab-swatch lab-swatch-neg"></span> $1/\sqrt{1 + t/20}$</span>
+                            <span><span class="lab-swatch lab-swatch-pos"></span> cosinus</span>
+                            <span><span class="lab-swatch lab-swatch-ink"></span> échauffement puis cosinus (tirets)</span>
+                        </div>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- ==================== 5 ==================== -->
+            <section class="lab-section" id="retenir">
+                <h2>5. Ce qu'il faut retenir</h2>
+                <div class="lab-table-wrap">
+                    <table class="lab-table">
+                        <thead><tr><th>hypothèses sur $F$</th><th>algorithme</th><th>garantie</th><th>itérations pour une précision $\epsilon$</th></tr></thead>
+                        <tbody>
+                            <tr><td>$L$-régulière</td><td>GD, $\gamma = 1/L$</td><td>$\min_s\|\nabla F(\theta_s)\|^2 = O(1/t)$</td><td>$1/\epsilon^2$ (pour $\|\nabla F\| \le \epsilon$)</td></tr>
+                            <tr><td>convexe, $L$-régulière</td><td>GD, $\gamma = 1/L$</td><td>$F(\theta_t) - F^\star = O(1/t)$</td><td>$1/\epsilon$</td></tr>
+                            <tr><td>$\mu$-fortement convexe, $L$-régulière</td><td>GD, $\gamma = 1/L$</td><td>$O\big((1 - 1/\kappa)^t\big)$</td><td>$\kappa\log(1/\epsilon)$</td></tr>
+                            <tr><td>idem, quadratique</td><td>momentum réglé</td><td>$O\big(((\sqrt\kappa - 1)/(\sqrt\kappa+1))^t\big)$</td><td>$\sqrt\kappa\log(1/\epsilon)$</td></tr>
+                            <tr><td>fortement convexe</td><td>SGD, $\gamma$ constant</td><td>$O((1 - \gamma\mu)^t) + $ plancher $L\gamma\sigma^2/(2\mu)$</td><td>ne converge pas</td></tr>
+                            <tr><td>fortement convexe</td><td>SGD, $\gamma_t \propto 1/t$</td><td>$O(1/t)$</td><td>$1/\epsilon$</td></tr>
+                            <tr><td>convexe</td><td>SGD, $\gamma_t \propto 1/\sqrt t$, moyenne</td><td>$O(\log t/\sqrt t)$</td><td>$1/\epsilon^2$ (à un log près)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="lab-recap">
+                    <span class="lab-recap-title">En cinq phrases</span>
+                    <ol>
+                        <li>On minimise un risque empirique par un algorithme itératif, et une précision de l'ordre de l'erreur statistique suffit.</li>
+                        <li>La descente de gradient minimise à chaque pas une majoration quadratique : pas sous $2/L$, vitesse gouvernée par le conditionnement $\kappa$, que l'on améliore en standardisant les variables.</li>
+                        <li>SGD remplace le gradient par une estimation sans biais sur quelques exemples : $n/b$ fois moins cher par pas, au prix d'un bruit de variance $\sigma^2/b$.</li>
+                        <li>L'erreur de SGD est un biais (la trace de $\theta_0$) plus une variance (le bruit accumulé), et le pas règle le compromis : à pas constant, SGD plafonne à un niveau proportionnel à $\gamma$ ; un pas décroissant, la moyenne des itérés ou de plus grands lots réduisent la variance et le font converger. Son coût total ne dépend pas de $n$.</li>
+                        <li>Le momentum remplace $\kappa$ par $\sqrt\kappa$ sur une quadratique (pour toute fonction fortement convexe, avec la variante de Nesterov) ; Adam met chaque coordonnée à l'échelle et s'utilise avec un pas décroissant, souvent après un échauffement.</li>
+                    </ol>
+                </div>
+
+                <div class="lab-prose">
+                    <h3>Pour aller plus loin</h3>
+                    <ul>
+                        <li>L. Bottou, F. E. Curtis, J. Nocedal, <a href="https://arxiv.org/abs/1606.04838" target="_blank" rel="noopener noreferrer"><em>Optimization Methods for Large-Scale Machine Learning</em></a>, SIAM Review, 2018 : la référence sur SGD en apprentissage.</li>
+                        <li>G. Garrigos, R. M. Gower, <a href="https://arxiv.org/abs/2301.11235" target="_blank" rel="noopener noreferrer"><em>Handbook of Convergence Theorems for (Stochastic) Gradient Methods</em></a>, 2023 : toutes les démonstrations, pas à pas.</li>
+                        <li>F. Bach, <a href="https://www.di.ens.fr/~fbach/ltfp_book.pdf" target="_blank" rel="noopener noreferrer"><em>Learning Theory from First Principles</em></a>, 2024, chapitre 5.</li>
+                        <li>I. Goodfellow, Y. Bengio, A. Courville, <a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener noreferrer"><em>Deep Learning</em></a>, 2016, chapitre 8 : l'optimisation en pratique.</li>
+                        <li>D. P. Kingma, J. Ba, <a href="https://arxiv.org/abs/1412.6980" target="_blank" rel="noopener noreferrer"><em>Adam: A Method for Stochastic Optimization</em></a>, 2015 ; I. Loshchilov, F. Hutter, <a href="https://arxiv.org/abs/1711.05101" target="_blank" rel="noopener noreferrer"><em>Decoupled Weight Decay Regularization</em></a> (AdamW), 2019.</li>
+                        <li>Les <a href="../2026_2027_MAPI3_Machine_Learning/optimization-for-ml.pdf" target="_blank" rel="noopener noreferrer">transparents du cours de MAPI3</a> (en anglais) : le flot de gradient, la méthode de Newton, la démonstration du cas convexe de SGD.</li>
+                    </ul>
+                    <p>Le cours précédent : le <a href="reseaux-de-neurones.html">cours-TD sur les réseaux de neurones</a>, entraînés par les algorithmes de cette page.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../../js/lab-kit.js"></script>
+    <script src="../../js/opt-engine.js"></script>
+    <script src="../../js/opt-experiments-fr.js"></script>
+    <script src="../../js/opt-playground.js"></script>
+    <script src="../../js/opt-figures.js"></script>
+</body>
+</html>

@@ -210,7 +210,7 @@
       watch: 'The two risk curves, and the curve between the data points.',
       explanation: String.raw`<p>The noise has variance $0.2^2 = 0.04$, which is the smallest risk any predictor can have. The training risk goes <em>below</em> it ($0.017$ after 20000 iterations): the network fits the noise. Meanwhile the test risk, which estimates $R(f_\theta)$, climbs from $0.06$ to $0.19$, and the gap $R - \widehat{R}_S$ keeps growing.</p>
 <p>The other values of $n$ explore the middle regime, where the network still has many more parameters than data points. The gap after 20000 iterations, against the rate $\sqrt{P/n}$ of the bound of Part IV:</p>
-<table class="nn-table">
+<table class="lab-table">
 <tr><th>$n$</th><td>20</td><td>30</td><td>50</td><td>100</td><td>200</td><td>500</td></tr>
 <tr><th>$\sqrt{P/n}$</th><td>7.6</td><td>6.2</td><td>4.8</td><td>3.4</td><td>2.4</td><td>1.5</td></tr>
 <tr><th>gap $R - \widehat{R}_S$</th><td>0.18</td><td>0.05</td><td>0.02</td><td>0.01</td><td>0.003</td><td>0.005</td></tr>
