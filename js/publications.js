@@ -82,22 +82,55 @@ const phdThesis = {
   badge: venueBadge([], 'THESE'),
 };
 
-// Inserting the publications pushes down everything below them. A visitor who
-// is already further down, typically after following a link to #teaching while
-// the list was loading, would end up in the middle of the publications. So when
-// the whole list is above what the visitor sees (the top of the window, or the
-// bottom of the navigation bar pinned there), scroll by the same amount,
-// keeping the Teaching section (and what is below it) in place. Browsers that
-// do this themselves (scroll anchoring) leave no shift to correct.
+// Inserting the publications pushes down everything below them, typically while
+// a visitor who followed a link to #blog, #teaching or #curriculum (the menu, or
+// index.html#teaching from another page) is reading that section. So:
+//   - if the visitor followed a link to a section below the list and has not
+//     scrolled since, the page goes back to that section once the list is in;
+//   - otherwise, if the whole list is above what the visitor sees (the top of
+//     the window, or the bottom of the navigation bar pinned there), the page is
+//     scrolled by the height the list added, so that what they see stays in place.
+// The first case matters on tall screens: before the list arrives the page is
+// too short to bring the section to the top, part of the list stays on screen,
+// and Firefox then does not keep the view in place by itself (scroll anchoring).
+// The correction is applied again at the next frame, in case a browser keeps the
+// view in place itself at that moment: both corrections set a position, so
+// applying them twice is harmless.
+
+// The section asked with a link to #id, forgotten as soon as the visitor scrolls.
+let askedSection = null;
+function sectionOf(hash) {
+  try {
+    return hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+  } catch (error) {
+    return null;  // malformed hash
+  }
+}
+askedSection = sectionOf(window.location.hash);
+document.addEventListener('click', event => {
+  const link = event.target.closest && event.target.closest('a[href*="#"]');
+  if (link && link.href.split('#')[0] === window.location.href.split('#')[0]) askedSection = sectionOf(link.hash);
+});
+['wheel', 'touchmove', 'keydown'].forEach(type => window.addEventListener(type, () => { askedSection = null; }, { passive: true }));
+
 function keepViewInPlace(update) {
-  const below = document.getElementById('teaching');
+  const container = document.querySelector('.publications-container');
+  const below = document.getElementById('publications').nextElementSibling;
   const bar = document.querySelector('.top-nav');
   const visibleTop = bar && getComputedStyle(bar).position === 'sticky' ? bar.getBoundingClientRect().bottom : 0;
-  const listAboveScreen = document.querySelector('.publications-container').getBoundingClientRect().bottom <= visibleTop + 1;
+  const listAboveScreen = container.getBoundingClientRect().bottom <= visibleTop + 1;
+  const asked = askedSection && (container.compareDocumentPosition(askedSection) & Node.DOCUMENT_POSITION_FOLLOWING) ? askedSection : null;
   const before = below.getBoundingClientRect().top;
   update();
-  const shift = below.getBoundingClientRect().top - before;
-  if (listAboveScreen && shift) window.scrollBy(0, shift);
+  const correct = () => {
+    if (asked) {
+      if (askedSection === asked) asked.scrollIntoView({ block: 'start' });  // below the bar, by its scroll-margin-top
+    } else if (listAboveScreen) {
+      window.scrollBy(0, below.getBoundingClientRect().top - before);
+    }
+  };
+  correct();
+  requestAnimationFrame(correct);
 }
 
 async function fetchPublications() {
